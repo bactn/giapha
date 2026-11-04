@@ -1,0 +1,219 @@
+﻿Mã ID,Tên Thánh (Pháp Danh),Họ và Tên,Giới Tính,Thế Hệ (Đời),Chi / Ngành,Nhánh Nội / Ngoại,Mã ID Cha/Mẹ,Tên Cha/Mẹ,Vợ / Chồng / Phối Ngẫu,Ngày/Năm Sinh,Ngày/Năm Mất (Giỗ AL),Trạng Thái,Vai Trò Dòng Họ,Ghi Chú Chi Tiết & Con Cháu
+P001,,Trần Ngọc Truyền,Nam,1,Ngành II,Nội tộc (Trực hệ),-,Thủy Tổ,,,,Đã mất,Thủy Tổ,Cố Trần Ngọc Truyền - Khởi đầu Ngành II Công Giáo
+P002,,Trần Ngọc Toại,Nam,2,Ngành II,Nội tộc (Trực hệ),P001,Trần Ngọc Truyền,,,,Đã mất,Thành viên,Con nối dõi Cố Trần Ngọc Truyền
+P003,,Trần Ngọc Thanh,Nam,3,Ngành II,Nội tộc (Trực hệ),P002,Trần Ngọc Toại,Bà cả; Bà hai,,,Đã mất,Thành viên,Thượng Chi (Chi 1) - Có 2 đời vợ
+P004,,Trần Ngọc Phúc,Nam,3,Ngành II,Nội tộc (Trực hệ),P002,Trần Ngọc Toại,(Có vợ),,,Đã mất,Thành viên,Hạ Chi (Chi 2)
+P005,,Trần Ngọc Tân,Nam,4,Chi 1,Nội tộc (Trực hệ),P003,Trần Ngọc Thanh,,,,Đã mất,Trưởng Chi,Trưởng Chi 1 - Đời 4 (Có 6 người con)
+P006,Giuse,Trần Ngọc Xuân,Nam,4,Chi 1,Nội tộc (Trực hệ),P003,Trần Ngọc Thanh,Anna Đoàn Thị Loan,,Đã chết,Đã mất,Thành viên,Thầy/Thoại - Đã chết (Trang 9)
+P007,,Trần Ngọc Lịch,Nam,4,Chi 1,Nội tộc (Trực hệ),P003,Trần Ngọc Thanh,,,Đã chết,Đã mất,Thành viên,Con cụ Thanh (Trang 13)
+P008,,Trần Ngọc Quáp,Nam,4,Chi 2,Nội tộc (Trực hệ),P004,Trần Ngọc Phúc,Vũ Thị Tới,,,Đã mất,Thành viên,Con cụ Phúc (Trang 19)
+P009,,Trần Ngọc Thước,Nam,4,Chi 2,Nội tộc (Trực hệ),P004,Trần Ngọc Phúc,,,,Đã mất,Thành viên,Con cụ Phúc (Trang 25)
+P010,,Trần Ngọc Chán (Thủ),Nam,4,Chi 2,Nội tộc (Trực hệ),P004,Trần Ngọc Phúc,,,,Đã mất,Thành viên,Con cụ Phúc (Trang 31)
+P011,,Trần Thị Dịch,Nữ,4,Chi 2,Nội tộc (Con gái),P004,Trần Ngọc Phúc,Nguyễn Văn Địch,,,Đã mất,Thành viên,Con gái cụ Phúc (Trang 32)
+P012,,Trần Thị ... (Con thứ 1),Nữ,5,Chi 1,Nội tộc (Con gái),P005,Trần Ngọc Tân,Trần Hữu Đồn,,,Còn sống,Thành viên,Con gái thứ 1 cụ Tân (Trang 2)
+P013,,Trần Thị ... (Con thứ 2),Nữ,5,Chi 1,Nội tộc (Con gái),P005,Trần Ngọc Tân,Trần Ngọc Thân,,,Còn sống,Thành viên,Con gái thứ 2 cụ Tân (Trang 2)
+P014,Ma Rea (Maria),Trần Ngọc Ngo,Nam,5,Chi 1,Nội tộc (Trực hệ),P005,Trần Ngọc Tân,Trần Thị Thiều,,Mất 21/3; Vợ mất 21/10,Đã mất,Thành viên,Con thứ 3 cụ Tân (Trang 3)
+P015,,Trần Ngọc Mùi,Nam,5,Chi 1,Nội tộc (Trực hệ),P005,Trần Ngọc Tân,Bà cả: Trần Thị ...; Bà hai: Vũ Thị Cờn,,Đã mất,Đã mất,Thành viên,Con thứ 4 cụ Tân (Trang 3
+P016,,Trần Ngọc Tý,Nam,5,Chi 1,Nội tộc (Trực hệ),P005,Trần Ngọc Tân,Maria Đoàn Thị Dụ,,,Còn sống,Thành viên,Con thứ 5 cụ Tân
+P017,,Trần Thị Cam,Nữ,5,Chi 1,Nội tộc (Con gái),P005,Trần Ngọc Tân,-,,Mất 12 - 3,Đã mất,Thành viên,Con thứ 6 cụ Tân (Chết nhỏ)
+P012_1,,Trần Hữu Vợi,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P012,Trần Thị ... (Con 1 cụ Tân),Trần Thị ...,,,Còn sống,Thành viên,Con ông Trần Hữu Đồn & Cụ Trần Thị ... (Cháu ngoại)
+P012_2,,Trần Hữu Bảo,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P012,Trần Thị ... (Con 1 cụ Tân),Trần Thị ...,,,Còn sống,Thành viên,Con ông Trần Hữu Đồn & Cụ Trần Thị ... (Cháu ngoại)
+P012_3,,Trần Thị ...,Nữ,6,Chi 1,Nội tộc (Con gái),P012,Trần Thị ... (Con 1 cụ Tân),Phạm Quang Quyến,,,Còn sống,Thành viên,Con gái ông Trần Hữu Đồn (Cháu ngoại)
+P012_4,,Trần Thị ...,Nữ,6,Chi 1,Nội tộc (Con gái),P012,Trần Thị ... (Con 1 cụ Tân),Phạm Quang Trình,,,Còn sống,Thành viên,Con gái ông Trần Hữu Đồn (Cháu ngoại)
+P013_1,,Trần Thị ...,Nữ,6,Chi 1,Nội tộc (Con gái),P013,Trần Thị ... (Con 2 cụ Tân),Trần Xuân Thơ,,,Còn sống,Thành viên,Con gái ông Trần Ngọc Thân & Cụ Trần Thị ... (Cháu ngoại)
+P013_2,,Trần Thị Chiện,Nữ,6,Chi 1,Nội tộc (Con gái),P013,Trần Thị ... (Con 2 cụ Tân),,,,Còn sống,Thành viên,Con gái ông Trần Ngọc Thân & Cụ Trần Thị ... (Cháu ngoại)
+P018,,Trần Thị Én,Nữ,6,Chi 1,Nội tộc (Con gái),P014,Trần Ngọc Ngo,Trần Văn Thủ,,,Còn sống,Thành viên,Có 7 con (2 gái
+P019,,Trần Thị Ngói,Nữ,6,Chi 1,Nội tộc (Con gái),P014,Trần Ngọc Ngo,Nguyễn Văn Tình,,,Còn sống,Thành viên,Có 5 con (2 trai
+P020,Maria,Trần Thị Lê,Nữ,6,Chi 1,Nội tộc (Con gái),P014,Trần Ngọc Ngo,Phanxico Vũ Đình Án,,,Còn sống,Thành viên,Có 4 con (3 trai
+P021,,Trần Thị Thạch,Nữ,6,Chi 1,Nội tộc (Con gái),P014,Trần Ngọc Ngo,Phạm Quang Viết,,,Còn sống,Thành viên,Có 7 con (4 trai
+P022,,Trần Ngọc Giai,Nam,6,Chi 1,Nội tộc (Trực hệ),P015,Trần Ngọc Mùi,-,,Chết sớm 20/4,Mất sớm,Thành viên,Con cụ Mùi
+P023,Phanxico,Trần Ngọc Vị,Nam,6,Chi 1,Nội tộc (Trực hệ),P015,Trần Ngọc Mùi,Têrêxa Vũ Thị Suý,SN 1928,Mất 15/08/1998 Âm,Đã mất,Thành viên,8 con (4 trai
+P024,,Trần Ngọc Thể,Nam,6,Chi 1,Nội tộc (Trực hệ),P015,Trần Ngọc Mùi,-,,Chết sớm,Mất sớm,Thành viên,Con cụ Mùi
+P025,Phanxico,Trần Ngọc Đức,Nam,6,Chi 1,Nội tộc (Trực hệ),P015,Trần Ngọc Mùi,Anna Nguyễn Thị Vy,SN 1935,Mất 04/09/1993 Âm,Đã mất,Thành viên,8 con (3 trai
+P026,Phanxico,Trần Ngọc Bi,Nam,7,Chi 1,Nội tộc (Trực hệ),P023,Trần Ngọc Vị,Maria Trần Thị Thục (SN 1955),23/04/1954,Mất 19/12/2004,Đã mất,Thành viên,Có 5 con (4 gái
+P027,Têrêxa,Trần Thị Chuột,Nữ,7,Chi 1,Nội tộc (Con gái),P023,Trần Ngọc Vị,-,SN 1956,Ốm chết từ nhỏ,Mất sớm,Thành viên,Con gái cụ Vị
+P028,Phanxico,Trần Ngọc Thoàn,Nam,7,Chi 1,Nội tộc (Trực hệ),P023,Trần Ngọc Vị,Anna Trần Thị Lan (SN 1965),SN 1958,,Còn sống,Thành viên,Có 4 con (2 trai
+P029,Têrêxa,Trần Thị Thúy,Nữ,7,Chi 1,Nội tộc (Con gái),P023,Trần Ngọc Vị,Trần Hữu Đài,02/08/1960,,Còn sống,Thành viên,Có 4 con (2 trai
+P030,Phanxico,Trần Ngọc Thạnh,Nam,7,Chi 1,Nội tộc (Trực hệ),P023,Trần Ngọc Vị,Têrêxa Ngô Thị Bình (SN 1970),20/11/1962,,Còn sống,Thành viên,Có 3 con (2 trai
+P031,Têrêxa,Trần Thị Thơi,Nữ,7,Chi 1,Nội tộc (Con gái),P023,Trần Ngọc Vị,-,13/01/1965,Ốm chết từ nhỏ,Mất sớm,Thành viên,Con gái cụ Vị
+P032,Anna,Trần Thị Hồng,Nữ,7,Chi 1,Nội tộc (Con gái),P023,Trần Ngọc Vị,,SN 1969,,Còn sống,Thành viên,Con gái cụ Vị
+P033,Phanxico,Trần Ngọc Hào,Nam,7,Chi 1,Nội tộc (Trực hệ),P023,Trần Ngọc Vị,Nguyễn Thị Dung (SN 1979),06/07/1972,,Còn sống,Thành viên,Có 2 con (1 trai
+P029_1,,Trần Hữu Đoan,Nam,8,Chi 1,Ngoại tộc (Cháu ngoại),P029,Trần Thị Thúy,,,,Còn sống,Thành viên,Con ông Trần Hữu Đài & Bà Trần Thị Thúy (Cháu ngoại)
+P029_2,,Trần Hữu Điệp,Nam,8,Chi 1,Ngoại tộc (Cháu ngoại),P029,Trần Thị Thúy,,,,Còn sống,Thành viên,Con ông Trần Hữu Đài & Bà Trần Thị Thúy (Cháu ngoại)
+P029_3,,Trần Thị Chung,Nữ,8,Chi 1,Nội tộc (Con gái),P029,Trần Thị Thúy,,,,Còn sống,Thành viên,Con gái ông Trần Hữu Đài (Cháu ngoại)
+P029_4,,Trần Thị Chiều,Nữ,8,Chi 1,Nội tộc (Con gái),P029,Trần Thị Thúy,,,,Còn sống,Thành viên,Con gái ông Trần Hữu Đài (Cháu ngoại)
+P034,Vivian,Trần Thị Thuận,Nữ,8,Chi 1,Nội tộc (Con gái),P026,Trần Ngọc Bi,,29/09/1981,,Còn sống,Thành viên,Con ông Bi
+P035,Anna,Trần Thị Thảo,Nữ,8,Chi 1,Nội tộc (Con gái),P026,Trần Ngọc Bi,,,,Còn sống,Thành viên,Con ông Bi
+P036,Anna,Trần Thị Thêu,Nữ,8,Chi 1,Nội tộc (Con gái),P026,Trần Ngọc Bi,,06/10/1989,,Còn sống,Thành viên,Con ông Bi
+P037,Anna,Trần Thị Thoa,Nữ,8,Chi 1,Nội tộc (Con gái),P026,Trần Ngọc Bi,,,,Còn sống,Thành viên,Con ông Bi
+P038,Phanxico,Trần Ngọc Bắc,Nam,8,Chi 1,Nội tộc (Trực hệ),P026,Trần Ngọc Bi,,13/06/1992,,Còn sống,Đích Tôn,ĐÍCH TÔN dòng họ (Trang 4)
+P039,Maria,Trần Thị Thao,Nữ,8,Chi 1,Nội tộc (Con gái),P028,Trần Ngọc Thoàn,,28/04/1986,,Còn sống,Thành viên,Con ông Thoàn
+P040,Maria,Trần Thị Thế,Nữ,8,Chi 1,Nội tộc (Con gái),P028,Trần Ngọc Thoàn,,01/03/1988,,Còn sống,Thành viên,Con ông Thoàn
+P041,Phanxico,Trần Ngọc Hùng,Nam,8,Chi 1,Nội tộc (Trực hệ),P028,Trần Ngọc Thoàn,,06/07/1992,,Còn sống,Thành viên,Con ông Thoàn
+P042,Phanxico,Trần Ngọc Hải,Nam,8,Chi 1,Nội tộc (Trực hệ),P028,Trần Ngọc Thoàn,,10/08/1995,,Còn sống,Thành viên,Con ông Thoàn
+P043,Anna,Trần Thị Ngọc,Nữ,8,Chi 1,Nội tộc (Con gái),P030,Trần Ngọc Thạnh,,10/11/1991,,Còn sống,Thành viên,Con ông Thạnh
+P044,Phanxico,Trần Ngọc Thái,Nam,8,Chi 1,Nội tộc (Trực hệ),P030,Trần Ngọc Thạnh,,06/07/1993,,Còn sống,Thành viên,Con ông Thạnh
+P045,Phanxico,Trần Ngọc Huân,Nam,8,Chi 1,Nội tộc (Trực hệ),P030,Trần Ngọc Thạnh,,27/07/1997,,Còn sống,Thành viên,Con ông Thạnh
+P046,Phanxico,Trần Ngọc Hân,Nam,8,Chi 1,Nội tộc (Trực hệ),P033,Trần Ngọc Hào,,03/10/2001,,Còn sống,Thành viên,Con ông Hào
+P047,Anna,Trần Thị Dương,Nữ,8,Chi 1,Nội tộc (Con gái),P033,Trần Ngọc Hào,,28/06/2003,,Còn sống,Thành viên,Con ông Hào
+P048,,Trần Thị Về,Nữ,7,Chi 1,Nội tộc (Con gái),P025,Trần Ngọc Đức,-,,Ốm chết từ nhỏ,Mất sớm,Thành viên,Con gái cụ Đức
+P049,,Trần Thị Mị,Nữ,7,Chi 1,Nội tộc (Con gái),P025,Trần Ngọc Đức,-,,Ốm chết từ nhỏ,Mất sớm,Thành viên,Con gái cụ Đức
+P050,Gioan,Trần Ngọc Đạo,Nam,7,Chi 1,Nội tộc (Trực hệ),P025,Trần Ngọc Đức,Anna Trần Thị Lục (SN 1961),30/11/1959,,Còn sống,Thành viên,Có 1 trai
+P051,Têrêxa,Trần Thị Chuyên,Nữ,7,Chi 1,Nội tộc (Con gái),P025,Trần Ngọc Đức,Phanxico Vũ Đình Điểm (SN 1958),SN 1962,,Còn sống,Thành viên,Có 1 trai
+P052,Phanxico,Trần Ngọc Hạm,Nam,7,Chi 1,Nội tộc (Trực hệ),P025,Trần Ngọc Đức,Anna Trần Thị Khuyên (SN 1969),SN 1966,,Còn sống,Thành viên,Có 1 trai
+P053,Phanxico,Trần Ngọc Hành,Nam,7,Chi 1,Nội tộc (Trực hệ),P025,Trần Ngọc Đức,Anna Nguyễn Thị Ngát (SN 1966),SN 1967,,Còn sống,Thành viên,Có 2 con trai
+P054,Anna,Trần Thị Hoa,Nữ,7,Chi 1,Nội tộc (Con gái),P025,Trần Ngọc Đức,Nguyễn Văn Kỳ,,,Còn sống,Thành viên,Có 1 trai
+P055,,Trần Thị Quế,Nữ,7,Chi 1,Nội tộc (Con gái),P025,Trần Ngọc Đức,Trần Hữu Vinh (SN 1971),SN 1973,,Còn sống,Thành viên,Có 2 trai
+P051_1,Anna,Vũ Thị Huyền,Nữ,8,Chi 1,Ngoại tộc (Cháu ngoại),P051,Trần Thị Chuyên,,SN 1983,,Còn sống,Thành viên,Con gái ông Vũ Đình Điểm & Bà Trần Thị Chuyên
+P051_2,Anna,Vũ Thị Sâm,Nữ,8,Chi 1,Ngoại tộc (Cháu ngoại),P051,Trần Thị Chuyên,,SN 1986,,Còn sống,Thành viên,Con gái ông Vũ Đình Điểm & Bà Trần Thị Chuyên
+P054_1,,Nguyễn Văn Phượng,Nam,8,Chi 1,Ngoại tộc (Cháu ngoại),P054,Trần Thị Hoa,,,,Còn sống,Thành viên,Con ông Nguyễn Văn Kỳ & Bà Trần Thị Hoa
+P054_2,,Nguyễn Thị Huệ,Nữ,8,Chi 1,Ngoại tộc (Cháu ngoại),P054,Trần Thị Hoa,,,,Còn sống,Thành viên,Con gái ông Nguyễn Văn Kỳ & Bà Trần Thị Hoa
+P055_1,Phanxico,Trần Hữu Quy,Nam,8,Chi 1,Nội tộc,P055,Trần Thị Quế,,SN 1992,,Còn sống,Thành viên,Con ông Trần Hữu Vinh & Bà Trần Thị Quế
+P055_2,Phanxico,Trần Hữu Huy,Nam,8,Chi 1,Nội tộc,P055,Trần Thị Quế,,SN 1994,,Còn sống,Thành viên,Con ông Trần Hữu Vinh & Bà Trần Thị Quế
+P055_3,Anna,Trần Thị Huế,Nữ,8,Chi 1,Nội tộc (Con gái),P055,Trần Thị Quế,,SN 2003,,Còn sống,Thành viên,Con gái ông Trần Hữu Vinh & Bà Trần Thị Quế
+P056,Phanxico,Trần Ngọc Long,Nam,8,Chi 1,Nội tộc (Trực hệ),P050,Trần Ngọc Đạo,,SN 1982,,Còn sống,Đích Tôn,ĐÍCH TÔN nhánh cụ Đức
+P057,Maria,Trần Thị Ly,Nữ,8,Chi 1,Nội tộc (Con gái),P050,Trần Ngọc Đạo,,SN 1985,,Còn sống,Thành viên,Con ông Đạo
+P058,Giuse,Trần Ngọc Quân,Nam,8,Chi 1,Nội tộc (Trực hệ),P053,Trần Ngọc Hành,,SN 1989,,Còn sống,Thành viên,Con ông Hành
+P059,Phanxico,Trần Ngọc Quảng,Nam,8,Chi 1,Nội tộc (Trực hệ),P053,Trần Ngọc Hành,,SN 1999,,Còn sống,Thành viên,Con ông Hành
+P060,Phanxico,Trần Ngọc Thi,Nam,5,Chi 1,Nội tộc (Trực hệ),P006,Trần Ngọc Xuân,-,,Đã chết,Đã mất,Thành viên,Đi nhà thầy đã chết
+P061,Anna,Trần Thị Nhâm,Nữ,5,Chi 1,Nội tộc (Con gái),P006,Trần Ngọc Xuân,Mai Văn San,,Đã chết,Đã mất,Thành viên,Có 8 con họ Mai (Trang 10
+P062,Phanxico,Trần Ngọc Mô,Nam,5,Chi 1,Nội tộc (Trực hệ),P006,Trần Ngọc Xuân,Anna Phạm Thị Suý,,Vợ mất 01/12/1962,Đã mất,Thành viên,Có 6 con (2 trai
+P061_1,,Mai Văn Quỳnh,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,Quyết,,,Còn sống,Thành viên,Con ông Mai Văn San & Cụ Trần Thị Nhâm (Có 10 con)
+P061_2,,Mai Thị Ánh,Nữ,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,Vũ Đình Thìn,,,Còn sống,Thành viên,Con gái ông Mai Văn San (Có 11 con)
+P061_3,,Mai Văn Hô,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,Nguyễn Thị Lựu,,,Còn sống,Thành viên,Con ông Mai Văn San (Có 8 con)
+P061_4,,Mai Văn Phách,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,Trần Thị Nhâm,,,Còn sống,Thành viên,Con ông Mai Văn San (Có 4 con)
+P061_5,,Mai Thị Sáng,Nữ,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,Vũ Văn Luyện,,,Còn sống,Thành viên,Con gái ông Mai Văn San (Có 10 con)
+P061_6,,Mai Thị Loan,Nữ,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,-,,Chết sớm,Mất sớm,Thành viên,Con gái ông Mai Văn San
+P061_7,,Mai Văn Dương,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P061,Trần Thị Nhâm,Nguyễn Thị Tám,,,Còn sống,Thành viên,Con ông Mai Văn San (Có 5 con)
+P063,,Trần Thị Tình,Nữ,6,Chi 1,Nội tộc (Con gái),P062,Trần Ngọc Mô,Trần Hữu Quyết,,,Còn sống,Thành viên,Có 8 con (3 trai
+P064,,Trần Thị Tự,Nữ,6,Chi 1,Nội tộc (Con gái),P062,Trần Ngọc Mô,Trần Hữu Sinh,,,Còn sống,Thành viên,Có 8 con (4 trai
+P065,,Trần Thị Tam,Nữ,6,Chi 1,Nội tộc (Con gái),P062,Trần Ngọc Mô,-,,Đã chết,Đã mất,Thành viên,Con cụ Mô
+P066,,Trần Thị Tứ,Nữ,6,Chi 1,Nội tộc (Con gái),P062,Trần Ngọc Mô,,,,Còn sống,Thành viên,Có 4 con (2 trai
+P067,Phanxico,Trần Ngọc Ngữ,Nam,6,Chi 1,Nội tộc (Trực hệ),P062,Trần Ngọc Mô,-,,Đã chết,Đã mất,Thành viên,Con cụ Mô
+P068,Phanxico,Trần Ngọc Thuyết,Nam,6,Chi 1,Nội tộc (Trực hệ),P062,Trần Ngọc Mô,Maria Đinh Thị Mùi (SN 1950),12/11/1949,,Còn sống,Thành viên,Có 4 con (2 trai
+P069,Anna,Trần Thị Tuyến,Nữ,7,Chi 1,Nội tộc (Con gái),P068,Trần Ngọc Thuyết,Phaolo Vũ Đình Khải (ốm chết),20/12/1975,,Còn sống,Thành viên,Có 1 trai
+P070,Phanxico,Trần Ngọc Tuyền,Nam,7,Chi 1,Nội tộc (Trực hệ),P068,Trần Ngọc Thuyết,Anna Nguyễn Thị Linh (SN 1980),01/10/1977,,Còn sống,Thành viên,Có 3 con (Trang 12)
+P071,Anna,Trần Thị Tuyết,Nữ,7,Chi 1,Nội tộc (Con gái),P068,Trần Ngọc Thuyết,,08/04/1981,,Còn sống,Thành viên,Con ông Thuyết
+P072,Giuse,Trần Ngọc Dung,Nam,7,Chi 1,Nội tộc (Trực hệ),P068,Trần Ngọc Thuyết,-,15/01/1985,Mất 04/10/2004 Âm,Đã mất,Thành viên,Con ông Thuyết
+P069_1,,Vũ Thị Mị,Nữ,8,Chi 1,Ngoại tộc (Cháu ngoại),P069,Trần Thị Tuyến,,,,Còn sống,Thành viên,Con gái ông Vũ Đình Khải & Bà Trần Thị Tuyến
+P069_2,,Vũ Đình Hoạt,Nam,8,Chi 1,Ngoại tộc (Cháu ngoại),P069,Trần Thị Tuyến,,,,Còn sống,Thành viên,Con ông Vũ Đình Khải & Bà Trần Thị Tuyến
+P073,,Trần Thị Hương,Nữ,8,Chi 1,Nội tộc (Con gái),P070,Trần Ngọc Tuyền,,19/09/1999,,Còn sống,Thành viên,Con ông Tuyền
+P074,,Trần Thị Thúy,Nữ,8,Chi 1,Nội tộc (Con gái),P070,Trần Ngọc Tuyền,,09/11/2001,,Còn sống,Thành viên,Con ông Tuyền
+P075,,Trần Ngọc Minh,Nam,8,Chi 1,Nội tộc (Trực hệ),P070,Trần Ngọc Tuyền,,30/09/2004,,Còn sống,Đích Tôn,ĐÍCH TÔN nhánh cụ Thuyết
+P076,,Trần Ngọc Nguyên,Nam,5,Chi 1,Nội tộc (Trực hệ),P007,Trần Ngọc Lịch,Anna Trần Thị Đại,,Vợ mất 17/03/1970,Đã mất,Thành viên,Con cụ Lịch (Trang 13)
+P077,,Trần Thị Lân,Nữ,5,Chi 1,Nội tộc (Con gái),P007,Trần Ngọc Lịch,Ngô Văn Phong,,,Còn sống,Thành viên,Có 6 con họ Ngô (Trang 14)
+P078,Phanxico,Trần Ngọc Căn,Nam,5,Chi 1,Nội tộc (Trực hệ),P007,Trần Ngọc Lịch,Hoàng Thị Thao,,Mất 26/06/1973,Đã mất,Thành viên,Có 8 con (2 trai
+P079,,Trần Ngọc Khiết,Nam,5,Chi 1,Nội tộc (Trực hệ),P007,Trần Ngọc Lịch,-,,Mất sớm,Mất sớm,Thành viên,Con cụ Lịch
+P077_1,,Ngô Văn Hòa,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P077,Trần Thị Lân,Trần Thị ...,,,Còn sống,Thành viên,Con ông Ngô Văn Phong & Cụ Trần Thị Lân (Có 6 con)
+P077_2,,Ngô Thị Tính,Nữ,6,Chi 1,Ngoại tộc (Cháu ngoại),P077,Trần Thị Lân,Đức Hoàng,,,Còn sống,Thành viên,Con gái ông Ngô Văn Phong (Có 6 con)
+P077_3,,Ngô Văn Khiêu,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P077,Trần Thị Lân,Trần Thị Cảnh,,,Còn sống,Thành viên,Con ông Ngô Văn Phong (Có 5 con)
+P077_4,,Ngô Văn Khích,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P077,Trần Thị Lân,-,,Ốm chết,Đã mất,Thành viên,Con ông Ngô Văn Phong
+P077_5,,Ngô Thị Tách,Nữ,6,Chi 1,Ngoại tộc (Cháu ngoại),P077,Trần Thị Lân,Tịch,,,Còn sống,Thành viên,Con gái ông Ngô Văn Phong (Có 5 con gái)
+P077_6,,Ngô Văn Thích,Nam,6,Chi 1,Ngoại tộc (Cháu ngoại),P077,Trần Thị Lân,Vũ Thị Lan,,,Còn sống,Thành viên,Con ông Ngô Văn Phong (Có 2 con)
+P080,,Trần Thị Diệp,Nữ,6,Chi 1,Nội tộc (Con gái),P078,Trần Ngọc Căn,,SN 1947,,Còn sống,Thành viên,Con cụ Căn
+P081,,Trần Ngọc Thiệp,Nam,6,Chi 1,Nội tộc (Trực hệ),P078,Trần Ngọc Căn,-,SN 1948,Chết sớm,Mất sớm,Thành viên,Con cụ Căn
+P082,,Trần Thị Cai,Nữ,6,Chi 1,Nội tộc (Con gái),P078,Trần Ngọc Căn,Phạm Văn Hưng,SN 1950,,Còn sống,Thành viên,Có 3 con (1 trai
+P083,,Trần Thị Ly,Nữ,6,Chi 1,Nội tộc (Con gái),P078,Trần Ngọc Căn,Trần Văn Bảo,,,Còn sống,Thành viên,Có 5 con (2 trai
+P084,,Trần Thị Bi,Nữ,6,Chi 1,Nội tộc (Con gái),P078,Trần Ngọc Căn,Mai Văn Thuấn,,,Còn sống,Thành viên,Có 3 con (2 trai
+P085,,Trần Ngọc Bản,Nam,6,Chi 1,Nội tộc (Trực hệ),P078,Trần Ngọc Căn,Nguyễn Thị Tươi,,,Còn sống,Thành viên,Có 2 con (1 trai
+P086,,Trần Thị Phảng,Nữ,6,Chi 1,Nội tộc (Con gái),P078,Trần Ngọc Căn,Ngô Văn Xuyến,,,Còn sống,Thành viên,Có 2 con họ Ngô (Cháu ngoại cụ Căn)
+P087,,Trần Thị Tuy,Nữ,6,Chi 1,Nội tộc (Con gái),P078,Trần Ngọc Căn,Mai Văn Cẩm,,,Còn sống,Thành viên,Có 6 con họ Mai (Cháu ngoại cụ Căn)
+P086_1,,Ngô Văn Luyến,Nam,7,Chi 1,Ngoại tộc (Cháu ngoại),P086,Trần Thị Phảng,,,,Còn sống,Thành viên,Con ông Ngô Văn Xuyến & Bà Trần Thị Phảng
+P086_2,,Ngô Thị Nga,Nữ,7,Chi 1,Ngoại tộc (Cháu ngoại),P086,Trần Thị Phảng,,,,Còn sống,Thành viên,Con gái ông Ngô Văn Xuyến & Bà Trần Thị Phảng
+P088,,Trần Ngọc Khoa,Nam,7,Chi 1,Nội tộc (Trực hệ),P085,Trần Ngọc Bản,,,,Còn sống,Đích Tôn,ĐÍCH TÔN nhánh cụ Căn
+P089,,Trần Thị Diệu,Nữ,7,Chi 1,Nội tộc (Con gái),P085,Trần Ngọc Bản,,,,Còn sống,Thành viên,Con ông Bản
+P090,,Trần Ngọc Đoán,Nam,5,Chi 2,Nội tộc (Trực hệ),P008,Trần Ngọc Quáp,Mai Thị Xứng (Mất 1975),,Mất 1943,Đã mất,Thành viên,Con cụ Quáp (Trang 19)
+P091,,Trần Ngọc Cầu,Nam,5,Chi 2,Nội tộc (Trực hệ),P008,Trần Ngọc Quáp,-,,Chết sớm,Mất sớm,Thành viên,Con cụ Quáp
+P092,,Trần Ngọc Dân,Nam,5,Chi 2,Nội tộc (Trực hệ),P008,Trần Ngọc Quáp,-,,Chết sớm,Mất sớm,Thành viên,Con cụ Quáp
+P093,,Trần Thị Đào,Nữ,6,Chi 2,Nội tộc (Con gái),P090,Trần Ngọc Đoán,Phạm Quang Viêm (đã chết),,,Còn sống,Thành viên,Có 8 con họ Phạm (Trang 20)
+P094,,Trần Ngọc Đông,Nam,6,Chi 2,Nội tộc (Trực hệ),P090,Trần Ngọc Đoán,Bà cả: Đinh Thị Thảo (mất 1953); Bà hai: Đỗ Thị Hương (SN 1941),08/05/1930,,Còn sống,Thành viên,Có 10 con (7 trai
+P095,,Trần Thị Lý Sính,Nữ,6,Chi 2,Nội tộc (Con gái),P090,Trần Ngọc Đoán,Đỗ Duy Tý,,,Còn sống,Thành viên,Có 11 con họ Đỗ (Trang 24)
+P093_1,,Phạm Quang Đăng,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con ông Phạm Quang Viêm & Bà Trần Thị Đào
+P093_2,,Phạm Quang Thán,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con ông Phạm Quang Viêm & Bà Trần Thị Đào
+P093_3,,Phạm Quang Pháo,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con ông Phạm Quang Viêm & Bà Trần Thị Đào
+P093_4,,Phạm Thị Thẹn,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con gái ông Phạm Quang Viêm
+P093_5,,Phạm Thị Thể,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con gái ông Phạm Quang Viêm
+P093_6,,Phạm Thị Thị,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con gái ông Phạm Quang Viêm
+P093_7,,Phạm Thị Bình,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con gái ông Phạm Quang Viêm
+P093_8,,Phạm Thị Bính,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P093,Trần Thị Đào,,,,Còn sống,Thành viên,Con gái ông Phạm Quang Viêm
+P095_1,,Đỗ Duy Lan,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Tu sỹ,Tu sỹ - Con ông Đỗ Duy Tý & Bà Trần Thị Lý Sính
+P095_2,,Đỗ Thị Hải,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con gái ông Đỗ Duy Tý (Có 3 con)
+P095_3,,Đỗ Duy Thành,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con ông Đỗ Duy Tý (Có 8 con)
+P095_4,,Đỗ Minh Tuấn,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con ông Đỗ Duy Tý
+P095_5,,Đỗ Duy Sơn,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con ông Đỗ Duy Tý (Có 2 con)
+P095_6,,Đỗ Duy Sử,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con ông Đỗ Duy Tý (Có 2 con)
+P095_7,,Đỗ Duy Dũng,Nam,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con ông Đỗ Duy Tý
+P095_8,,Đỗ Thị Nguyệt,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con gái ông Đỗ Duy Tý
+P095_9,,Đỗ Thị Hồng,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con gái ông Đỗ Duy Tý (Có 1 con)
+P095_10,,Đỗ Thị Tiến,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con gái ông Đỗ Duy Tý
+P095_11,,Đỗ Thị Ngát,Nữ,7,Chi 2,Ngoại tộc (Cháu ngoại),P095,Trần Thị Lý Sính,,,,Còn sống,Thành viên,Con gái ông Đỗ Duy Tý (Có 3 con)
+P096,,Trần Thị Châu,Nữ,7,Chi 2,Nội tộc (Con gái),P094,Trần Ngọc Đông,Vũ Hữu Quang,SN 1950,,Còn sống,Thành viên,Con bà cả Đinh Thị Thảo (Có 5 con họ Vũ)
+P097,,Trần Ngọc Đồng (Hòa),Nam,7,Chi 2,Nội tộc (Trực hệ),P094,Trần Ngọc Đông,Bùi Thị Hương,SN 1961,,Còn sống,Thành viên,Con bà hai Đỗ Thị Hương
+P098,,Trần Thị Ngọc Chiêu,Nữ,7,Chi 2,Nội tộc (Con gái),P094,Trần Ngọc Đông,Nguyễn Văn Liệu,17/05/1963,,Còn sống,Thành viên,Có 2 con (Cháu ngoại cụ Đông)
+P099,,Trần Thị Chi,Nữ,7,Chi 2,Nội tộc (Con gái),P094,Trần Ngọc Đông,Vũ Duy Quyền,SN 1965,,Còn sống,Thành viên,Có 2 con họ Vũ (Cháu ngoại cụ Đông)
+P100,,Trần Ngọc Điển,Nam,7,Chi 2,Nội tộc (Trực hệ),P094,Trần Ngọc Đông,Nguyễn Thị Ánh Trang,SN 1966,,Còn sống,Thành viên,Có 3 con (2 trai
+P101,,Trần Ngọc Hùng,Nam,7,Chi 2,Nội tộc (Trực hệ),P094,Trần Ngọc Đông,Nguyễn Thị Thu Hà,SN 1970,,Còn sống,Thành viên,Con ông Đông
+P102,,Trần Ngọc Dũng,Nam,7,Chi 2,Nội tộc (Trực hệ),P094,Trần Ngọc Đông,,13/02/1972,,Còn sống,Thành viên,Con ông Đông
+P103,,Trần Ngọc Cường,Nam,7,Chi 2,Nội tộc (Trực hệ),P094,Trần Ngọc Đông,,02/12/1973,,Còn sống,Thành viên,Con ông Đông
+P104,,Trần Ngọc Hồng Phước,Nam,7,Chi 2,Nội tộc (Trực hệ),P094,Trần Ngọc Đông,,02/09/1980,,Còn sống,Thành viên,Con ông Đông
+P105,,Trần Xuân Lộc,Nam,7,Chi 2,Nội tộc,P094,Trần Ngọc Đông,,12/06/1985,,Còn sống,Thành viên,Con ông Đông
+P096_1,,Vũ Thị Vân,Nữ,8,Chi 2,Ngoại tộc (Cháu ngoại),P096,Trần Thị Châu,,SN 1950,,Còn sống,Thành viên,Con gái ông Vũ Hữu Quang & Bà Trần Thị Châu
+P096_2,,Vũ Trần Long,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P096,Trần Thị Châu,,,,Còn sống,Thành viên,Con ông Vũ Hữu Quang & Bà Trần Thị Châu
+P096_3,,Vũ Trần Vũ,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P096,Trần Thị Châu,,,,Còn sống,Thành viên,Con ông Vũ Hữu Quang & Bà Trần Thị Châu
+P096_4,,Vũ Trần Giang,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P096,Trần Thị Châu,,,,Còn sống,Thành viên,Con ông Vũ Hữu Quang & Bà Trần Thị Châu
+P096_5,,Vũ Trần Kế,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P096,Trần Thị Châu,,,,Còn sống,Thành viên,Con ông Vũ Hữu Quang & Bà Trần Thị Châu
+P098_1,,Nguyễn Thị Oanh Kiều,Nữ,8,Chi 2,Ngoại tộc (Cháu ngoại),P098,Trần Thị Ngọc Chiêu,,,,Còn sống,Thành viên,Con gái ông Nguyễn Văn Liệu & Bà Trần Thị Ngọc Chiêu
+P098_2,,Nguyễn Trần Văn Phú,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P098,Trần Thị Ngọc Chiêu,,,,Còn sống,Thành viên,Con ông Nguyễn Văn Liệu & Bà Trần Thị Ngọc Chiêu
+P099_1,,Vũ Trần Kiên,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P099,Trần Thị Chi,,,,Còn sống,Thành viên,Con ông Vũ Duy Quyền & Bà Trần Thị Chi
+P099_2,,Vũ Trần Di Tâm,Nam,8,Chi 2,Ngoại tộc (Cháu ngoại),P099,Trần Thị Chi,,,,Còn sống,Thành viên,Con ông Vũ Duy Quyền & Bà Trần Thị Chi
+P106,,Trần Thị Huyền,Nữ,8,Chi 2,Nội tộc (Con gái),P097,Trần Ngọc Đồng,,,,Còn sống,Thành viên,Con ông Đồng
+P107,,Trần Ngọc Huy,Nam,8,Chi 2,Nội tộc (Trực hệ),P100,Trần Ngọc Điển,,,,Còn sống,Thành viên,Con ông Điển
+P108,,Trần Ngọc Hoàng,Nam,8,Chi 2,Nội tộc (Trực hệ),P100,Trần Ngọc Điển,,,,Còn sống,Thành viên,Con ông Điển
+P109,,Trần Thị Anh Ngọc,Nữ,8,Chi 2,Nội tộc (Con gái),P100,Trần Ngọc Điển,,,,Còn sống,Thành viên,Con ông Điển
+P110,,Trần Thị ...,Nữ,5,Chi 2,Nội tộc (Con gái),P009,Trần Ngọc Thước,Phạm Văn Nga,,Đã mất,Đã mất,Thành viên,Có 5 con họ Phạm (Trang 25)
+P111,Phanxico,Trần Ngọc Hoàng,Nam,5,Chi 2,Nội tộc (Trực hệ),P009,Trần Ngọc Thước,,,Đã mất,Đã mất,Thành viên,Có 7 con (2 trai
+P112,,Trần Thị ...,Nữ,5,Chi 2,Nội tộc (Con gái),P009,Trần Ngọc Thước,Trần Văn Tẹo,,Đã mất,Đã mất,Thành viên,Có 5 con (Trang 29)
+P113,,Trần Thị Rím,Nữ,5,Chi 2,Nội tộc (Con gái),P009,Trần Ngọc Thước,Nguyễn Văn Cản,,Đã mất,Đã mất,Thành viên,Có 5 con họ Nguyễn (Trang 30)
+P114,Phanxico,Trần Ngọc Đềnh,Nam,5,Chi 2,Nội tộc (Trực hệ),P009,Trần Ngọc Thước,,,Đã mất,Đã mất,Thành viên,Có 2 con (Trang 30)
+P110_1,,Phạm Văn Điệt,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P110,Trần Thị ...,,,,Còn sống,Thành viên,Con ông Phạm Văn Nga & Cụ Trần Thị ... (Có 3 con)
+P110_2,,Phạm Thị ...,Nữ,6,Chi 2,Ngoại tộc (Cháu ngoại),P110,Trần Thị ...,Am,,,Còn sống,Thành viên,Con gái ông Phạm Văn Nga (Có 4 con)
+P110_3,,Phạm Văn Hảo,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P110,Trần Thị ...,,,,Còn sống,Thành viên,Con ông Phạm Văn Nga
+P110_4,,Phạm Văn Nhân,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P110,Trần Thị ...,,,,Còn sống,Thành viên,Con ông Phạm Văn Nga
+P110_5,,Phạm Văn Diệu,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P110,Trần Thị ...,,,,Còn sống,Thành viên,Con ông Phạm Văn Nga
+P112_1,,Trần Thị ...,Nữ,6,Chi 2,Nội tộc (Con gái),P112,Trần Thị ...,Vũ Đình Mỹ,,,Còn sống,Thành viên,Con gái ông Trần Văn Tẹo (Có 6 con)
+P112_2,,Trần Thị ...,Nữ,6,Chi 2,Nội tộc (Con gái),P112,Trần Thị ...,Nguyễn Văn Lợi,,,Còn sống,Thành viên,Con gái ông Trần Văn Tẹo (Có 7 con)
+P112_3,,Trần Thị ...,Nữ,6,Chi 2,Nội tộc (Con gái),P112,Trần Thị ...,Phạm Văn Lâm,,,Còn sống,Thành viên,Con gái ông Trần Văn Tẹo (Có 8 con)
+P134,,Trần Văn Ước,Nam,6,Chi 2,Nội tộc,P112,Trần Thị ...,Trần Thị Duyên,,,Còn sống,Thành viên,Có 7 con (4 trai
+P135,,Trần Thị Tình,Nữ,6,Chi 2,Nội tộc (Con gái),P112,Trần Thị ...,Vũ Đình Dụ,,,Còn sống,Thành viên,Con gái ông Trần Văn Tẹo
+P113_1,,Nguyễn Văn Châu,Nữ,6,Chi 2,Ngoại tộc (Cháu ngoại),P113,Trần Thị Rím,Trần Thị Phượng,,,Còn sống,Thành viên,Con ông Nguyễn Văn Cản & Cụ Trần Thị Rím (Có 5 con)
+P113_2,,Nguyễn Văn Thiện,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P113,Trần Thị Rím,Phan Thị Vui,,,Còn sống,Thành viên,Con ông Nguyễn Văn Cản & Cụ Trần Thị Rím (Có 4 con)
+P113_3,,Nguyễn Thị Nhị,Nữ,6,Chi 2,Ngoại tộc (Cháu ngoại),P113,Trần Thị Rím,Trần Văn Tá,,,Còn sống,Thành viên,Con gái ông Nguyễn Văn Cản (Có 5 con)
+P113_4,,Trần Thị Cài,Nữ,6,Chi 2,Nội tộc (Con gái),P113,Trần Thị Rím,Ngô Văn Hổ,,,Còn sống,Thành viên,Con gái ông Nguyễn Văn Cản
+P113_5,,Trần Thị Sợi,Nữ,6,Chi 2,Nội tộc (Con gái),P113,Trần Thị Rím,Vũ Đình Dân,,,Còn sống,Thành viên,Con gái ông Nguyễn Văn Cản
+P115,Phanxico,Trần Ngọc Thư,Nam,6,Chi 2,Nội tộc (Trực hệ),P111,Trần Ngọc Hoàng,,,,Còn sống,Thành viên,Có 8 con (3 trai
+P116,,Trần Thị Hiệu,Nữ,6,Chi 2,Nội tộc (Con gái),P111,Trần Ngọc Hoàng,Nguyễn Văn Chấm,,,Còn sống,Thành viên,Có 4 con (2 trai
+P117,,Trần Thị Han,Nữ,6,Chi 2,Nội tộc (Con gái),P111,Trần Ngọc Hoàng,,,,Còn sống,Thành viên,Con cụ Hoàng
+P118,,Trần Thị Ngọt,Nữ,6,Chi 2,Nội tộc (Con gái),P111,Trần Ngọc Hoàng,Trần Văn Kiểm,,,Còn sống,Thành viên,Có 2 con
+P119,,Trần Thị Mãng,Nữ,6,Chi 2,Nội tộc (Con gái),P111,Trần Ngọc Hoàng,Đoàn Văn Quản,,,Còn sống,Thành viên,Con cụ Hoàng
+P120,,Trần Thị Minh (Mọc),Nữ,6,Chi 2,Nội tộc (Con gái),P111,Trần Ngọc Hoàng,,,,Còn sống,Thành viên,Con cụ Hoàng
+P121,Phanxico,Trần Ngọc Chung,Nam,6,Chi 2,Nội tộc (Trực hệ),P111,Trần Ngọc Hoàng,-,,Chết sớm,Mất sớm,Thành viên,Con cụ Hoàng
+P122,,Trần Ngọc Thìu,Nam,7,Chi 2,Nội tộc (Trực hệ),P115,Trần Ngọc Thư,Phạm Thị Phương,,,Còn sống,Thành viên,Có 3 con (Trang 27)
+P123,,Trần Thị Nẻ,Nữ,7,Chi 2,Nội tộc (Con gái),P115,Trần Ngọc Thư,-,,Chết sớm,Mất sớm,Thành viên,Con ông Thư
+P124,Phanxico,Trần Ngọc Thụy,Nam,7,Chi 2,Nội tộc (Trực hệ),P115,Trần Ngọc Thư,-,,Chết sớm,Mất sớm,Thành viên,Con ông Thư
+P125,,Trần Thị Thuý,Nữ,7,Chi 2,Nội tộc (Con gái),P115,Trần Ngọc Thư,,,,Còn sống,Thành viên,Con ông Thư
+P126,,Trần Thị Lam,Nữ,7,Chi 2,Nội tộc (Con gái),P115,Trần Ngọc Thư,Trần Văn Tuấn,,,Còn sống,Thành viên,Con ông Thư
+P127,,Trần Thị Miến,Nữ,7,Chi 2,Nội tộc (Con gái),P115,Trần Ngọc Thư,-,,Chết sớm,Mất sớm,Thành viên,Con ông Thư
+P128,,Trần Thị Miền,Nữ,7,Chi 2,Nội tộc (Con gái),P115,Trần Ngọc Thư,,,,Còn sống,Thành viên,Con ông Thư
+P129,,Trần Ngọc Bắc,Nam,7,Chi 2,Nội tộc (Trực hệ),P115,Trần Ngọc Thư,Nguyễn Thị Chân,,,Còn sống,Thành viên,Con ông Thư (Trang 28)
+P130,Phanxico,Trần Ngọc Kỳ,Nam,8,Chi 2,Nội tộc (Trực hệ),P122,Trần Ngọc Thìu,,,Mất năm 200.,Đã mất,Thành viên,Con ông Thìu
+P131,,Trần Thị Mừng,Nữ,8,Chi 2,Nội tộc (Con gái),P122,Trần Ngọc Thìu,,,,Còn sống,Thành viên,Con ông Thìu
+P132,,Trần Ngọc Trường,Nam,8,Chi 2,Nội tộc (Trực hệ),P122,Trần Ngọc Thìu,,,,Còn sống,Thành viên,Con ông Thìu
+P133,,Trần Ngọc Chung (Bảo),Nam,8,Chi 2,Nội tộc (Trực hệ),P129,Trần Ngọc Bắc,-,,Chết sớm,Mất sớm,Thành viên,Con ông Bắc
+P136,,Trần Thị Thô,Nữ,6,Chi 2,Nội tộc (Con gái),P114,Trần Ngọc Đềnh,,,,Còn sống,Thành viên,Con cụ Đềnh (Trang 30)
+P137,,Trần Ngọc Kim,Nam,6,Chi 2,Nội tộc (Trực hệ),P114,Trần Ngọc Đềnh,-,,Chết sớm,Mất sớm,Thành viên,Con cụ Đềnh
+P138,,Trần Thị Thủ,Nữ,5,Chi 2,Nội tộc (Con gái),P010,Trần Ngọc Chán,Vũ Đình Do,,,Còn sống,Thành viên,Con cụ Chán (Trang 31)
+P139,,Trần Thị ...,Nữ,5,Chi 2,Nội tộc (Con gái),P010,Trần Ngọc Chán,Trần Văn Khoang,,,Còn sống,Thành viên,Con cụ Chán
+P138_1,,Vũ Đình Giáp,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P138,Trần Thị Thủ,Vũ Thị Tẹo,,,Còn sống,Thành viên,Con ông Vũ Đình Do & Cụ Trần Thị Thủ
+P138_2,,Vũ Đình Lý,Nam,6,Chi 2,Ngoại tộc (Cháu ngoại),P138,Trần Thị Thủ,Sinh; Hội,,,Còn sống,Thành viên,Con ông Vũ Đình Do & Cụ Trần Thị Thủ
+P140,,Nguyễn Thị Gái,Nữ,5,Chi 2,Ngoại tộc (Cháu ngoại),P011,Trần Thị Dịch,,,,Còn sống,Thành viên,Con cụ Dịch (Trang 32)
+P141,,Nguyễn Thị ...,Nữ,5,Chi 2,Ngoại tộc (Cháu ngoại),P011,Trần Thị Dịch,Nguyễn Văn Chấm,,,Còn sống,Thành viên,Con cụ Dịch

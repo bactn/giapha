@@ -1,0 +1,21 @@
+{
+  "name": "giapha_online",
+  "version": "1.0.0",
+  "description": "Nền tảng Quản lý & Trực quan hoá Cây Gia Phả Dòng Họ - Hỗ trợ Import Excel & Giao diện Kéo Thả MindNode",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "generate-excel": "python3 generate_excel.py"
+  },
+  "keywords": [
+    "genealogy",
+    "family-tree",
+    "gia-pha",
+    "mindnode",
+    "excel-import",
+    "vietnam"
+  ],
+  "author": "Antigravity Team",
+  "license": "ISC"
+}

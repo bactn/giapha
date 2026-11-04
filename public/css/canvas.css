@@ -1,0 +1,249 @@
+/* canvas.css - Infinite Canvas, Visible Connector Links & Standardized Node Cards */
+
+#canvas-viewport {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(#cbd5e1 1.2px, transparent 1.2px),
+    radial-gradient(#cbd5e1 1.2px, #f8fafc 1.2px);
+  background-size: 26px 26px;
+  background-position: 0 0, 13px 13px;
+  position: relative;
+  touch-action: none; /* Prevent native browser scrolling so touch pan/pinch works */
+}
+
+/* HIGH CONTRAST SVG CONNECTOR LINES */
+#canvas-svg {
+  z-index: 5;
+  pointer-events: none;
+}
+
+.tree-link {
+  fill: none;
+  stroke: #64748b;
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke 0.2s, stroke-width 0.2s;
+}
+
+.tree-link-chi-1 {
+  stroke: #2563eb; /* Bold blue for Chi 1 */
+}
+
+.tree-link-chi-2 {
+  stroke: #059669; /* Bold emerald for Chi 2 */
+}
+
+.tree-link-root {
+  stroke: #b45309; /* Amber for ancestor roots */
+  stroke-width: 3px;
+}
+
+.tree-link.highlighted {
+  stroke: #f59e0b !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.5));
+}
+
+.tree-port-dot {
+  fill: #475569;
+  stroke: #ffffff;
+  stroke-width: 1.5px;
+}
+.tree-port-dot.port-chi-1 { fill: #2563eb; }
+.tree-port-dot.port-chi-2 { fill: #059669; }
+
+/* FAMILY TREE NODE CARD */
+.family-node {
+  position: absolute;
+  width: 230px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  border: 1.5px solid #cbd5e1;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  transition: box-shadow 0.15s ease, transform 0.15s ease, border-color 0.15s ease;
+  cursor: grab;
+  user-select: none;
+  z-index: 10;
+}
+.family-node:hover {
+  box-shadow: 0 10px 18px -3px rgba(0, 0, 0, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.06);
+  border-color: #94a3b8;
+  transform: translateY(-2px);
+  z-index: 25 !important;
+}
+.family-node.selected {
+  border-color: #d97706 !important;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.3), 0 10px 20px -3px rgba(0, 0, 0, 0.15) !important;
+  z-index: 30 !important;
+}
+.family-node.dragging {
+  cursor: grabbing;
+  opacity: 0.85;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+  z-index: 50 !important;
+}
+
+/* Gender Borders */
+.family-node.gender-male {
+  border-top: 4px solid #2563eb;
+}
+.family-node.gender-female {
+  border-top: 4px solid #e11d48;
+}
+.family-node.is-dich-ton {
+  border-top: 4px solid #f59e0b;
+  border-left: 2.5px solid #f59e0b;
+}
+
+/* Node Header */
+.node-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 8px 4px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 10px;
+}
+
+/* STANDARDIZED ON-CARD DELETE BUTTON */
+.btn-node-delete-quick {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-node-delete-quick:hover {
+  background-color: #fee2e2;
+  color: #dc2626;
+}
+
+/* Node Body */
+.node-body {
+  padding: 6px 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.node-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.avatar-male {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+.avatar-female {
+  background-color: #ffe4e6;
+  color: #9f1239;
+}
+
+.node-info {
+  flex: 1;
+  min-width: 0;
+}
+.node-christian-name {
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #d97706;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+.node-full-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: text;
+}
+.node-full-name:hover {
+  text-decoration: underline dotted #d97706;
+}
+.node-meta {
+  font-size: 10px;
+  color: #64748b;
+  margin-top: 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.node-footer {
+  padding: 3px 8px 4px;
+  background-color: #f8fafc;
+  border-top: 1px solid #f1f5f9;
+  border-bottom-left-radius: 11px;
+  border-bottom-right-radius: 11px;
+  font-size: 9.5px;
+  color: #64748b;
+}
+
+/* Node Inline Input for Direct Canvas Editing */
+.node-inline-input {
+  width: 100%;
+  font-size: 11.5px;
+  font-weight: 700;
+  border: 1px solid #d97706;
+  border-radius: 4px;
+  padding: 1px 4px;
+  outline: none;
+  background-color: #fffbeb;
+}
+
+/* Quick Action Hover Bar */
+.node-actions {
+  position: absolute;
+  bottom: -13px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  background-color: #0f172a;
+  border-radius: 16px;
+  padding: 2px 6px;
+  gap: 3px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.25);
+  z-index: 40;
+}
+.family-node:hover .node-actions {
+  display: flex;
+}
+.node-action-btn {
+  background: transparent;
+  border: none;
+  color: #f8fafc;
+  font-size: 9.5px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+}
+.node-action-btn:hover {
+  background-color: #334155;
+  color: #fbbf24;
+}
+.node-action-btn.btn-act-del:hover {
+  color: #f87171;
+}
