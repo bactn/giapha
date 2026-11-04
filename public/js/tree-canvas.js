@@ -187,6 +187,33 @@ export class TreeCanvas {
     this.renderMinimap();
   }
 
+  // Pan and zoom to center on a specific member's node
+  focusOnMember(memberId) {
+    if (!this.layoutData || !this.layoutData.positions) return;
+    const pos = this.layoutData.positions.get(memberId);
+    if (!pos) return;
+
+    const vWidth = this.viewport.clientWidth;
+    const vHeight = this.viewport.clientHeight;
+    const nodeW = this.layout.nodeWidth;
+    const nodeH = this.layout.nodeHeight;
+
+    // Target scale: fit the node with some padding
+    const targetScale = Math.min(1.5, Math.min(vWidth / (nodeW + 200), vHeight / (nodeH + 200)));
+
+    // Center the node in the viewport
+    const centerX = pos.x + nodeW / 2;
+    const centerY = pos.y + nodeH / 2;
+
+    this.scale = targetScale;
+    this.panX = vWidth / 2 - centerX * targetScale;
+    this.panY = vHeight / 2 - centerY * targetScale;
+
+    this.applyTransform();
+    this.updateZoomDisplay();
+    this.renderMinimap();
+  }
+
   render() {
     this.layoutData = this.layout.calculateLayout(this.dataStore, this.activeFilter);
     const { positions, links } = this.layoutData;
@@ -292,11 +319,25 @@ export class TreeCanvas {
           <div class="node-meta">${member.birth_date ? member.birth_date : ''} ${member.death_date ? '• ' + member.death_date : ''}</div>
         </div>
       </div>
-      ${member.spouse ? `
+      ${member.spouse_id && this.dataStore.members.has(member.spouse_id) ? (() => {
+        const sp = this.dataStore.members.get(member.spouse_id);
+        const spInitials = sp.full_name.split(' ').map(n => n[0]).slice(-2).join('');
+        const spGender = sp.gender === 'Nữ' ? 'avatar-female' : 'avatar-male';
+        const spChristian = sp.christian_name ? `[${sp.christian_name}] ` : '';
+        const spBirthYear = sp.birth_date ? sp.birth_date : '';
+        return `
+        <div class="node-footer node-footer-spouse" data-spouse-id="${sp.id}" title="Nhấp để xem chi tiết ${sp.full_name}">
+          <div class="spouse-mini-avatar ${spGender}">${spInitials}</div>
+          <div class="spouse-mini-info">
+            <span class="spouse-mini-name">⚭ ${spChristian}${sp.full_name}</span>
+            <span class="spouse-mini-meta">${spBirthYear}</span>
+          </div>
+        </div>`;
+      })() : (member.spouse ? `
         <div class="node-footer">
           <span class="truncate">⚭ ${member.spouse}</span>
         </div>
-      ` : ''}
+      ` : '')}
       
       <!-- Quick Action Hover Bar -->
       <div class="node-actions">
@@ -359,15 +400,33 @@ export class TreeCanvas {
       window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: child.id }));
     };
 
-    // Quick action: Add Spouse
+    // Quick action: Add Spouse (as full member node)
     card.querySelector('.action-add-spouse').onclick = (e) => {
       e.stopPropagation();
-      const spouseName = prompt(`Nhập họ tên vợ/chồng của ${member.full_name}:`);
-      if (spouseName && spouseName.trim()) {
-        const current = member.spouse ? `${member.spouse}; ${spouseName.trim()}` : spouseName.trim();
-        this.dataStore.updateMember(member.id, { spouse: current });
+      const existingSpouse = this.dataStore.getSpouseMember(member.id);
+      if (existingSpouse) {
+        alert(`${member.full_name} đã có phối ngẫu là ${existingSpouse.full_name}. Nếu muốn thay đổi, hãy hủy liên kết trước.`);
+        return;
+      }
+      const spouse = this.dataStore.addSpouseAsMember(member.id);
+      if (spouse) {
+        this.dataStore.selectMember(spouse.id);
+        window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: spouse.id }));
       }
     };
+
+    // Click on spouse footer to open spouse details in inspector
+    const spouseFooter = card.querySelector('.node-footer-spouse');
+    if (spouseFooter) {
+      spouseFooter.onclick = (e) => {
+        e.stopPropagation();
+        const spouseId = spouseFooter.dataset.spouseId;
+        if (spouseId) {
+          this.dataStore.selectMember(spouseId);
+          window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: spouseId }));
+        }
+      };
+    }
 
     // Quick action: Edit in Left Inspector
     card.querySelector('.action-edit').onclick = (e) => {

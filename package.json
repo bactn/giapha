@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
+    "be": "node server.js",
     "generate-excel": "python3 generate_excel.py"
   },
   "keywords": [

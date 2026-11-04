@@ -153,6 +153,29 @@ body {
   outline: 2px dashed #d97706;
 }
 
+/* Spouse row styling */
+.outline-spouse-row {
+  border-left: 2px solid #fda4af;
+  margin-left: 8px;
+  padding-left: 8px;
+}
+.outline-spouse-row:hover {
+  background-color: #fff1f2;
+}
+.outline-spouse-row.selected {
+  background-color: #ffe4e6;
+  color: #9f1239;
+  font-weight: 600;
+}
+
+/* Spouse label inline in outline tree */
+.outline-spouse-label {
+  color: #e11d48;
+  font-size: 11px;
+  margin-left: 2px;
+  font-weight: 500;
+}
+
 .outline-toggle-btn {
   width: 20px;
   height: 20px;

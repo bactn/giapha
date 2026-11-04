@@ -1,0 +1,20 @@
+[
+  {
+    "id": "6e80bbde-b299-46e1-9c98-d8fa1b5b9ccc",
+    "lineage_id": "6431107a-2971-40b4-97a7-66a602832d42",
+    "code": "JP8YTR",
+    "expires_at": null,
+    "created_at": "2026-11-04T08:56:10.682Z",
+    "is_active": true,
+    "used": true
+  },
+  {
+    "id": "0701ab82-6199-415a-8791-7a0cf5e1989e",
+    "lineage_id": "7081fe7a-158b-4d0e-96f0-34a026a0de83",
+    "code": "VY3MPY",
+    "expires_at": null,
+    "created_at": "2026-11-04T11:25:31.376Z",
+    "is_active": true,
+    "used": true
+  }
+]

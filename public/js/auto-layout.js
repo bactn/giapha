@@ -8,7 +8,7 @@ export class AutoLayout {
     this.orientation = options.orientation || 'VERTICAL'; // 'VERTICAL' (Top->Down) or 'HORIZONTAL' (Left->Right)
   }
 
-  calculateLayout(dataStore, filterOption = 'ALL') {
+  calculateLayout(dataStore, filterOption = 'ALL', maxDepth = 0) {
     const allMembers = dataStore.getAllMembers();
     if (allMembers.length === 0) {
       return { positions: new Map(), links: [], bounds: { minX: 0, maxX: 0, minY: 0, maxY: 0 } };
@@ -44,6 +44,20 @@ export class AutoLayout {
       visibleMembers = allMembers.filter(m => m.branch_type && m.branch_type.includes('Nội tộc'));
     } else if (filterOption === 'MATERNAL_ONLY') {
       visibleMembers = allMembers.filter(m => m.branch_type && m.branch_type.includes('Ngoại tộc'));
+    }
+
+    // 2. Apply depth filter (maxDepth generations from the minimum generation)
+    if (maxDepth > 0) {
+      let minGen = Infinity;
+      for (const m of visibleMembers) {
+        const g = parseInt(m.generation, 10);
+        if (!isNaN(g) && g < minGen) minGen = g;
+      }
+      if (minGen === Infinity) minGen = 1;
+      visibleMembers = visibleMembers.filter(m => {
+        const g = parseInt(m.generation, 10);
+        return !isNaN(g) && (g - minGen + 1) <= maxDepth;
+      });
     }
 
     const memberMap = new Map();

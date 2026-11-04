@@ -1,0 +1,31 @@
+[
+  {
+    "lineage_id": "6431107a-2971-40b4-97a7-66a602832d42",
+    "user_id": "9748fbbc-f854-4417-b124-e2a199752fef",
+    "granted_by": "share_code",
+    "granted_at": "2026-11-04T08:56:37.211Z",
+    "role": "viewer"
+  },
+  {
+    "lineage_id": "7081fe7a-158b-4d0e-96f0-34a026a0de83",
+    "user_id": "2f0acf49-33c3-4b46-b87c-af35a2c4df95",
+    "granted_by": "share_code",
+    "granted_at": "2026-11-04T11:25:59.784Z"
+  },
+  {
+    "id": "e8f8a795-f882-4c04-914e-66453118d0d7",
+    "lineage_id": "6431107a-2971-40b4-97a7-66a602832d42",
+    "user_id": null,
+    "role": "editor",
+    "granted_at": "2026-11-04T11:52:14.136Z",
+    "granted_by": "00fe8ab4-bb16-43b9-ae2b-3a485bf401a1"
+  },
+  {
+    "id": "b16b3d64-e02b-47f4-8fbe-23c528e0a06e",
+    "lineage_id": "69f4fcf4-b377-48db-a9ce-cb6dbc75a402",
+    "user_id": null,
+    "role": "editor",
+    "granted_at": "2026-11-04T11:52:24.548Z",
+    "granted_by": "e2bb8975-a541-4336-9437-33feec56c155"
+  }
+]

@@ -2,7 +2,7 @@
   "lineage_info": {
     "name": "Họ Trần Ngọc - Ngành II Công Giáo",
     "origin": "Nam Định / Ninh Bình",
-    "total_members": 221,
+    "total_members": 350,
     "generations": 9
   },
   "members": [
@@ -50,12 +50,13 @@
       "branch_type": "Nội tộc (Trực hệ)",
       "parent_id": "P002",
       "parent_name": "Trần Ngọc Toại",
-      "spouse": "Bà cả; Bà hai",
+      "spouse": "Bà cả",
       "birth_date": "",
       "death_date": "",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Thượng Chi (Chi 1) - Có 2 đời vợ"
+      "notes": "Thượng Chi (Chi 1) - Có 2 đời vợ",
+      "spouse_id": "P228"
     },
     {
       "id": "P004",
@@ -72,7 +73,8 @@
       "death_date": "",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Hạ Chi (Chi 2)"
+      "notes": "Hạ Chi (Chi 2)",
+      "spouse_id": "P229"
     },
     {
       "id": "P005",
@@ -106,7 +108,8 @@
       "death_date": "Đã chết",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Thầy/Thoại - Đã chết (Trang 9)"
+      "notes": "Thầy/Thoại - Đã chết (Trang 9)",
+      "spouse_id": "P230"
     },
     {
       "id": "P007",
@@ -140,7 +143,8 @@
       "death_date": "",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con cụ Phúc (Trang 19)"
+      "notes": "Con cụ Phúc (Trang 19)",
+      "spouse_id": "P231"
     },
     {
       "id": "P009",
@@ -191,7 +195,8 @@
       "death_date": "",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con gái cụ Phúc (Trang 32)"
+      "notes": "Con gái cụ Phúc (Trang 32)",
+      "spouse_id": "P232"
     },
     {
       "id": "P012",
@@ -208,7 +213,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái thứ 1 cụ Tân (Trang 2)"
+      "notes": "Con gái thứ 1 cụ Tân (Trang 2)",
+      "spouse_id": "P233"
     },
     {
       "id": "P013",
@@ -225,7 +231,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái thứ 2 cụ Tân (Trang 2)"
+      "notes": "Con gái thứ 2 cụ Tân (Trang 2)",
+      "spouse_id": "P234"
     },
     {
       "id": "P014",
@@ -242,7 +249,8 @@
       "death_date": "Mất 21/3; Vợ mất 21/10",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con thứ 3 cụ Tân (Trang 3)"
+      "notes": "Con thứ 3 cụ Tân (Trang 3)",
+      "spouse_id": "P235"
     },
     {
       "id": "P015",
@@ -254,12 +262,13 @@
       "branch_type": "Nội tộc (Trực hệ)",
       "parent_id": "P005",
       "parent_name": "Trần Ngọc Tân",
-      "spouse": "Bà cả: Trần Thị ...; Bà hai: Vũ Thị Cờn",
+      "spouse": "Bà cả: Trần Thị ...",
       "birth_date": "",
       "death_date": "Đã mất",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con thứ 4 cụ Tân (Trang 3"
+      "notes": "Con thứ 4 cụ Tân (Trang 3",
+      "spouse_id": "P236"
     },
     {
       "id": "P016",
@@ -276,7 +285,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con thứ 5 cụ Tân"
+      "notes": "Con thứ 5 cụ Tân",
+      "spouse_id": "P237"
     },
     {
       "id": "P017",
@@ -293,7 +303,8 @@
       "death_date": "Mất 12 - 3",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con thứ 6 cụ Tân (Chết nhỏ)"
+      "notes": "Con thứ 6 cụ Tân (Chết nhỏ)",
+      "spouse_id": "P238"
     },
     {
       "id": "P012_1",
@@ -310,7 +321,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Trần Hữu Đồn & Cụ Trần Thị ... (Cháu ngoại)"
+      "notes": "Con ông Trần Hữu Đồn & Cụ Trần Thị ... (Cháu ngoại)",
+      "spouse_id": "P239"
     },
     {
       "id": "P012_2",
@@ -327,7 +339,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Trần Hữu Đồn & Cụ Trần Thị ... (Cháu ngoại)"
+      "notes": "Con ông Trần Hữu Đồn & Cụ Trần Thị ... (Cháu ngoại)",
+      "spouse_id": "P240"
     },
     {
       "id": "P012_3",
@@ -344,7 +357,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Hữu Đồn (Cháu ngoại)"
+      "notes": "Con gái ông Trần Hữu Đồn (Cháu ngoại)",
+      "spouse_id": "P241"
     },
     {
       "id": "P012_4",
@@ -361,7 +375,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Hữu Đồn (Cháu ngoại)"
+      "notes": "Con gái ông Trần Hữu Đồn (Cháu ngoại)",
+      "spouse_id": "P242"
     },
     {
       "id": "P013_1",
@@ -378,7 +393,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Ngọc Thân & Cụ Trần Thị ... (Cháu ngoại)"
+      "notes": "Con gái ông Trần Ngọc Thân & Cụ Trần Thị ... (Cháu ngoại)",
+      "spouse_id": "P243"
     },
     {
       "id": "P013_2",
@@ -412,7 +428,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 7 con (2 gái"
+      "notes": "Có 7 con (2 gái",
+      "spouse_id": "P244"
     },
     {
       "id": "P019",
@@ -429,7 +446,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 5 con (2 trai"
+      "notes": "Có 5 con (2 trai",
+      "spouse_id": "P245"
     },
     {
       "id": "P020",
@@ -446,7 +464,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 4 con (3 trai"
+      "notes": "Có 4 con (3 trai",
+      "spouse_id": "P246"
     },
     {
       "id": "P021",
@@ -463,7 +482,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 7 con (4 trai"
+      "notes": "Có 7 con (4 trai",
+      "spouse_id": "P247"
     },
     {
       "id": "P022",
@@ -480,7 +500,8 @@
       "death_date": "Chết sớm 20/4",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Mùi"
+      "notes": "Con cụ Mùi",
+      "spouse_id": "P248"
     },
     {
       "id": "P023",
@@ -497,7 +518,8 @@
       "death_date": "Mất 15/08/1998 Âm",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "8 con (4 trai"
+      "notes": "8 con (4 trai",
+      "spouse_id": "P249"
     },
     {
       "id": "P024",
@@ -514,7 +536,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Mùi"
+      "notes": "Con cụ Mùi",
+      "spouse_id": "P250"
     },
     {
       "id": "P025",
@@ -531,7 +554,8 @@
       "death_date": "Mất 04/09/1993 Âm",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "8 con (3 trai"
+      "notes": "8 con (3 trai",
+      "spouse_id": "P251"
     },
     {
       "id": "P026",
@@ -548,7 +572,8 @@
       "death_date": "Mất 19/12/2004",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 5 con (4 gái"
+      "notes": "Có 5 con (4 gái",
+      "spouse_id": "P252"
     },
     {
       "id": "P027",
@@ -565,7 +590,8 @@
       "death_date": "Ốm chết từ nhỏ",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con gái cụ Vị"
+      "notes": "Con gái cụ Vị",
+      "spouse_id": "P253"
     },
     {
       "id": "P028",
@@ -582,7 +608,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 4 con (2 trai"
+      "notes": "Có 4 con (2 trai - 2 gái)",
+      "spouse_id": "P254"
     },
     {
       "id": "P029",
@@ -599,7 +626,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 4 con (2 trai"
+      "notes": "Có 4 con (2 trai",
+      "spouse_id": "P255"
     },
     {
       "id": "P030",
@@ -616,7 +644,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 3 con (2 trai"
+      "notes": "Có 3 con (2 trai",
+      "spouse_id": "P256"
     },
     {
       "id": "P031",
@@ -633,7 +662,8 @@
       "death_date": "Ốm chết từ nhỏ",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con gái cụ Vị"
+      "notes": "Con gái cụ Vị",
+      "spouse_id": "P257"
     },
     {
       "id": "P032",
@@ -667,7 +697,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con (1 trai"
+      "notes": "Có 2 con (1 trai",
+      "spouse_id": "P258"
     },
     {
       "id": "P029_1",
@@ -747,12 +778,13 @@
       "branch_type": "Nội tộc (Con gái)",
       "parent_id": "P026",
       "parent_name": "Trần Ngọc Bi",
-      "spouse": "",
+      "spouse": "Phối Ngẫu",
       "birth_date": "29/09/1981",
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Bi"
+      "notes": "Con ông Bi",
+      "spouse_id": "P227"
     },
     {
       "id": "P035",
@@ -769,7 +801,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Bi"
+      "notes": "Con ông Bi",
+      "spouse_id": ""
     },
     {
       "id": "P036",
@@ -781,12 +814,13 @@
       "branch_type": "Nội tộc (Con gái)",
       "parent_id": "P026",
       "parent_name": "Trần Ngọc Bi",
-      "spouse": "",
+      "spouse": "Phối Ngẫu",
       "birth_date": "06/10/1989",
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Bi"
+      "notes": "Con ông Bi",
+      "spouse_id": "P224"
     },
     {
       "id": "P037",
@@ -815,12 +849,13 @@
       "branch_type": "Nội tộc (Trực hệ)",
       "parent_id": "P026",
       "parent_name": "Trần Ngọc Bi",
-      "spouse": "",
+      "spouse": "Phối Ngẫu",
       "birth_date": "13/06/1992",
       "death_date": "",
       "status": "Còn sống",
       "role": "Đích Tôn",
-      "notes": "ĐÍCH TÔN dòng họ (Trang 4)"
+      "notes": "ĐÍCH TÔN dòng họ (Trang 4)",
+      "spouse_id": "P349"
     },
     {
       "id": "P039",
@@ -842,7 +877,7 @@
     {
       "id": "P040",
       "christian_name": "Maria",
-      "full_name": "Trần Thị Thế",
+      "full_name": "Trần Thị Thê",
       "gender": "Nữ",
       "generation": "8",
       "branch": "Chi 1",
@@ -990,7 +1025,8 @@
       "death_date": "Ốm chết từ nhỏ",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con gái cụ Đức"
+      "notes": "Con gái cụ Đức",
+      "spouse_id": "P259"
     },
     {
       "id": "P049",
@@ -1007,7 +1043,8 @@
       "death_date": "Ốm chết từ nhỏ",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con gái cụ Đức"
+      "notes": "Con gái cụ Đức",
+      "spouse_id": "P260"
     },
     {
       "id": "P050",
@@ -1024,7 +1061,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 1 trai"
+      "notes": "Có 1 trai",
+      "spouse_id": "P261"
     },
     {
       "id": "P051",
@@ -1041,7 +1079,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 1 trai"
+      "notes": "Có 1 trai",
+      "spouse_id": "P262"
     },
     {
       "id": "P052",
@@ -1058,7 +1097,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 1 trai"
+      "notes": "Có 1 trai",
+      "spouse_id": "P263"
     },
     {
       "id": "P053",
@@ -1075,7 +1115,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con trai"
+      "notes": "Có 2 con trai",
+      "spouse_id": "P264"
     },
     {
       "id": "P054",
@@ -1092,7 +1133,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 1 trai"
+      "notes": "Có 1 trai",
+      "spouse_id": "P265"
     },
     {
       "id": "P055",
@@ -1109,7 +1151,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 trai"
+      "notes": "Có 2 trai",
+      "spouse_id": "P266"
     },
     {
       "id": "P051_1",
@@ -1313,7 +1356,8 @@
       "death_date": "Đã chết",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Đi nhà thầy đã chết"
+      "notes": "Đi nhà thầy đã chết",
+      "spouse_id": "P267"
     },
     {
       "id": "P061",
@@ -1330,7 +1374,8 @@
       "death_date": "Đã chết",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 8 con họ Mai (Trang 10"
+      "notes": "Có 8 con họ Mai (Trang 10",
+      "spouse_id": "P268"
     },
     {
       "id": "P062",
@@ -1347,7 +1392,8 @@
       "death_date": "Vợ mất 01/12/1962",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 6 con (2 trai"
+      "notes": "Có 6 con (2 trai",
+      "spouse_id": "P269"
     },
     {
       "id": "P061_1",
@@ -1364,7 +1410,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Mai Văn San & Cụ Trần Thị Nhâm (Có 10 con)"
+      "notes": "Con ông Mai Văn San & Cụ Trần Thị Nhâm (Có 10 con)",
+      "spouse_id": "P270"
     },
     {
       "id": "P061_2",
@@ -1381,7 +1428,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Mai Văn San (Có 11 con)"
+      "notes": "Con gái ông Mai Văn San (Có 11 con)",
+      "spouse_id": "P271"
     },
     {
       "id": "P061_3",
@@ -1398,7 +1446,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Mai Văn San (Có 8 con)"
+      "notes": "Con ông Mai Văn San (Có 8 con)",
+      "spouse_id": "P272"
     },
     {
       "id": "P061_4",
@@ -1415,7 +1464,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Mai Văn San (Có 4 con)"
+      "notes": "Con ông Mai Văn San (Có 4 con)",
+      "spouse_id": "P273"
     },
     {
       "id": "P061_5",
@@ -1432,7 +1482,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Mai Văn San (Có 10 con)"
+      "notes": "Con gái ông Mai Văn San (Có 10 con)",
+      "spouse_id": "P274"
     },
     {
       "id": "P061_6",
@@ -1449,7 +1500,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con gái ông Mai Văn San"
+      "notes": "Con gái ông Mai Văn San",
+      "spouse_id": "P275"
     },
     {
       "id": "P061_7",
@@ -1466,7 +1518,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Mai Văn San (Có 5 con)"
+      "notes": "Con ông Mai Văn San (Có 5 con)",
+      "spouse_id": "P276"
     },
     {
       "id": "P063",
@@ -1483,7 +1536,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 8 con (3 trai"
+      "notes": "Có 8 con (3 trai",
+      "spouse_id": "P277"
     },
     {
       "id": "P064",
@@ -1500,7 +1554,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 8 con (4 trai"
+      "notes": "Có 8 con (4 trai",
+      "spouse_id": "P278"
     },
     {
       "id": "P065",
@@ -1517,7 +1572,8 @@
       "death_date": "Đã chết",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con cụ Mô"
+      "notes": "Con cụ Mô",
+      "spouse_id": "P279"
     },
     {
       "id": "P066",
@@ -1551,7 +1607,8 @@
       "death_date": "Đã chết",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con cụ Mô"
+      "notes": "Con cụ Mô",
+      "spouse_id": "P280"
     },
     {
       "id": "P068",
@@ -1568,7 +1625,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 4 con (2 trai"
+      "notes": "Có 4 con (2 trai",
+      "spouse_id": "P281"
     },
     {
       "id": "P069",
@@ -1585,7 +1643,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 1 trai"
+      "notes": "Có 1 trai",
+      "spouse_id": "P282"
     },
     {
       "id": "P070",
@@ -1602,7 +1661,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 3 con (Trang 12)"
+      "notes": "Có 3 con (Trang 12)",
+      "spouse_id": "P283"
     },
     {
       "id": "P071",
@@ -1636,7 +1696,8 @@
       "death_date": "Mất 04/10/2004 Âm",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con ông Thuyết"
+      "notes": "Con ông Thuyết",
+      "spouse_id": "P284"
     },
     {
       "id": "P069_1",
@@ -1738,7 +1799,8 @@
       "death_date": "Vợ mất 17/03/1970",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con cụ Lịch (Trang 13)"
+      "notes": "Con cụ Lịch (Trang 13)",
+      "spouse_id": "P285"
     },
     {
       "id": "P077",
@@ -1755,7 +1817,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 6 con họ Ngô (Trang 14)"
+      "notes": "Có 6 con họ Ngô (Trang 14)",
+      "spouse_id": "P286"
     },
     {
       "id": "P078",
@@ -1772,7 +1835,8 @@
       "death_date": "Mất 26/06/1973",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 8 con (2 trai"
+      "notes": "Có 8 con (2 trai",
+      "spouse_id": "P287"
     },
     {
       "id": "P079",
@@ -1789,7 +1853,8 @@
       "death_date": "Mất sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Lịch"
+      "notes": "Con cụ Lịch",
+      "spouse_id": "P288"
     },
     {
       "id": "P077_1",
@@ -1806,7 +1871,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Ngô Văn Phong & Cụ Trần Thị Lân (Có 6 con)"
+      "notes": "Con ông Ngô Văn Phong & Cụ Trần Thị Lân (Có 6 con)",
+      "spouse_id": "P289"
     },
     {
       "id": "P077_2",
@@ -1823,7 +1889,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Ngô Văn Phong (Có 6 con)"
+      "notes": "Con gái ông Ngô Văn Phong (Có 6 con)",
+      "spouse_id": "P290"
     },
     {
       "id": "P077_3",
@@ -1840,7 +1907,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Ngô Văn Phong (Có 5 con)"
+      "notes": "Con ông Ngô Văn Phong (Có 5 con)",
+      "spouse_id": "P291"
     },
     {
       "id": "P077_4",
@@ -1857,7 +1925,8 @@
       "death_date": "Ốm chết",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con ông Ngô Văn Phong"
+      "notes": "Con ông Ngô Văn Phong",
+      "spouse_id": "P292"
     },
     {
       "id": "P077_5",
@@ -1874,7 +1943,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Ngô Văn Phong (Có 5 con gái)"
+      "notes": "Con gái ông Ngô Văn Phong (Có 5 con gái)",
+      "spouse_id": "P293"
     },
     {
       "id": "P077_6",
@@ -1891,7 +1961,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Ngô Văn Phong (Có 2 con)"
+      "notes": "Con ông Ngô Văn Phong (Có 2 con)",
+      "spouse_id": "P294"
     },
     {
       "id": "P080",
@@ -1925,7 +1996,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Căn"
+      "notes": "Con cụ Căn",
+      "spouse_id": "P295"
     },
     {
       "id": "P082",
@@ -1942,7 +2014,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 3 con (1 trai"
+      "notes": "Có 3 con (1 trai",
+      "spouse_id": "P296"
     },
     {
       "id": "P083",
@@ -1959,7 +2032,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 5 con (2 trai"
+      "notes": "Có 5 con (2 trai",
+      "spouse_id": "P297"
     },
     {
       "id": "P084",
@@ -1976,7 +2050,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 3 con (2 trai"
+      "notes": "Có 3 con (2 trai",
+      "spouse_id": "P298"
     },
     {
       "id": "P085",
@@ -1993,7 +2068,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con (1 trai"
+      "notes": "Có 2 con (1 trai",
+      "spouse_id": "P299"
     },
     {
       "id": "P086",
@@ -2010,7 +2086,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con họ Ngô (Cháu ngoại cụ Căn)"
+      "notes": "Có 2 con họ Ngô (Cháu ngoại cụ Căn)",
+      "spouse_id": "P300"
     },
     {
       "id": "P087",
@@ -2027,7 +2104,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 6 con họ Mai (Cháu ngoại cụ Căn)"
+      "notes": "Có 6 con họ Mai (Cháu ngoại cụ Căn)",
+      "spouse_id": "P301"
     },
     {
       "id": "P086_1",
@@ -2112,7 +2190,8 @@
       "death_date": "Mất 1943",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Con cụ Quáp (Trang 19)"
+      "notes": "Con cụ Quáp (Trang 19)",
+      "spouse_id": "P302"
     },
     {
       "id": "P091",
@@ -2129,7 +2208,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Quáp"
+      "notes": "Con cụ Quáp",
+      "spouse_id": "P303"
     },
     {
       "id": "P092",
@@ -2146,7 +2226,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Quáp"
+      "notes": "Con cụ Quáp",
+      "spouse_id": "P304"
     },
     {
       "id": "P093",
@@ -2163,7 +2244,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 8 con họ Phạm (Trang 20)"
+      "notes": "Có 8 con họ Phạm (Trang 20)",
+      "spouse_id": "P305"
     },
     {
       "id": "P094",
@@ -2175,12 +2257,13 @@
       "branch_type": "Nội tộc (Trực hệ)",
       "parent_id": "P090",
       "parent_name": "Trần Ngọc Đoán",
-      "spouse": "Bà cả: Đinh Thị Thảo (mất 1953); Bà hai: Đỗ Thị Hương (SN 1941)",
+      "spouse": "Bà cả: Đinh Thị Thảo (mất 1953)",
       "birth_date": "08/05/1930",
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 10 con (7 trai"
+      "notes": "Có 10 con (7 trai",
+      "spouse_id": "P306"
     },
     {
       "id": "P095",
@@ -2197,7 +2280,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 11 con họ Đỗ (Trang 24)"
+      "notes": "Có 11 con họ Đỗ (Trang 24)",
+      "spouse_id": "P307"
     },
     {
       "id": "P093_1",
@@ -2537,7 +2621,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con bà cả Đinh Thị Thảo (Có 5 con họ Vũ)"
+      "notes": "Con bà cả Đinh Thị Thảo (Có 5 con họ Vũ)",
+      "spouse_id": "P308"
     },
     {
       "id": "P097",
@@ -2554,7 +2639,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con bà hai Đỗ Thị Hương"
+      "notes": "Con bà hai Đỗ Thị Hương",
+      "spouse_id": "P309"
     },
     {
       "id": "P098",
@@ -2571,7 +2657,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con (Cháu ngoại cụ Đông)"
+      "notes": "Có 2 con (Cháu ngoại cụ Đông)",
+      "spouse_id": "P310"
     },
     {
       "id": "P099",
@@ -2588,7 +2675,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con họ Vũ (Cháu ngoại cụ Đông)"
+      "notes": "Có 2 con họ Vũ (Cháu ngoại cụ Đông)",
+      "spouse_id": "P311"
     },
     {
       "id": "P100",
@@ -2605,7 +2693,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 3 con (2 trai"
+      "notes": "Có 3 con (2 trai",
+      "spouse_id": "P312"
     },
     {
       "id": "P101",
@@ -2622,7 +2711,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Đông"
+      "notes": "Con ông Đông",
+      "spouse_id": "P313"
     },
     {
       "id": "P102",
@@ -2928,7 +3018,8 @@
       "death_date": "Đã mất",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 5 con họ Phạm (Trang 25)"
+      "notes": "Có 5 con họ Phạm (Trang 25)",
+      "spouse_id": "P314"
     },
     {
       "id": "P111",
@@ -2962,7 +3053,8 @@
       "death_date": "Đã mất",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 5 con (Trang 29)"
+      "notes": "Có 5 con (Trang 29)",
+      "spouse_id": "P315"
     },
     {
       "id": "P113",
@@ -2979,7 +3071,8 @@
       "death_date": "Đã mất",
       "status": "Đã mất",
       "role": "Thành viên",
-      "notes": "Có 5 con họ Nguyễn (Trang 30)"
+      "notes": "Có 5 con họ Nguyễn (Trang 30)",
+      "spouse_id": "P316"
     },
     {
       "id": "P114",
@@ -3030,7 +3123,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Phạm Văn Nga (Có 4 con)"
+      "notes": "Con gái ông Phạm Văn Nga (Có 4 con)",
+      "spouse_id": "P317"
     },
     {
       "id": "P110_3",
@@ -3098,7 +3192,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Văn Tẹo (Có 6 con)"
+      "notes": "Con gái ông Trần Văn Tẹo (Có 6 con)",
+      "spouse_id": "P318"
     },
     {
       "id": "P112_2",
@@ -3115,7 +3210,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Văn Tẹo (Có 7 con)"
+      "notes": "Con gái ông Trần Văn Tẹo (Có 7 con)",
+      "spouse_id": "P319"
     },
     {
       "id": "P112_3",
@@ -3132,7 +3228,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Văn Tẹo (Có 8 con)"
+      "notes": "Con gái ông Trần Văn Tẹo (Có 8 con)",
+      "spouse_id": "P320"
     },
     {
       "id": "P134",
@@ -3149,7 +3246,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 7 con (4 trai"
+      "notes": "Có 7 con (4 trai",
+      "spouse_id": "P321"
     },
     {
       "id": "P135",
@@ -3166,7 +3264,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Trần Văn Tẹo"
+      "notes": "Con gái ông Trần Văn Tẹo",
+      "spouse_id": "P322"
     },
     {
       "id": "P113_1",
@@ -3183,7 +3282,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Nguyễn Văn Cản & Cụ Trần Thị Rím (Có 5 con)"
+      "notes": "Con ông Nguyễn Văn Cản & Cụ Trần Thị Rím (Có 5 con)",
+      "spouse_id": "P323"
     },
     {
       "id": "P113_2",
@@ -3200,7 +3300,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Nguyễn Văn Cản & Cụ Trần Thị Rím (Có 4 con)"
+      "notes": "Con ông Nguyễn Văn Cản & Cụ Trần Thị Rím (Có 4 con)",
+      "spouse_id": "P324"
     },
     {
       "id": "P113_3",
@@ -3217,7 +3318,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Nguyễn Văn Cản (Có 5 con)"
+      "notes": "Con gái ông Nguyễn Văn Cản (Có 5 con)",
+      "spouse_id": "P325"
     },
     {
       "id": "P113_4",
@@ -3234,7 +3336,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Nguyễn Văn Cản"
+      "notes": "Con gái ông Nguyễn Văn Cản",
+      "spouse_id": "P326"
     },
     {
       "id": "P113_5",
@@ -3251,7 +3354,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con gái ông Nguyễn Văn Cản"
+      "notes": "Con gái ông Nguyễn Văn Cản",
+      "spouse_id": "P327"
     },
     {
       "id": "P115",
@@ -3285,7 +3389,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 4 con (2 trai"
+      "notes": "Có 4 con (2 trai",
+      "spouse_id": "P328"
     },
     {
       "id": "P117",
@@ -3319,7 +3424,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 2 con"
+      "notes": "Có 2 con",
+      "spouse_id": "P329"
     },
     {
       "id": "P119",
@@ -3336,7 +3442,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con cụ Hoàng"
+      "notes": "Con cụ Hoàng",
+      "spouse_id": "P330"
     },
     {
       "id": "P120",
@@ -3370,7 +3477,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Hoàng"
+      "notes": "Con cụ Hoàng",
+      "spouse_id": "P331"
     },
     {
       "id": "P122",
@@ -3387,7 +3495,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Có 3 con (Trang 27)"
+      "notes": "Có 3 con (Trang 27)",
+      "spouse_id": "P332"
     },
     {
       "id": "P123",
@@ -3404,7 +3513,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con ông Thư"
+      "notes": "Con ông Thư",
+      "spouse_id": "P333"
     },
     {
       "id": "P124",
@@ -3421,7 +3531,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con ông Thư"
+      "notes": "Con ông Thư",
+      "spouse_id": "P334"
     },
     {
       "id": "P125",
@@ -3455,7 +3566,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Thư"
+      "notes": "Con ông Thư",
+      "spouse_id": "P335"
     },
     {
       "id": "P127",
@@ -3472,7 +3584,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con ông Thư"
+      "notes": "Con ông Thư",
+      "spouse_id": "P336"
     },
     {
       "id": "P128",
@@ -3506,7 +3619,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Thư (Trang 28)"
+      "notes": "Con ông Thư (Trang 28)",
+      "spouse_id": "P337"
     },
     {
       "id": "P130",
@@ -3574,7 +3688,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con ông Bắc"
+      "notes": "Con ông Bắc",
+      "spouse_id": "P338"
     },
     {
       "id": "P136",
@@ -3608,7 +3723,8 @@
       "death_date": "Chết sớm",
       "status": "Mất sớm",
       "role": "Thành viên",
-      "notes": "Con cụ Đềnh"
+      "notes": "Con cụ Đềnh",
+      "spouse_id": "P339"
     },
     {
       "id": "P138",
@@ -3625,7 +3741,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con cụ Chán (Trang 31)"
+      "notes": "Con cụ Chán (Trang 31)",
+      "spouse_id": "P340"
     },
     {
       "id": "P139",
@@ -3642,7 +3759,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con cụ Chán"
+      "notes": "Con cụ Chán",
+      "spouse_id": "P341"
     },
     {
       "id": "P138_1",
@@ -3659,7 +3777,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Vũ Đình Do & Cụ Trần Thị Thủ"
+      "notes": "Con ông Vũ Đình Do & Cụ Trần Thị Thủ",
+      "spouse_id": "P342"
     },
     {
       "id": "P138_2",
@@ -3671,12 +3790,13 @@
       "branch_type": "Ngoại tộc (Cháu ngoại)",
       "parent_id": "P138",
       "parent_name": "Trần Thị Thủ",
-      "spouse": "Sinh; Hội",
+      "spouse": "Sinh",
       "birth_date": "",
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con ông Vũ Đình Do & Cụ Trần Thị Thủ"
+      "notes": "Con ông Vũ Đình Do & Cụ Trần Thị Thủ",
+      "spouse_id": "P343"
     },
     {
       "id": "P140",
@@ -3710,7 +3830,8 @@
       "death_date": "",
       "status": "Còn sống",
       "role": "Thành viên",
-      "notes": "Con cụ Dịch"
+      "notes": "Con cụ Dịch",
+      "spouse_id": "P344"
     },
     {
       "id": "P219",
@@ -3757,6 +3878,2328 @@
       "parent_id": "P033",
       "parent_name": "Trần Ngọc Hào",
       "spouse": "",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Thành viên",
+      "notes": ""
+    },
+    {
+      "id": "P222",
+      "christian_name": "",
+      "full_name": "Trịnh Văn Đoán",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "",
+      "spouse_id": "",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P223",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần",
+      "spouse_id": "P035",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P224",
+      "christian_name": "",
+      "full_name": "Nguyễn Minh Phúc",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Thêu",
+      "spouse_id": "P036",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P225",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "",
+      "spouse_id": "",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P226",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "",
+      "spouse_id": "",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P227",
+      "christian_name": "Phanxico",
+      "full_name": "Trịnh Văn Đoán",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Thuận",
+      "spouse_id": "P034",
+      "birth_date": "17/02/1980",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P228",
+      "christian_name": "",
+      "full_name": "Bà cả",
+      "gender": "Nữ",
+      "generation": "3",
+      "branch": "Ngành II",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thanh",
+      "spouse_id": "P003",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P229",
+      "christian_name": "",
+      "full_name": "(Có vợ)",
+      "gender": "Nữ",
+      "generation": "3",
+      "branch": "Ngành II",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Phúc",
+      "spouse_id": "P004",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P230",
+      "christian_name": "",
+      "full_name": "Anna Đoàn Thị Loan",
+      "gender": "Nữ",
+      "generation": "4",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Xuân",
+      "spouse_id": "P006",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P231",
+      "christian_name": "",
+      "full_name": "Vũ Thị Tới",
+      "gender": "Nữ",
+      "generation": "4",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Quáp",
+      "spouse_id": "P008",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P232",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Địch",
+      "gender": "Nam",
+      "generation": "4",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Dịch",
+      "spouse_id": "P011",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P233",
+      "christian_name": "",
+      "full_name": "Trần Hữu Đồn",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ... (Con thứ 1)",
+      "spouse_id": "P012",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P234",
+      "christian_name": "",
+      "full_name": "Trần Ngọc Thân",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ... (Con thứ 2)",
+      "spouse_id": "P013",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P235",
+      "christian_name": "",
+      "full_name": "Trần Thị Thiều",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Ngọ",
+      "spouse_id": "P014",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P236",
+      "christian_name": "",
+      "full_name": "Bà cả: Trần Thị ...",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Mùi",
+      "spouse_id": "P015",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P237",
+      "christian_name": "",
+      "full_name": "Maria Đoàn Thị Dụ",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Tý",
+      "spouse_id": "P016",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P238",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Cam",
+      "spouse_id": "P017",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P239",
+      "christian_name": "",
+      "full_name": "Trần Thị ...",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Hữu Vợi",
+      "spouse_id": "P012_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P240",
+      "christian_name": "",
+      "full_name": "Trần Thị ...",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Hữu Bảo",
+      "spouse_id": "P012_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P241",
+      "christian_name": "",
+      "full_name": "Phạm Quang Quyến",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P012_3",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P242",
+      "christian_name": "",
+      "full_name": "Phạm Quang Trình",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P012_4",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P243",
+      "christian_name": "",
+      "full_name": "Trần Xuân Thơ",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P013_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P244",
+      "christian_name": "",
+      "full_name": "Trần Văn Thủ",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Én",
+      "spouse_id": "P018",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P245",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Tình",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Ngói",
+      "spouse_id": "P019",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P246",
+      "christian_name": "",
+      "full_name": "Phanxico Vũ Đình Án",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Lê",
+      "spouse_id": "P020",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P247",
+      "christian_name": "",
+      "full_name": "Phạm Quang Viết",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Thạch",
+      "spouse_id": "P021",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P248",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Giai",
+      "spouse_id": "P022",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P249",
+      "christian_name": "",
+      "full_name": "Têrêxa Vũ Thị Suý",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Vị",
+      "spouse_id": "P023",
+      "birth_date": "",
+      "death_date": "23/08/2007",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P250",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thể",
+      "spouse_id": "P024",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P251",
+      "christian_name": "",
+      "full_name": "Anna Nguyễn Thị Vy",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Đức",
+      "spouse_id": "P025",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P252",
+      "christian_name": "Maria",
+      "full_name": "Trần Thị Thục",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bi",
+      "spouse_id": "P026",
+      "birth_date": "07/03/1955",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P253",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Chuột",
+      "spouse_id": "P027",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P254",
+      "christian_name": "",
+      "full_name": "Anna Trần Thị Lan (SN 1965)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thoàn",
+      "spouse_id": "P028",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P255",
+      "christian_name": "",
+      "full_name": "Trần Hữu Đài",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Thúy",
+      "spouse_id": "P029",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P256",
+      "christian_name": "",
+      "full_name": "Têrêxa Ngô Thị Bình (SN 1970)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thạnh",
+      "spouse_id": "P030",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P257",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Thơi",
+      "spouse_id": "P031",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P258",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Dung (SN 1979)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Hào",
+      "spouse_id": "P033",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P259",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Về",
+      "spouse_id": "P048",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P260",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Mị",
+      "spouse_id": "P049",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P261",
+      "christian_name": "",
+      "full_name": "Anna Trần Thị Lục (SN 1961)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Đạo",
+      "spouse_id": "P050",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P262",
+      "christian_name": "",
+      "full_name": "Phanxico Vũ Đình Điểm (SN 1958)",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Chuyên",
+      "spouse_id": "P051",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P263",
+      "christian_name": "",
+      "full_name": "Anna Trần Thị Khuyên (SN 1969)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Hạnh",
+      "spouse_id": "P052",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P264",
+      "christian_name": "",
+      "full_name": "Anna Nguyễn Thị Ngát (SN 1966)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Hành",
+      "spouse_id": "P053",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P265",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Kỳ",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Hoa",
+      "spouse_id": "P054",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P266",
+      "christian_name": "",
+      "full_name": "Trần Hữu Vinh (SN 1971)",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Quế",
+      "spouse_id": "P055",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P267",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thi",
+      "spouse_id": "P060",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P268",
+      "christian_name": "",
+      "full_name": "Mai Văn San",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Nhâm",
+      "spouse_id": "P061",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P269",
+      "christian_name": "",
+      "full_name": "Anna Phạm Thị Suý",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Mô",
+      "spouse_id": "P062",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P270",
+      "christian_name": "",
+      "full_name": "Quyết",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Văn Quỳnh",
+      "spouse_id": "P061_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P271",
+      "christian_name": "",
+      "full_name": "Vũ Đình Thìn",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Thị Ánh",
+      "spouse_id": "P061_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P272",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Lựu",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Văn Hô",
+      "spouse_id": "P061_3",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P273",
+      "christian_name": "",
+      "full_name": "Trần Thị Nhâm",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Văn Phách",
+      "spouse_id": "P061_4",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P274",
+      "christian_name": "",
+      "full_name": "Vũ Văn Luyện",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Thị Sáng",
+      "spouse_id": "P061_5",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P275",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Thị Loan",
+      "spouse_id": "P061_6",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P276",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Tám",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Mai Văn Dương",
+      "spouse_id": "P061_7",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P277",
+      "christian_name": "",
+      "full_name": "Trần Hữu Quyết",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Tình",
+      "spouse_id": "P063",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P278",
+      "christian_name": "",
+      "full_name": "Trần Hữu Sinh",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Tự",
+      "spouse_id": "P064",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P279",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Tam",
+      "spouse_id": "P065",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P280",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Ngữ",
+      "spouse_id": "P067",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P281",
+      "christian_name": "",
+      "full_name": "Maria Đinh Thị Mùi (SN 1950)",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thuyết",
+      "spouse_id": "P068",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P282",
+      "christian_name": "",
+      "full_name": "Phaolo Vũ Đình Khải (ốm chết)",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Tuyến",
+      "spouse_id": "P069",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P283",
+      "christian_name": "",
+      "full_name": "Anna Nguyễn Thị Linh (SN 1980)",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Tuyền",
+      "spouse_id": "P070",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P284",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Dung",
+      "spouse_id": "P072",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P285",
+      "christian_name": "",
+      "full_name": "Anna Trần Thị Đại",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Nguyên",
+      "spouse_id": "P076",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P286",
+      "christian_name": "",
+      "full_name": "Ngô Văn Phong",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Lân",
+      "spouse_id": "P077",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P287",
+      "christian_name": "",
+      "full_name": "Hoàng Thị Thao",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Căn",
+      "spouse_id": "P078",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P288",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Khiết",
+      "spouse_id": "P079",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P289",
+      "christian_name": "",
+      "full_name": "Trần Thị ...",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Ngô Văn Hòa",
+      "spouse_id": "P077_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P290",
+      "christian_name": "",
+      "full_name": "Đức Hoàng",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Ngô Thị Tính",
+      "spouse_id": "P077_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P291",
+      "christian_name": "",
+      "full_name": "Trần Thị Cảnh",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Ngô Văn Khiêu",
+      "spouse_id": "P077_3",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P292",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Ngô Văn Khích",
+      "spouse_id": "P077_4",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P293",
+      "christian_name": "",
+      "full_name": "Tịch",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Ngô Thị Tách",
+      "spouse_id": "P077_5",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P294",
+      "christian_name": "",
+      "full_name": "Vũ Thị Lan",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Ngô Văn Thích",
+      "spouse_id": "P077_6",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P295",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thiệp",
+      "spouse_id": "P081",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P296",
+      "christian_name": "",
+      "full_name": "Phạm Văn Hưng",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Cai",
+      "spouse_id": "P082",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P297",
+      "christian_name": "",
+      "full_name": "Trần Văn Bảo",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Ly",
+      "spouse_id": "P083",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P298",
+      "christian_name": "",
+      "full_name": "Mai Văn Thuấn",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Bi",
+      "spouse_id": "P084",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P299",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Tươi",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bản",
+      "spouse_id": "P085",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P300",
+      "christian_name": "",
+      "full_name": "Ngô Văn Xuyến",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Phảng",
+      "spouse_id": "P086",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P301",
+      "christian_name": "",
+      "full_name": "Mai Văn Cẩm",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Tuy",
+      "spouse_id": "P087",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P302",
+      "christian_name": "",
+      "full_name": "Mai Thị Xứng (Mất 1975)",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Đoán",
+      "spouse_id": "P090",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P303",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Cầu",
+      "spouse_id": "P091",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P304",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Dân",
+      "spouse_id": "P092",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P305",
+      "christian_name": "",
+      "full_name": "Phạm Quang Viêm (đã chết)",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Đào",
+      "spouse_id": "P093",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P306",
+      "christian_name": "",
+      "full_name": "Bà cả: Đinh Thị Thảo (mất 1953)",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Đông",
+      "spouse_id": "P094",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P307",
+      "christian_name": "",
+      "full_name": "Đỗ Duy Tý",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Lý Sính",
+      "spouse_id": "P095",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P308",
+      "christian_name": "",
+      "full_name": "Vũ Hữu Quang",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Châu",
+      "spouse_id": "P096",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P309",
+      "christian_name": "",
+      "full_name": "Bùi Thị Hương",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Đồng (Hòa)",
+      "spouse_id": "P097",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P310",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Liệu",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Ngọc Chiêu",
+      "spouse_id": "P098",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P311",
+      "christian_name": "",
+      "full_name": "Vũ Duy Quyền",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Chi",
+      "spouse_id": "P099",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P312",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Ánh Trang",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Điển",
+      "spouse_id": "P100",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P313",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Thu Hà",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Hùng",
+      "spouse_id": "P101",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P314",
+      "christian_name": "",
+      "full_name": "Phạm Văn Nga",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P110",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P315",
+      "christian_name": "",
+      "full_name": "Trần Văn Tẹo",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P112",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P316",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Cản",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Rím",
+      "spouse_id": "P113",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P317",
+      "christian_name": "",
+      "full_name": "Am",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Phạm Thị ...",
+      "spouse_id": "P110_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P318",
+      "christian_name": "",
+      "full_name": "Vũ Đình Mỹ",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P112_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P319",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Lợi",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P112_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P320",
+      "christian_name": "",
+      "full_name": "Phạm Văn Lâm",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P112_3",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P321",
+      "christian_name": "",
+      "full_name": "Trần Thị Duyên",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Văn Ước",
+      "spouse_id": "P134",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P322",
+      "christian_name": "",
+      "full_name": "Vũ Đình Dụ",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Tình",
+      "spouse_id": "P135",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P323",
+      "christian_name": "",
+      "full_name": "Trần Thị Phượng",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Nguyễn Văn Châu",
+      "spouse_id": "P113_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P324",
+      "christian_name": "",
+      "full_name": "Phan Thị Vui",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Nguyễn Văn Thiện",
+      "spouse_id": "P113_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P325",
+      "christian_name": "",
+      "full_name": "Trần Văn Tá",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Nguyễn Thị Nhị",
+      "spouse_id": "P113_3",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P326",
+      "christian_name": "",
+      "full_name": "Ngô Văn Hổ",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Cài",
+      "spouse_id": "P113_4",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P327",
+      "christian_name": "",
+      "full_name": "Vũ Đình Dân",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Sợi",
+      "spouse_id": "P113_5",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P328",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Chấm",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Hiệu",
+      "spouse_id": "P116",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P329",
+      "christian_name": "",
+      "full_name": "Trần Văn Kiểm",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Ngọt",
+      "spouse_id": "P118",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P330",
+      "christian_name": "",
+      "full_name": "Đoàn Văn Quản",
+      "gender": "Nam",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Mãng",
+      "spouse_id": "P119",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P331",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Chung",
+      "spouse_id": "P121",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P332",
+      "christian_name": "",
+      "full_name": "Phạm Thị Phương",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thìu",
+      "spouse_id": "P122",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P333",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Nẻ",
+      "spouse_id": "P123",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P334",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Thụy",
+      "spouse_id": "P124",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P335",
+      "christian_name": "",
+      "full_name": "Trần Văn Tuấn",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Lam",
+      "spouse_id": "P126",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P336",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nam",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Miến",
+      "spouse_id": "P127",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P337",
+      "christian_name": "",
+      "full_name": "Nguyễn Thị Chân",
+      "gender": "Nữ",
+      "generation": "7",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bắc",
+      "spouse_id": "P129",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P338",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "8",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Chung (Bảo)",
+      "spouse_id": "P133",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P339",
+      "christian_name": "",
+      "full_name": "-",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Kim",
+      "spouse_id": "P137",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P340",
+      "christian_name": "",
+      "full_name": "Vũ Đình Do",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị Thủ",
+      "spouse_id": "P138",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P341",
+      "christian_name": "",
+      "full_name": "Trần Văn Khoang",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Thị ...",
+      "spouse_id": "P139",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P342",
+      "christian_name": "",
+      "full_name": "Vũ Thị Tẹo",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Vũ Đình Giáp",
+      "spouse_id": "P138_1",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P343",
+      "christian_name": "",
+      "full_name": "Sinh",
+      "gender": "Nữ",
+      "generation": "6",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Vũ Đình Lý",
+      "spouse_id": "P138_2",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P344",
+      "christian_name": "",
+      "full_name": "Nguyễn Văn Chấm",
+      "gender": "Nam",
+      "generation": "5",
+      "branch": "Chi 2",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Nguyễn Thị ...",
+      "spouse_id": "P141",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P345",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nữ",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bắc",
+      "spouse_id": "P038",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P346",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nữ",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bắc",
+      "spouse_id": "P038",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P347",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nữ",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bắc",
+      "spouse_id": "P038",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P348",
+      "christian_name": "",
+      "full_name": "Phối Ngẫu",
+      "gender": "Nữ",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bắc",
+      "spouse_id": "P038",
+      "birth_date": "",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P349",
+      "christian_name": "Anna",
+      "full_name": "Vũ Thị Vui",
+      "gender": "Nữ",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Ngoại tộc (Phối ngẫu)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "Trần Ngọc Bắc",
+      "spouse_id": "P038",
+      "birth_date": "07/02/1991",
+      "death_date": "",
+      "status": "Còn sống",
+      "role": "Phối ngẫu",
+      "notes": ""
+    },
+    {
+      "id": "P350",
+      "christian_name": "",
+      "full_name": "Người Mới",
+      "gender": "Nam",
+      "generation": "8",
+      "branch": "Chi 1",
+      "branch_type": "Nội tộc (Trực hệ)",
+      "parent_id": "-",
+      "parent_name": "",
+      "spouse": "",
+      "spouse_id": "",
       "birth_date": "",
       "death_date": "",
       "status": "Còn sống",

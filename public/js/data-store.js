@@ -13,6 +13,8 @@ export class DataStore {
     this.future = [];
     this.maxHistory = 30;
     this.listeners = new Set();
+    // ─── Change Tracking (co-working: editor → admin approval) ───
+    this._originalState = null; // Baseline snapshot for diff calculation
   }
 
   subscribe(callback) {
@@ -103,6 +105,8 @@ export class DataStore {
   getRootMembers() {
     const roots = [];
     for (const m of this.members.values()) {
+      // Exclude members that are linked as spouses (they render under their partner)
+      if (m.spouse_id && this.members.has(m.spouse_id)) continue;
       if (!m.parent_id || m.parent_id === '-' || !this.members.has(m.parent_id)) {
         roots.push(m);
       }
@@ -140,6 +144,87 @@ export class DataStore {
     return descendants.has(newParentId);
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Change Tracking (co-working: editor → admin approval)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Initialize the baseline snapshot after data load.
+   * Call this once after loadState() to start tracking changes.
+   */
+  initializeTracking() {
+    this._originalState = {
+      members: Array.from(this.members.values()).map(m => ({ ...m }))
+    };
+  }
+
+  /**
+   * Return a structured diff of all changes since initializeTracking().
+   * Format matches the server's pending-changes API:
+   *   { type: 'update_member', member_id: 'P001', new_value: { full_name: 'New' } }
+   *   { type: 'add_member', new_value: { id: 'P099', ... } }
+   *   { type: 'delete_member', member_id: 'P005' }
+   */
+  getTrackedChanges() {
+    if (!this._originalState) return [];
+
+    const changes = [];
+    const originals = new Map(this._originalState.members.map(m => [m.id, m]));
+
+    // Detect updates and deletions
+    for (const [id, original] of originals) {
+      const current = this.members.get(id);
+      if (!current) {
+        // Member was deleted
+        changes.push({ type: 'delete_member', member_id: id, old_value: { ...original } });
+      } else {
+        // Check for field-level updates
+        const updatedFields = {};
+        const oldFields = {};
+        for (const key of Object.keys(original)) {
+          if (current[key] !== original[key]) {
+            updatedFields[key] = current[key];
+            oldFields[key] = original[key];
+          }
+        }
+        if (Object.keys(updatedFields).length > 0) {
+          changes.push({
+            type: 'update_member',
+            member_id: id,
+            new_value: updatedFields,
+            old_value: oldFields
+          });
+        }
+      }
+    }
+
+    // Detect additions
+    for (const [id, current] of this.members) {
+      if (!originals.has(id)) {
+        changes.push({ type: 'add_member', new_value: { ...current } });
+      }
+    }
+
+    return changes;
+  }
+
+  /**
+   * Check if there are any tracked changes.
+   */
+  hasChanges() {
+    return this.getTrackedChanges().length > 0;
+  }
+
+  /**
+   * Reset the baseline to the current state.
+   * Call this after admin approval to start a new change set.
+   */
+  resetTracking() {
+    this._originalState = {
+      members: Array.from(this.members.values()).map(m => ({ ...m }))
+    };
+  }
+
   addMember(memberData) {
     this.recordSnapshot();
 
@@ -161,6 +246,7 @@ export class DataStore {
       parent_id: memberData.parent_id || '-',
       parent_name: memberData.parent_name || '',
       spouse: memberData.spouse || '',
+      spouse_id: memberData.spouse_id || '',
       birth_date: memberData.birth_date || '',
       death_date: memberData.death_date || '',
       status: memberData.status || 'Còn sống',
@@ -198,6 +284,22 @@ export class DataStore {
       }
     }
 
+    // Handle spouse_id changes
+    if (updates.spouse_id !== undefined) {
+      // Clear old spouse link if changing
+      if (existing.spouse_id && existing.spouse_id !== updates.spouse_id && this.members.has(existing.spouse_id)) {
+        const oldPartner = this.members.get(existing.spouse_id);
+        oldPartner.spouse_id = '';
+        oldPartner.spouse = '';
+        this.members.set(oldPartner.id, oldPartner);
+      }
+      // Auto-fill spouse name when spouse_id is set
+      if (updates.spouse_id && updates.spouse_id !== '' && this.members.has(updates.spouse_id)) {
+        const spouse = this.members.get(updates.spouse_id);
+        updates.spouse = spouse.full_name;
+      }
+    }
+
     const updated = { ...existing, ...updates };
     this.members.set(id, updated);
     this.recalculateStats();
@@ -227,6 +329,15 @@ export class DataStore {
       }
     }
 
+    // Clear spouse link on partner if this member had one
+    const member = this.members.get(id);
+    if (member && member.spouse_id && this.members.has(member.spouse_id)) {
+      const partner = this.members.get(member.spouse_id);
+      partner.spouse_id = '';
+      partner.spouse = '';
+      this.members.set(partner.id, partner);
+    }
+
     this.members.delete(id);
     if (this.selectedMemberId === id) {
       this.selectedMemberId = null;
@@ -247,5 +358,116 @@ export class DataStore {
   selectMember(id) {
     this.selectedMemberId = id;
     this.notify('select', id);
+  }
+
+  // Add spouse as a full member node
+  addSpouseAsMember(memberId) {
+    const member = this.members.get(memberId);
+    if (!member) return null;
+
+    this.recordSnapshot();
+
+    // Determine opposite gender
+    const oppositeGender = member.gender === 'Nam' ? 'Nữ' : 'Nam';
+
+    // Generate new ID for spouse
+    const spouseId = `P${String(this.members.size + 1).padStart(3, '0')}`;
+
+    // Create spouse as a full member (inline, no extra snapshots)
+    const spouse = {
+      id: spouseId,
+      christian_name: '',
+      full_name: 'Phối Ngẫu',
+      gender: oppositeGender,
+      generation: member.generation,
+      branch: member.branch,
+      branch_type: 'Ngoại tộc (Phối ngẫu)',
+      parent_id: '-',
+      parent_name: '',
+      spouse: member.full_name,
+      spouse_id: memberId,
+      birth_date: '',
+      death_date: '',
+      status: 'Còn sống',
+      role: 'Phối ngẫu',
+      notes: ''
+    };
+
+    this.members.set(spouseId, spouse);
+
+    // Link spouses bidirectionally (inline, no extra snapshots)
+    const updatedMember = { ...member, spouse_id: spouseId, spouse: spouse.full_name };
+    this.members.set(memberId, updatedMember);
+
+    this.recalculateStats();
+    this.notify('update', updatedMember); // Notify about partner update so inspector refreshes
+    this.notify('add', spouse);
+
+    return spouse;
+  }
+
+  // Get spouse member by spouse_id
+  getSpouseMember(memberId) {
+    const member = this.members.get(memberId);
+    if (!member || !member.spouse_id || !this.members.has(member.spouse_id)) return null;
+    return this.members.get(member.spouse_id);
+  }
+
+  // Migrate existing spouse text strings to full member nodes
+  migrateSpouseTextToMembers() {
+    this.recordSnapshot();
+    let migrated = 0;
+
+    for (const member of this.members.values()) {
+      // Skip if already linked via spouse_id
+      if (member.spouse_id) continue;
+      // Skip if no spouse text
+      if (!member.spouse || !member.spouse.trim()) continue;
+
+      // Parse spouse text - may contain multiple spouses separated by ";"
+      const spouseNames = member.spouse.split(';').map(s => s.trim()).filter(s => s);
+
+      // For now, only migrate the first spouse
+      const spouseName = spouseNames[0];
+      if (!spouseName) continue;
+
+      // Determine opposite gender
+      const oppositeGender = member.gender === 'Nam' ? 'Nữ' : 'Nam';
+
+      // Generate new ID
+      const spouseId = `P${String(this.members.size + 1).padStart(3, '0')}`;
+
+      // Create spouse as a full member
+      const spouse = {
+        id: spouseId,
+        christian_name: '',
+        full_name: spouseName,
+        gender: oppositeGender,
+        generation: member.generation,
+        branch: member.branch,
+        branch_type: 'Ngoại tộc (Phối ngẫu)',
+        parent_id: '-',
+        parent_name: '',
+        spouse: member.full_name,
+        spouse_id: member.id,
+        birth_date: '',
+        death_date: '',
+        status: 'Còn sống',
+        role: 'Phối ngẫu',
+        notes: ''
+      };
+
+      this.members.set(spouseId, spouse);
+
+      // Link bidirectionally
+      const updatedMember = { ...member, spouse_id: spouseId, spouse: spouseName };
+      this.members.set(member.id, updatedMember);
+
+      migrated++;
+    }
+
+    this.recalculateStats();
+    this.notify('load', null);
+    return migrated;
   }
 }

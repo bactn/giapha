@@ -120,11 +120,53 @@
         <span class="hidden md:inline">Xuất Cây</span>
       </button>
 
+      <!-- Share Button (Admin Only) -->
+      <button id="btn-open-share" class="text-xs flex items-center space-x-1 py-1.5 px-2 md:px-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-700 font-medium hidden" title="Chia sẻ và Quản lý Truy cập">
+        <svg class="w-3.5 h-3.5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <span class="hidden md:inline">Chia sẻ</span>
+      </button>
+
+      <!-- Request Edit Button (Viewer Only) -->
+      <button id="btn-request-edit" class="text-xs flex items-center space-x-1 py-1.5 px-2 md:px-2.5 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg text-amber-800 font-medium hidden" title="Yêu cầu chỉnh sửa">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+        <span class="hidden md:inline">Yêu cầu Sửa</span>
+      </button>
+
       <!-- Save Button -->
       <button id="btn-save-lineage" class="text-xs flex items-center space-x-1 py-1.5 px-2.5 md:px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-semibold shadow-xs transition-colors" title="Lưu dữ liệu">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
         <span>Lưu</span>
       </button>
+
+      <!-- Notification Bell (Admin Only) -->
+      <div id="notification-bell-wrapper" class="hidden relative">
+        <button id="btn-notification-bell" class="relative p-1.5 hover:bg-slate-100 rounded-lg transition-colors" title="Yêu cầu chỉnh sửa">
+          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+          <span id="notification-badge" class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center">0</span>
+        </button>
+        <!-- Notification Dropdown -->
+        <div id="notification-dropdown" class="hidden absolute right-0 top-full mt-1 w-80 bg-white border border-slate-200 rounded-xl shadow-xl z-[110] overflow-hidden">
+          <div class="px-3 py-2 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700">Yêu cầu Chỉnh sửa</span>
+            <span id="notification-count" class="text-[10px] text-slate-500">0 yêu cầu</span>
+          </div>
+          <div id="notification-list" class="max-h-64 overflow-y-auto">
+            <div class="p-4 text-center text-xs text-slate-400">Không có yêu cầu nào.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- User Display -->
+      <div id="user-display" class="hidden items-center space-x-2 px-2 py-1 bg-slate-50 border border-slate-200 rounded-lg">
+        <span id="user-avatar" class="w-6 h-6 rounded-full bg-amber-100 text-amber-800 text-[10px] font-bold flex items-center justify-center">A</span>
+        <div class="hidden sm:block">
+          <span id="user-username" class="text-[11px] font-semibold text-slate-700 block leading-tight">Admin</span>
+          <span id="user-role-badge" class="text-[9px] px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-700 font-medium">Quản trị</span>
+        </div>
+        <button id="btn-logout" class="text-[10px] px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded-md font-medium transition-colors" title="Đăng xuất">
+          Đăng xuất
+        </button>
+      </div>
     </div>
   </header>
 
@@ -146,13 +188,13 @@
       </div>
 
       <!-- Tab Switcher -->
-      <div class="flex items-center border-b border-slate-200 bg-slate-50/80 p-1">
-        <button id="tab-btn-outline" class="flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-900 shadow-xs flex items-center justify-center space-x-1.5 transition-all">
+      <div class="flex border-b border-slate-200 bg-slate-50/80 p-1">
+        <button id="tab-btn-outline" class="tab-btn flex-1 py-1.5 text-xs font-bold rounded-lg bg-white text-slate-900 shadow-xs flex items-center justify-center space-x-1.5 transition-all border-b-2 border-amber-500">
           <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
           <span>Cây Thư Mục</span>
           <span id="outline-count-badge" class="px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">218</span>
         </button>
-        <button id="tab-btn-inspector" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5 transition-all">
+        <button id="tab-btn-inspector" class="tab-btn flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 flex items-center justify-center space-x-1.5 transition-all border-b-2 border-transparent">
           <svg class="w-3.5 h-3.5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
           <span>Thông Tin Chi Tiết</span>
           <span id="inspector-selected-indicator" class="w-2 h-2 rounded-full bg-emerald-500 hidden"></span>
@@ -264,7 +306,13 @@
 
           <div>
             <label class="block font-semibold text-slate-600 mb-0.5">Vợ / Chồng / Phối Ngẫu</label>
-            <input type="text" id="inspect-spouse" placeholder="Bà cả; Bà hai hoặc Têrêxa..." class="form-input">
+            <select id="inspect-spouse-select" class="form-input">
+              <option value="">— Chưa liên kết —</option>
+            </select>
+            <button id="btn-add-spouse-new" class="mt-1 text-[11px] text-amber-700 hover:underline font-medium flex items-center space-x-1">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+              <span>Tạo phối ngẫu mới</span>
+            </button>
           </div>
 
           <div class="grid grid-cols-2 gap-2">
@@ -298,10 +346,14 @@
             <textarea id="inspect-notes" rows="3" placeholder="Số con, cháu, tiểu sử..." class="form-input resize-none"></textarea>
           </div>
 
-          <div class="pt-2 flex items-center justify-between border-t border-slate-100">
-            <button type="button" id="btn-inspect-add-child" class="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-xs flex items-center justify-center space-x-1">
+          <div class="pt-2 flex items-center gap-2 border-t border-slate-100">
+            <button type="button" id="btn-inspect-save" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-xs flex items-center justify-center space-x-1">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>Lưu</span>
+            </button>
+            <button type="button" id="btn-inspect-add-child" class="flex-1 py-2 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-xs flex items-center justify-center space-x-1">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-              <span>+ Thêm Con Của Người Này</span>
+              <span>+ Thêm Con</span>
             </button>
           </div>
         </div>
@@ -509,13 +561,58 @@
         <div id="export-subtree-hint" class="text-[11px] text-amber-600 hidden">💡 Đã chọn thành viên — thêm tùy chọn "Nhánh Cụ ..." bên dưới</div>
       </div>
 
+      <!-- Depth Selector -->
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-slate-700">📊 Số Cấp Xuất (Số thế hệ từ gốc)</label>
+        <select id="select-export-depth" class="w-full text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-amber-500">
+          <option value="0">Tất cả các cấp</option>
+          <option value="2">2 cấp (2 thế hệ)</option>
+          <option value="3">3 cấp (3 thế hệ)</option>
+          <option value="4">4 cấp (4 thế hệ)</option>
+          <option value="5">5 cấp (5 thế hệ)</option>
+          <option value="6">6 cấp (6 thế hệ)</option>
+          <option value="7">7 cấp (7 thế hệ)</option>
+          <option value="8">8 cấp (8 thế hệ)</option>
+        </select>
+        <div class="text-[11px] text-slate-400">Chọn số thế hệ muốn xuất, tính từ đời đầu tiên</div>
+      </div>
+
       <div class="space-y-2 text-xs">
+        <!-- A4 Template Selector -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-slate-700">📋 Mẫu Xuất A4 Ngang</label>
+          <select id="select-a4-template" class="w-full text-xs py-2 px-3 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <option value="card">🌳 Cây Ngang (Card — Có đường nối)</option>
+            <option value="table">📊 Bảng Dữ Liệu (Dày đặc thông tin)</option>
+          </select>
+        </div>
+
+        <!-- A4 PDF Download -->
+        <button id="btn-export-a4-pdf" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 flex items-center space-x-3 transition-colors">
+          <div class="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-xs flex-shrink-0">A4</div>
+          <div>
+            <div class="font-bold text-slate-800">Xuất PDF Khổ A4 Ngang (.pdf)</div>
+            <div class="text-[11px] text-slate-400">Bố cục ngang A4 landscape, tự co giãn — không bị cắt, chia nhiều trang</div>
+          </div>
+        </button>
+
+        <!-- A4 Print -->
+        <button id="btn-print-a4" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-teal-500 hover:bg-teal-50/50 flex items-center space-x-3 transition-colors">
+          <div class="w-9 h-9 rounded-lg bg-teal-100 text-teal-800 flex items-center justify-center font-bold text-xs flex-shrink-0">
+            <svg class="w-4 h-4 text-teal-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+          </div>
+          <div>
+            <div class="font-bold text-slate-800">In A4 Ngang (Print / Lưu PDF)</div>
+            <div class="text-[11px] text-slate-400">Mở hộp thoại in khổ A4 ngang — tự co giãn, không bị cắt</div>
+          </div>
+        </button>
+
         <!-- Direct PDF Download -->
         <button id="btn-export-pdf" class="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-rose-500 hover:bg-rose-50/50 flex items-center space-x-3 transition-colors">
           <div class="w-9 h-9 rounded-lg bg-rose-100 text-rose-800 flex items-center justify-center font-bold text-xs flex-shrink-0">PDF</div>
           <div>
             <div class="font-bold text-slate-800">Tải File PDF Khổ Lớn (.pdf)</div>
-            <div class="text-[11px] text-slate-400">Chuẩn in ấn A0, A1, A2 chất lượng cao tải trực tiếp về máy</div>
+            <div class="text-[11px] text-slate-400">Bố cục ngang khổ lớn A0, A1, A2 — phù hợp in bạt, treo tường</div>
           </div>
         </button>
 
@@ -525,8 +622,8 @@
             <svg class="w-4 h-4 text-indigo-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
           </div>
           <div>
-            <div class="font-bold text-slate-800">In Ấn Trực Tiếp (Print / Lưu PDF)</div>
-            <div class="text-[11px] text-slate-400">Mở hộp thoại in hệ thống của Mac để in hoặc xuất file PDF</div>
+            <div class="font-bold text-slate-800">In Khổ Lớn Ngang (Print / Lưu PDF)</div>
+            <div class="text-[11px] text-slate-400">Mở hộp thoại in khổ lớn ngang — phù hợp in bạt, treo tường</div>
           </div>
         </button>
 
@@ -563,7 +660,270 @@
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div id="toast-container" class="fixed bottom-4 right-4 z-50 space-y-2 pointer-events-none"></div>
 
+  <!-- AUTH OVERLAY (Login / Create) -->
+  <div id="auth-overlay" class="fixed inset-0 z-[100] bg-gradient-to-br from-amber-50 via-white to-amber-50 flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+      <!-- Logo -->
+      <div class="text-center mb-8">
+        <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white shadow-lg font-serif font-bold text-2xl mx-auto mb-4">
+          GP
+        </div>
+        <h1 class="text-2xl font-bold text-slate-900 font-serif">Cây Gia Phả Dòng Họ</h1>
+        <p class="text-sm text-slate-500 mt-1">MindNode Tree Platform</p>
+      </div>
+
+      <!-- Login Form -->
+      <div id="auth-login-form" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Đăng Nhập</h2>
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1.5">Tên người dùng</label>
+          <input id="auth-username" type="text" placeholder="Nhập tên người dùng" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" autocomplete="username">
+        </div>
+        <p id="auth-error" class="text-xs text-red-600 mt-2 hidden"></p>
+        <button id="auth-login-btn" class="w-full mt-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-xs transition-colors">
+          Đăng Nhập
+        </button>
+        <p class="text-xs text-slate-500 text-center mt-4">
+          Chưa có tài khoản? <a href="#" id="auth-switch-create" class="text-amber-600 hover:text-amber-700 font-semibold">Tạo Gia Phả Mới</a>
+        </p>
+        <p class="text-xs text-slate-500 text-center mt-2">
+          Hoặc <a href="#" id="auth-switch-code" class="text-amber-600 hover:text-amber-700 font-semibold">Truy cập bằng mã code</a>
+        </p>
+      </div>
+
+      <!-- Create Form (hidden) -->
+      <div id="auth-create-form" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 hidden">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Tạo Gia Phả Mới</h2>
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1.5">Tên người dùng (định danh duy nhất)</label>
+          <input id="auth-create-username" type="text" placeholder="Nhập tên người dùng" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500" autocomplete="username">
+        </div>
+        <p id="auth-create-error" class="text-xs text-red-600 mt-2 hidden"></p>
+        <button id="auth-create-btn" class="w-full mt-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-xs transition-colors">
+          Tạo Gia Phả
+        </button>
+        <p class="text-xs text-slate-500 text-center mt-4">
+          Đã có tài khoản? <a href="#" id="auth-switch-login" class="text-amber-600 hover:text-amber-700 font-semibold">Đăng Nhập</a>
+        </p>
+      </div>
+
+      <!-- Code Access Form (hidden) -->
+      <div id="auth-code-form" class="bg-white rounded-2xl shadow-xl border border-slate-200 p-6 hidden">
+        <h2 class="text-lg font-bold text-slate-900 mb-4">Truy cập bằng Mã Code</h2>
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1.5">Mã code</label>
+          <input id="auth-code-input" type="text" placeholder="Nhập mã code 6 ký tự" maxlength="6" class="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 text-center tracking-[0.5em] text-lg font-mono" autocomplete="off">
+        </div>
+        <p id="auth-code-error" class="text-xs text-red-600 mt-2 hidden"></p>
+        <button id="auth-code-btn" class="w-full mt-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-xs transition-colors">
+          Truy Cập
+        </button>
+        <p class="text-xs text-slate-500 text-center mt-4">
+          <a href="#" id="auth-switch-login-from-code" class="text-amber-600 hover:text-amber-700 font-semibold">Đăng Nhập</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- SHARE PANEL MODAL -->
+  <div id="share-panel-overlay" class="fixed inset-0 z-[90] bg-black/40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+        <h3 class="font-bold text-slate-900">Chia sẻ và Quản lý Truy cập</h3>
+        <button id="btn-close-share-panel" class="p-1 rounded-lg text-slate-400 hover:bg-slate-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <!-- Tabs -->
+      <div class="flex border-b border-slate-200 bg-slate-50 px-5">
+        <button id="share-tab-link" class="share-tab-btn px-3 py-2 text-xs font-bold rounded-t-lg bg-white text-slate-900 border-b-2 border-amber-500">Liên kết / Mã</button>
+        <button id="share-tab-access" class="share-tab-btn px-3 py-2 text-xs font-semibold rounded-t-lg text-slate-500 border-b-2 border-transparent">Danh sách Truy cập</button>
+        <button id="share-tab-pending" class="share-tab-btn px-3 py-2 text-xs font-semibold rounded-t-lg text-slate-500 border-b-2 border-transparent flex items-center space-x-1">
+          <span>Chờ Phê duyệt</span>
+          <span id="share-pending-badge" class="hidden px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-red-100 text-red-800">0</span>
+        </button>
+      </div>
+      <!-- Content -->
+      <div class="flex-1 overflow-y-auto p-5">
+        <!-- Tab: Link/Code -->
+        <div id="share-content-link" class="space-y-4">
+          <!-- Generate Link -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <h4 class="font-bold text-sm text-slate-800 mb-2">Tạo Liên kết Chia sẻ</h4>
+            <div class="flex items-center space-x-2">
+              <select id="share-link-role" class="form-input flex-1 text-xs">
+                <option value="viewer">Chỉ xem (Viewer)</option>
+                <option value="editor">Cho phép chỉnh sửa (Editor)</option>
+              </select>
+              <button id="btn-generate-share-link" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg">Tạo Link</button>
+            </div>
+            <div id="share-link-result" class="hidden mt-2">
+              <div class="flex items-center space-x-2">
+                <input id="share-link-url" type="text" readonly class="form-input flex-1 text-xs bg-white font-mono">
+                <button id="btn-copy-share-link" class="px-2 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs rounded-lg">Copy</button>
+              </div>
+            </div>
+          </div>
+          <!-- Generate Code -->
+          <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <h4 class="font-bold text-sm text-slate-800 mb-2">Tạo Mã Code (6 ký tự)</h4>
+            <div class="flex items-center space-x-2">
+              <select id="share-code-role" class="form-input flex-1 text-xs">
+                <option value="viewer">Chỉ xem (Viewer)</option>
+                <option value="editor">Cho phép chỉnh sửa (Editor)</option>
+              </select>
+              <button id="btn-generate-share-code" class="px-3 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-lg">Tạo Code</button>
+            </div>
+            <div id="share-code-result" class="hidden mt-2">
+              <div class="flex items-center space-x-2">
+                <input id="share-code-value" type="text" readonly class="form-input flex-1 text-xs bg-white font-mono text-center tracking-[0.5em] text-lg">
+                <button id="btn-copy-share-code" class="px-2 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs rounded-lg">Copy</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Tab: Access List -->
+        <div id="share-content-access" class="hidden space-y-2">
+          <div id="access-list-container" class="space-y-2"></div>
+        </div>
+        <!-- Tab: Pending Changes -->
+        <div id="share-content-pending" class="hidden space-y-2">
+          <div id="pending-changes-container" class="space-y-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EDIT REQUEST MODAL -->
+  <div id="edit-request-overlay" class="fixed inset-0 z-[90] bg-black/40 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+      <h3 class="font-bold text-slate-900 mb-2">Yêu cầu Chỉnh sửa</h3>
+      <p class="text-xs text-slate-500 mb-4">Bạn hiện chỉ có quyền xem. Chọn cách gửi yêu cầu:</p>
+
+      <!-- Mode Selection -->
+      <div class="flex items-center space-x-3 mb-4">
+        <label class="flex-1 flex items-center space-x-2 p-3 border-2 border-amber-400 rounded-lg cursor-pointer bg-amber-50" id="edit-request-account-label">
+          <input type="radio" name="edit-request-mode" value="account" checked class="accent-amber-600">
+          <div>
+            <span class="text-xs font-semibold text-slate-800 block">Tạo tài khoản</span>
+            <span class="text-[10px] text-slate-500">Đăng nhập rồi gửi yêu cầu</span>
+          </div>
+        </label>
+        <label class="flex-1 flex items-center space-x-2 p-3 border-2 border-slate-200 rounded-lg cursor-pointer hover:border-amber-300" id="edit-request-guest-label">
+          <input type="radio" name="edit-request-mode" value="guest" class="accent-amber-600">
+          <div>
+            <span class="text-xs font-semibold text-slate-800 block">Chế độ khách</span>
+            <span class="text-[10px] text-slate-500">Gửi ngay, không cần tài khoản</span>
+          </div>
+        </label>
+      </div>
+
+      <!-- Account mode: show form for authenticated users, login prompt for unauthenticated -->
+      <div id="edit-request-account-section" class="hidden">
+        <!-- Authenticated user form -->
+        <div id="edit-request-account-form" class="hidden">
+          <div>
+            <label class="block text-sm font-semibold text-slate-600 mb-1.5">Lý do</label>
+            <textarea id="edit-request-account-reason" rows="2" placeholder="Mô tả lý do bạn cần chỉnh sửa..." class="form-input resize-none text-xs"></textarea>
+          </div>
+          <!-- Edit Content Section: Thêm / Sửa / Xoá -->
+          <div class="mt-3 space-y-3">
+            <!-- Thêm (Add) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-sm font-semibold text-emerald-700">Thêm thành viên</label>
+                <button id="btn-add-proposed-add-account" class="text-[10px] px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded font-medium">+ Thêm</button>
+              </div>
+              <div id="proposed-add-list-account" class="space-y-2 max-h-32 overflow-y-auto">
+                <p class="text-[10px] text-slate-400 text-center py-2">Chưa có thành viên nào được đề xuất thêm</p>
+              </div>
+            </div>
+            <!-- Sửa (Edit) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-sm font-semibold text-amber-700">Sửa thành viên</label>
+                <button id="btn-add-proposed-edit-account" class="text-[10px] px-2 py-0.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded font-medium">+ Thêm</button>
+              </div>
+              <div id="proposed-edit-list-account" class="space-y-2 max-h-32 overflow-y-auto">
+                <p class="text-[10px] text-slate-400 text-center py-2">Chưa có thay đổi nào được đề xuất</p>
+              </div>
+            </div>
+            <!-- Xoá (Delete) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="text-sm font-semibold text-red-700">Xoá thành viên</label>
+                <button id="btn-add-proposed-delete-account" class="text-[10px] px-2 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded font-medium">+ Thêm</button>
+              </div>
+              <div id="proposed-delete-list-account" class="space-y-2 max-h-32 overflow-y-auto">
+                <p class="text-[10px] text-slate-400 text-center py-2">Chưa có thành viên nào được đề xuất xoá</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Unauthenticated login prompt -->
+        <div id="edit-request-account-login-prompt">
+          <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">
+            <p class="text-xs text-amber-800">Bạn cần <a href="#" id="edit-request-go-login" class="underline font-semibold">đăng nhập</a> hoặc <a href="#" id="edit-request-go-create" class="underline font-semibold">tạo tài khoản</a> trước khi gửi yêu cầu.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Guest mode: show form -->
+      <div id="edit-request-guest-section" class="hidden">
+        <div>
+          <label class="block text-sm font-semibold text-slate-600 mb-1.5">Tên của bạn (tùy chọn)</label>
+          <input id="edit-request-guest-name" type="text" placeholder="Nhập tên của bạn..." class="form-input text-xs">
+        </div>
+        <div class="mt-2">
+          <label class="block text-sm font-semibold text-slate-600 mb-1.5">Lý do</label>
+          <textarea id="edit-request-reason" rows="2" placeholder="Mô tả lý do bạn cần chỉnh sửa..." class="form-input resize-none text-xs"></textarea>
+        </div>
+
+        <!-- Edit Content Section: Thêm / Sửa / Xoá -->
+        <div class="mt-3 space-y-3">
+          <!-- Thêm (Add) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-sm font-semibold text-emerald-700">Thêm thành viên</label>
+              <button id="btn-add-proposed-add" class="text-[10px] px-2 py-0.5 bg-emerald-100 hover:bg-emerald-200 text-emerald-700 rounded font-medium">+ Thêm</button>
+            </div>
+            <div id="proposed-add-list" class="space-y-2 max-h-32 overflow-y-auto">
+              <p class="text-[10px] text-slate-400 text-center py-2">Chưa có thành viên nào được đề xuất thêm</p>
+            </div>
+          </div>
+          <!-- Sửa (Edit) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-sm font-semibold text-amber-700">Sửa thành viên</label>
+              <button id="btn-add-proposed-edit" class="text-[10px] px-2 py-0.5 bg-amber-100 hover:bg-amber-200 text-amber-700 rounded font-medium">+ Thêm</button>
+            </div>
+            <div id="proposed-edit-list" class="space-y-2 max-h-32 overflow-y-auto">
+              <p class="text-[10px] text-slate-400 text-center py-2">Chưa có thay đổi nào được đề xuất</p>
+            </div>
+          </div>
+          <!-- Xoá (Delete) -->
+          <div>
+            <div class="flex items-center justify-between mb-1.5">
+              <label class="text-sm font-semibold text-red-700">Xoá thành viên</label>
+              <button id="btn-add-proposed-delete" class="text-[10px] px-2 py-0.5 bg-red-100 hover:bg-red-200 text-red-700 rounded font-medium">+ Thêm</button>
+            </div>
+            <div id="proposed-delete-list" class="space-y-2 max-h-32 overflow-y-auto">
+              <p class="text-[10px] text-slate-400 text-center py-2">Chưa có thành viên nào được đề xuất xoá</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p id="edit-request-error" class="text-xs text-red-600 mt-2 hidden"></p>
+      <div class="flex items-center space-x-2 mt-4">
+        <button id="btn-submit-edit-request" class="flex-1 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg text-sm" disabled>Gửi Yêu cầu</button>
+        <button id="btn-cancel-edit-request" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium rounded-lg text-sm">Hủy</button>
+      </div>
+    </div>
+  </div>
+
   <!-- SCRIPTS -->
-  <script type="module" src="/js/app.js"></script>
+  <script type="module" src="/js/app.js?v=5"></script>
 </body>
 </html>

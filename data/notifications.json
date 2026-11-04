@@ -1,0 +1,772 @@
+[
+  {
+    "id": "a0ababf3-fb3b-4565-9439-46af00a34195",
+    "user_id": "2f0acf49-33c3-4b46-b87c-af35a2c4df95",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "3adf4fa9-faf8-4b25-8241-c84cecce3965",
+      "title": "Yêu cầu chỉnh sửa từ khách",
+      "requester_name": "Khách (Link chia sẻ)",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:25:20.565Z"
+  },
+  {
+    "id": "74506f1e-92c6-4aec-b20f-ca36f1105a85",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "4a755805-0b99-421b-8a49-70ce13e70341",
+      "title": "ccc",
+      "requester_name": "Khách (Link chia sẻ)",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:40:08.515Z"
+  },
+  {
+    "id": "18b01196-4851-4530-ae59-b301f3e5143a",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "5abec5a3-e9ac-432d-b921-bf41ddfe4f36",
+      "title": "fff",
+      "requester_name": "Khách (Link chia sẻ)",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:47:58.896Z"
+  },
+  {
+    "id": "acd4a8ed-7a92-414c-a875-0429b4a679cf",
+    "user_id": "00fe8ab4-bb16-43b9-ae2b-3a485bf401a1",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "718d1dac-a968-4380-a961-e9370beaa86f",
+      "title": "Test yêu cầu chỉnh sửa",
+      "requester_name": "Khách test",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:52:05.061Z"
+  },
+  {
+    "id": "6b9a05a9-dcc4-487b-b469-61b125aae35a",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "718d1dac-a968-4380-a961-e9370beaa86f",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:52:14.136Z"
+  },
+  {
+    "id": "c9282a51-d85a-4209-9be5-a9d6ec28b312",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "4a755805-0b99-421b-8a49-70ce13e70341",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:52:24.549Z"
+  },
+  {
+    "id": "a0c65c50-7886-4894-9f86-7cedc0cbbf85",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "57c38cf5-1c60-41c2-bedd-6530d2a2b911",
+      "title": "them dung",
+      "requester_name": "thuan",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:53:43.248Z"
+  },
+  {
+    "id": "e1bcb78e-eede-40a3-9068-65aa0a28a7fd",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "57c38cf5-1c60-41c2-bedd-6530d2a2b911",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:53:51.780Z"
+  },
+  {
+    "id": "8841c9d5-9e9d-429b-9a20-517dab1388e8",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "5abec5a3-e9ac-432d-b921-bf41ddfe4f36",
+      "reason": "sss"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:54:54.994Z"
+  },
+  {
+    "id": "1ef9a73b-b5e1-4479-8db1-8a529f92125b",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "12bfe548-bd6e-41ed-ae08-bf397a25bb29",
+      "title": "them dung",
+      "requester_name": "thuan",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:56:01.810Z"
+  },
+  {
+    "id": "9ceb4fc5-cba5-47fb-9802-de1dc12d0382",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "63f1752a-367c-4b30-a213-e0c82389aebb",
+      "title": "c",
+      "requester_name": "c",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:56:33.230Z"
+  },
+  {
+    "id": "91733fae-f340-430f-aed1-2db64a7298d9",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "12bfe548-bd6e-41ed-ae08-bf397a25bb29",
+      "reason": ""
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:56:38.228Z"
+  },
+  {
+    "id": "b10f2f71-a892-4d8d-8f18-d8e4f37cd035",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "63f1752a-367c-4b30-a213-e0c82389aebb",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T11:56:40.407Z"
+  },
+  {
+    "id": "7829758f-5fc1-45aa-a7d3-552be39c9d03",
+    "user_id": "00fe8ab4-bb16-43b9-ae2b-3a485bf401a1",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "95f4c86f-ce5a-457c-b68d-cf29dfd246c7",
+      "title": "Sửa thông tin",
+      "requester_name": "Khách test",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:04:07.154Z"
+  },
+  {
+    "id": "690c3dd5-b8e6-40df-b480-5c6f5977df20",
+    "user_id": "00fe8ab4-bb16-43b9-ae2b-3a485bf401a1",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "d2c17d04-fc3f-46a0-9751-6dea99fc6c27",
+      "title": "Sửa thông tin",
+      "requester_name": "Khách test",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:05:08.931Z"
+  },
+  {
+    "id": "85e40177-c72c-4f5f-8072-9cb7c80a560d",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "d2c17d04-fc3f-46a0-9751-6dea99fc6c27",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:05:44.395Z"
+  },
+  {
+    "id": "f518d09f-3434-4290-921c-0d81bc82ed56",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "96d99a9b-08dc-4951-9c47-8d8a422769a5",
+      "title": "a",
+      "requester_name": "a",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:05:55.345Z"
+  },
+  {
+    "id": "438830bc-f6bc-4862-bbea-28e7f376adb8",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "4c79ff01-72f9-4ac4-9177-c93d37e7fe9c",
+      "title": "cccc",
+      "requester_name": "cccc",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:06:08.980Z"
+  },
+  {
+    "id": "96d56439-968e-4615-82cb-c67054719dda",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "4c79ff01-72f9-4ac4-9177-c93d37e7fe9c",
+      "reason": ""
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:06:16.331Z"
+  },
+  {
+    "id": "0b43bc44-8735-4534-bfc6-8b9b6d1e5fcd",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "96d99a9b-08dc-4951-9c47-8d8a422769a5",
+      "reason": "dđ"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:07:20.242Z"
+  },
+  {
+    "id": "18589352-1a74-4b14-968a-7c512884f4e9",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "c58066e3-b73e-497a-bbbd-f8e93e88c211",
+      "title": "dd",
+      "requester_name": "dd",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:07:53.762Z"
+  },
+  {
+    "id": "2911e8e2-11a4-4b23-8f9e-2e6f96821ed1",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "c58066e3-b73e-497a-bbbd-f8e93e88c211",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:08:21.300Z"
+  },
+  {
+    "id": "bb504059-69cf-4b43-b6c2-d8fb0312728e",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "328773f5-4a63-4d7e-8b37-6ae0a3b1677a",
+      "title": "Sửa ngày sinh",
+      "requester_name": "Khách test",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:08:28.675Z"
+  },
+  {
+    "id": "8e0730f1-9136-44ab-8934-c51b09cf6b91",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "328773f5-4a63-4d7e-8b37-6ae0a3b1677a",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:08:49.275Z"
+  },
+  {
+    "id": "b19d97d1-b2dc-4225-8458-40f278726c63",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "9c9fe416-aca9-4a8c-9020-0f8fc13662f2",
+      "title": "dd",
+      "requester_name": "dd",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:09:07.737Z"
+  },
+  {
+    "id": "249d75b7-bfc8-4a7f-a80d-ded686d0b331",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "21344b16-6849-4e07-b7e2-d266473a4c90",
+      "title": "sss",
+      "requester_name": "ss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:09:47.803Z"
+  },
+  {
+    "id": "669f8d57-9506-4526-b9c6-00132ca9f566",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "9c9fe416-aca9-4a8c-9020-0f8fc13662f2",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:09:56.157Z"
+  },
+  {
+    "id": "ce77da30-d4ee-4e52-9b6b-65c3fdbfc6b4",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "21344b16-6849-4e07-b7e2-d266473a4c90",
+      "reason": ""
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:10:49.514Z"
+  },
+  {
+    "id": "2d68c1da-da41-4fe2-8aad-846bc898c89c",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "fb0c016e-554c-4501-a41d-de59f04893a1",
+      "title": "ss",
+      "requester_name": "ss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:11:33.771Z"
+  },
+  {
+    "id": "92a03da3-77f2-4eef-9c1a-9bf20983f3ed",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "fb0c016e-554c-4501-a41d-de59f04893a1",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:11:38.489Z"
+  },
+  {
+    "id": "4f6ebd99-5327-4ef4-a527-91d066730390",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "7b8476b1-1fab-4407-9323-773a744c42aa",
+      "title": "sss",
+      "requester_name": "sss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:13:03.396Z"
+  },
+  {
+    "id": "6db86f97-66f7-4ad9-8611-aaf41b1ca43d",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "7b8476b1-1fab-4407-9323-773a744c42aa",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:13:10.066Z"
+  },
+  {
+    "id": "79571c66-4408-4852-b22d-16f046c3646b",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "116ef1c1-881d-46fb-a367-5037831aa828",
+      "title": "dd",
+      "requester_name": "dđ",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:14:18.501Z"
+  },
+  {
+    "id": "e0ea8b6d-80f2-4b49-a930-f40a34d5ca9e",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "59299a72-650d-4e08-8d5a-b496dd318776",
+      "title": "dđ",
+      "requester_name": "dd",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:16:02.335Z"
+  },
+  {
+    "id": "4af2338a-e013-480f-9670-6cd2558e6c89",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "59299a72-650d-4e08-8d5a-b496dd318776",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:16:16.183Z"
+  },
+  {
+    "id": "42278e26-7572-4793-b41c-1603d3c22095",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "116ef1c1-881d-46fb-a367-5037831aa828",
+      "reason": ""
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:16:23.304Z"
+  },
+  {
+    "id": "f68fe9ef-fc04-47ff-bfc3-0c15862393ae",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "356f1489-effa-42fc-a923-b631310c931e",
+      "title": "fff",
+      "requester_name": "ff",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:18:01.494Z"
+  },
+  {
+    "id": "7458266b-768f-4168-81e3-ce0fb485ed23",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "356f1489-effa-42fc-a923-b631310c931e",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:18:09.682Z"
+  },
+  {
+    "id": "3b48719f-860e-4f65-801f-2ba862b6bf94",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "4ce1aac6-0d8e-44b5-b67e-8bfd718af9b8",
+      "title": "ssss",
+      "requester_name": "sas",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:20:13.145Z"
+  },
+  {
+    "id": "939146d6-fa32-4d87-8b97-9cab6282a505",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "4ce1aac6-0d8e-44b5-b67e-8bfd718af9b8",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:20:19.965Z"
+  },
+  {
+    "id": "17a489ee-d529-4874-93c4-051483ab67f5",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "b6750f40-f4d8-4d0e-ad58-04accb2f6403",
+      "title": "cc",
+      "requester_name": "cc",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:48:59.433Z"
+  },
+  {
+    "id": "c7acd3bd-77f3-4020-a92d-5235d573e93a",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "b6750f40-f4d8-4d0e-ad58-04accb2f6403",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:49:07.769Z"
+  },
+  {
+    "id": "133f5378-58c9-4f9c-bc59-adf892ef643d",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "a180ca1d-b735-4833-bd13-6b76c5ee4192",
+      "title": "ss",
+      "requester_name": "sss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:52:03.349Z"
+  },
+  {
+    "id": "eaf57317-31f7-4d4f-82f2-0264991f2f88",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "a180ca1d-b735-4833-bd13-6b76c5ee4192",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:52:11.881Z"
+  },
+  {
+    "id": "8711e0f6-aff9-46fb-96d5-010a53e0bef2",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "535c289f-3d8b-4e28-abfd-dcbe1668eec5",
+      "title": "cdsdsdsds",
+      "requester_name": "dssddsds",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:56:02.035Z"
+  },
+  {
+    "id": "e603638d-a024-47bc-8940-a90f7d45175f",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "535c289f-3d8b-4e28-abfd-dcbe1668eec5",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:56:10.372Z"
+  },
+  {
+    "id": "2a4c25e4-e41f-47b3-8acb-a14d74f65548",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "0230ef6a-0c5c-445e-acc1-29abf8d98479",
+      "title": "sss",
+      "requester_name": "sss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:58:44.841Z"
+  },
+  {
+    "id": "a8a105f6-7d2c-4bb9-9d48-4d276f9c241f",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "0230ef6a-0c5c-445e-acc1-29abf8d98479",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:58:55.291Z"
+  },
+  {
+    "id": "fc089d99-5365-43c5-938a-1ab7cb871bf4",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "3574796b-ee66-487a-a9cf-860172a589a5",
+      "title": "sss",
+      "requester_name": "sss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:59:13.614Z"
+  },
+  {
+    "id": "345445bf-2ce3-4eb5-ad91-e479c6a674a3",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "3574796b-ee66-487a-a9cf-860172a589a5",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T12:59:19.033Z"
+  },
+  {
+    "id": "2729d1ce-7638-48d2-ba6c-e13a2ee9c1e6",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "eb53a8eb-4ae5-4568-94e1-71ff66053e4f",
+      "title": "dd",
+      "requester_name": "dd",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:00:22.260Z"
+  },
+  {
+    "id": "ac2014b4-9a1a-4850-8cfd-6760a446e0b4",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "eb53a8eb-4ae5-4568-94e1-71ff66053e4f",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:00:31.115Z"
+  },
+  {
+    "id": "6a5b75c2-e8ee-4cd2-8e1e-39b0ff10bda5",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "fd51f29a-7088-4825-a79d-a5537cc0d651",
+      "title": "ssss",
+      "requester_name": "ss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:01:10.465Z"
+  },
+  {
+    "id": "233cefa3-fef0-421e-b13a-569279bac798",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "fd51f29a-7088-4825-a79d-a5537cc0d651",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:01:18.020Z"
+  },
+  {
+    "id": "e263eb52-921e-4200-a0e6-42305aaa6844",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "a39d62e3-7116-4c7b-8c98-68f565641eb3",
+      "title": "đ",
+      "requester_name": "đ",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:01:36.509Z"
+  },
+  {
+    "id": "1218bcd9-41d7-4cf3-b926-7da2c747e3b5",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "a39d62e3-7116-4c7b-8c98-68f565641eb3",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:01:42.289Z"
+  },
+  {
+    "id": "b2549254-f385-4ece-846f-ee9466ef82b7",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "dbe8cd1f-6f16-4982-a576-de4743e07a4d",
+      "title": "ss",
+      "requester_name": "ss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:06:31.687Z"
+  },
+  {
+    "id": "a3e61562-2727-488f-a1a0-29c7c6a61e7e",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "dbe8cd1f-6f16-4982-a576-de4743e07a4d",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:06:37.570Z"
+  },
+  {
+    "id": "48549bc7-a5a3-4427-b171-289bc9598d3d",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "74ccae77-22ed-4af2-9089-5ba4d800a6c2",
+      "title": "x",
+      "requester_name": "xx",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:07:56.308Z"
+  },
+  {
+    "id": "ae30c400-9e9a-4deb-bc0b-8d27459b2bb4",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "74ccae77-22ed-4af2-9089-5ba4d800a6c2",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:08:08.638Z"
+  },
+  {
+    "id": "222da586-56b4-430a-b901-870ef49a5555",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "4c1de3d5-2b86-49ec-bcdd-0218ded5a006",
+      "title": "ss",
+      "requester_name": "sss",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:09:21.436Z"
+  },
+  {
+    "id": "02442e1a-990c-4cf2-a1c8-22c9d2c3e11d",
+    "user_id": null,
+    "type": "role_granted",
+    "payload": {
+      "edit_request_id": "4c1de3d5-2b86-49ec-bcdd-0218ded5a006",
+      "new_role": "editor"
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:09:27.307Z"
+  },
+  {
+    "id": "3002a3e7-c076-4d8a-bb9e-37d90d6eec7e",
+    "user_id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "type": "edit_request",
+    "payload": {
+      "edit_request_id": "691c605b-96a3-4b14-9b50-0f20a4984ffa",
+      "title": "d",
+      "requester_name": "đ",
+      "is_guest": true
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T13:15:49.211Z"
+  },
+  {
+    "id": "76a7441d-9022-4376-8982-30317a34bb4c",
+    "user_id": null,
+    "type": "edit_request_rejected",
+    "payload": {
+      "edit_request_id": "691c605b-96a3-4b14-9b50-0f20a4984ffa",
+      "reason": ""
+    },
+    "is_read": false,
+    "created_at": "2026-11-04T15:04:07.444Z"
+  }
+]

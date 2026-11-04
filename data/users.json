@@ -1,0 +1,32 @@
+[
+  {
+    "id": "e2bb8975-a541-4336-9437-33feec56c155",
+    "username": "bac",
+    "created_at": "2026-11-04T08:11:03.920Z"
+  },
+  {
+    "id": "00fe8ab4-bb16-43b9-ae2b-3a485bf401a1",
+    "username": "admin",
+    "created_at": "2026-11-04T08:39:38.022Z"
+  },
+  {
+    "id": "30641d83-86ee-4251-9699-fa34a03dfd11",
+    "username": "testuser",
+    "created_at": "2026-11-04T08:51:35.230Z"
+  },
+  {
+    "id": "9748fbbc-f854-4417-b124-e2a199752fef",
+    "username": "viewer1",
+    "created_at": "2026-11-04T08:56:37.210Z"
+  },
+  {
+    "id": "f1cf1db6-41e9-4dd8-8d9e-4e55f535fbdb",
+    "username": "kita",
+    "created_at": "2026-11-04T09:47:27.797Z"
+  },
+  {
+    "id": "2f0acf49-33c3-4b46-b87c-af35a2c4df95",
+    "username": "aa",
+    "created_at": "2026-11-04T10:22:47.897Z"
+  }
+]
