@@ -4,6 +4,8 @@
   "description": "Nền tảng Quản lý & Trực quan hoá Cây Gia Phả Dòng Họ - Hỗ trợ Import Excel & Giao diện Kéo Thả MindNode",
   "main": "server.js",
   "scripts": {
+    "check:supabase": "node scripts/check-supabase.cjs",
+    "test:supabase": "node --test tests/supabase-config.test.cjs",
     "build:pages": "node scripts/build-pages.cjs",
     "build:pages:docs": "node scripts/build-pages.cjs --docs",
     "start": "node server.js",
@@ -20,5 +22,12 @@
     "vietnam"
   ],
   "author": "Antigravity Team",
-  "license": "ISC"
+  "license": "ISC",
+  "engines": { "node": ">=22" },
+  "dependencies": {
+    "@supabase/supabase-js": "2.119.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2"
+  }
 }

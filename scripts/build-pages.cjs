@@ -1,7 +1,9 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const { loadSupabaseConfig } = require('./supabase-config.cjs');
 
 const root = path.resolve(__dirname, '..');
+const supabase = loadSupabaseConfig(root);
 const output = path.join(root, 'dist');
 let apiBaseUrl = (process.env.API_BASE_URL || '').trim().replace(/\/+$/, '');
 if (apiBaseUrl) {
@@ -23,9 +25,24 @@ const html = fs.readFileSync(indexPath, 'utf8')
   .replaceAll('src="/js/', 'src="./js/');
 fs.writeFileSync(indexPath, html);
 fs.writeFileSync(path.join(output, 'js/config.js'),
-  `export const config = ${JSON.stringify({ apiBaseUrl, staticHosting: true })};\n`);
+  `export const config = ${JSON.stringify({ apiBaseUrl, staticHosting: true, supabase })};\n`);
+require('esbuild').buildSync({
+  stdin: {
+    contents: "export { createClient } from '@supabase/supabase-js';",
+    resolveDir: root,
+    sourcefile: 'supabase-sdk.js'
+  },
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  target: ['es2022'],
+  outfile: path.join(output, 'js/vendor/supabase.js'),
+  minify: true,
+  legalComments: 'eof'
+});
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
 console.log(`Built GitHub Pages assets in dist/ (backend ${apiBaseUrl ? 'configured' : 'not configured'}).`);
+console.log(`Supabase SDK bundled; project configuration ${supabase ? 'available' : 'not set'}.`);
 
 if (process.argv.includes('--docs')) {
   const docs = path.join(root, 'docs');

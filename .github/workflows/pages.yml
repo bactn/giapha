@@ -16,10 +16,17 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build static frontend
+      - name: Install dependencies
+        # npm dependencies now include the bundled Supabase SDK.
+        run: npm ci
+      - name: Test public Supabase configuration
+        run: npm run test:supabase
+      - name: Build Pages assets
         run: npm run build:pages
         env:
           API_BASE_URL: ${{ vars.API_BASE_URL }}
+          SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
