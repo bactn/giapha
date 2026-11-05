@@ -1,6 +1,7 @@
 # Kế hoạch chuyển Gia Phả sang Supabase
 
-Trạng thái: phương án đề xuất, chưa tạo project hoặc chuyển dữ liệu.
+Trạng thái: đã kết nối project giapha và triển khai schema/RLS cùng RPC cơ bản.
+Xem `plans/supabase-phase1.md`. Chưa chuyển giao diện hoặc nhập dữ liệu thật.
 
 ## 1. Kiến trúc
 

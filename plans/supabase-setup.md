@@ -5,9 +5,10 @@ Dashboard: https://supabase.com/dashboard/project/nwbozmxgdhouhzlpiskd
 
 ## Phạm vi hiện tại
 
-Đây là bước chuẩn bị kết nối: SDK, cấu hình public, kiểm tra Auth và build Pages.
+Đã có SDK, cấu hình public, kiểm tra Auth, build Pages và schema/RLS trên project.
+Xem `plans/supabase-phase1.md` cho các bảng, RPC và kết quả kiểm thử quyền.
 Giao diện đăng nhập/lưu gia phả vẫn đang dùng API Node.js cũ; chưa chuyển sang
-Supabase và chưa tạo bảng hoặc nhập dữ liệu. Website release chưa đổi.
+Supabase và chưa nhập dữ liệu thật. Website release chưa đổi.
 
 ## Chạy và kiểm tra
 
@@ -42,8 +43,8 @@ nhánh Supabase không tự thay đổi website đang chạy.
 
 ## Các bước tiếp theo
 
-1. Viết và kiểm thử schema, RLS, RPC theo `plans/supabase-migration.md`.
-2. Áp dụng migration lên project đã xác nhận và kiểm tra chính sách bằng nhiều role.
+1. Đã viết và kiểm thử schema, RLS, RPC cơ bản theo `plans/supabase-migration.md`.
+2. Đã áp dụng migration và kiểm tra bằng role admin/editor/viewer/outsider/anon.
 3. Chuyển đăng nhập, tải/lưu gia phả sang các service Supabase.
 4. Chuyển duyệt, chia sẻ, thông báo; xác nhận tài khoản chủ dữ liệu và dry-run import.
 5. Kiểm thử trên branch rồi mới hợp nhất vào release và build docs.
