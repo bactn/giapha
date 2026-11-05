@@ -1,5 +1,8 @@
 # Kết quả đợt 1 — schema và RLS
 
+Đây là báo cáo lịch sử trước tích hợp giao diện. Trạng thái hiện tại, dữ liệu thật
+và các hạn chế vận hành được cập nhật trong [supabase-setup.md](supabase-setup.md).
+
 Đã triển khai trên project `giapha` (`nwbozmxgdhouhzlpiskd`).
 Migration: `20261105160025_genealogy_schema_rls` (khớp lịch sử remote).
 
@@ -32,12 +35,12 @@ Data API exposed schemas. Các hàm có search_path cố định và EXECUTE gi�
 lưu snapshot, tăng revision, ghi audit trong cùng transaction. Mã lỗi quan trọng:
 
 - `42501`: thiếu quyền hoặc chưa đăng nhập.
-- `40001`: revision đã cũ; giữ bản nháp và đối chiếu trước khi lưu lại.
+- `PT409` (HTTP 409, sau migration bổ sung): revision đã cũ; giữ bản nháp và đối chiếu trước khi lưu lại.
 - `23503`: parent/spouse không tồn tại trong cùng gia phả.
 - `23505`: trùng ID thành viên.
 - `23514`: dữ liệu không hợp lệ, vòng lặp hoặc hạ quyền admin cuối cùng.
 
-Không tự retry lỗi 40001 bằng cách lấy revision mới rồi ghi đè snapshot cũ.
+Không tự retry lỗi revision bằng cách lấy revision mới rồi ghi đè snapshot cũ.
 
 ## Kiểm chứng
 

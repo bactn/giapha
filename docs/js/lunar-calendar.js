@@ -1,4 +1,5 @@
 // lunar-calendar.js - Lunar Calendar Death Anniversary (Giỗ Âm Lịch) Manager
+import { escapeHTML } from './html.js';
 export class LunarCalendarManager {
   static extractLunarDate(dateStr) {
     if (!dateStr) return null;
@@ -89,11 +90,11 @@ export class LunarCalendarManager {
             </span>
             <div>
               <div class="font-bold text-slate-800 flex items-center space-x-1">
-                ${item.member.christian_name ? `<span class="text-amber-700 font-semibold">[${item.member.christian_name}]</span>` : ''}
-                <span>${item.member.full_name}</span>
-                <span class="text-[10px] text-slate-400 font-normal">(${item.member.id} • Đời ${item.member.generation})</span>
+                ${item.member.christian_name ? `<span class="text-amber-700 font-semibold">[${escapeHTML(item.member.christian_name)}]</span>` : ''}
+                <span>${escapeHTML(item.member.full_name)}</span>
+                <span class="text-[10px] text-slate-400 font-normal">(${escapeHTML(item.member.id)} • Đời ${escapeHTML(item.member.generation)})</span>
               </div>
-              <div class="text-[11px] text-slate-500">${item.rawText}</div>
+              <div class="text-[11px] text-slate-500">${escapeHTML(item.rawText)}</div>
             </div>
           </div>
           <button class="text-[11px] text-amber-700 hover:text-amber-900 font-semibold px-2 py-1 bg-amber-50 hover:bg-amber-100 rounded-lg">

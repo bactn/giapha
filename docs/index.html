@@ -2,12 +2,14 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cây Gia Phả Dòng Họ - MindNode Tree Platform</title>
   <!-- Tailwind CSS CDN for instant JIT responsive styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/style.css">
   <link rel="stylesheet" href="./css/canvas.css">
+  <link rel="stylesheet" href="./css/supabase.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap" rel="stylesheet">
@@ -34,10 +36,10 @@
           <h1 id="lineage-title" class="app-header-title text-xs md:text-sm font-bold text-slate-900 font-serif truncate max-w-[150px] sm:max-w-[240px] md:max-w-none hover:text-amber-700 cursor-pointer" title="Bấm đúp để đổi tên dòng họ">
             Họ Trần Ngọc - Ngành II Công Giáo
           </h1>
-          <span class="badge-tag bg-amber-100 text-amber-800 border border-amber-200 text-[10px] px-1.5 py-0.2 rounded-full font-semibold hidden sm:inline-block">Công Giáo</span>
+          <span id="lineage-religion" class="badge-tag bg-amber-100 text-amber-800 border border-amber-200 text-[10px] px-1.5 py-0.2 rounded-full font-semibold hidden sm:inline-block">Công Giáo</span>
         </div>
         <p class="text-[10px] md:text-[11px] text-slate-500 flex items-center space-x-1.5 truncate">
-          <span class="truncate">Khởi tổ: <strong class="text-slate-700 font-medium">Cố Trần Ngọc Truyền</strong></span>
+          <span id="lineage-origin" class="truncate">Khởi tổ: <strong class="text-slate-700 font-medium">Cố Trần Ngọc Truyền</strong></span>
           <span class="hidden sm:inline">•</span>
           <span id="stats-summary" class="hidden sm:inline">8 Thế Hệ | 218 Thành Viên</span>
         </p>
@@ -929,6 +931,6 @@
   </div>
 
   <!-- SCRIPTS -->
-  <script type="module" src="./js/app.js?v=5"></script>
+  <script type="module" src="./js/app.js?v=6"></script>
 </body>
 </html>

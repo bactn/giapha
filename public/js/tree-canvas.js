@@ -1,4 +1,5 @@
 // tree-canvas.js - Infinite Pan/Zoom Canvas with Mobile Touch Gestures & Standardized SVG Icons
+import { escapeHTML } from './html.js';
 export class TreeCanvas {
   constructor(viewportEl, nodesContainerEl, svgEl, linksGroupEl, dataStore, autoLayout) {
     this.viewport = viewportEl;
@@ -298,11 +299,11 @@ export class TreeCanvas {
 
     card.innerHTML = `
       <div class="node-header">
-        <span class="font-bold text-[10px] text-slate-500">Đời ${member.generation} • ${member.branch || 'Ngành II'}</span>
+        <span class="font-bold text-[10px] text-slate-500">Đời ${escapeHTML(member.generation)} • ${escapeHTML(member.branch || 'Ngành II')}</span>
         <div class="flex items-center space-x-1.5">
           ${member.role === 'Đích Tôn' ? '<span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded">👑 Đích Tôn</span>' : ''}
           ${member.branch_type && member.branch_type.includes('Ngoại tộc') ? '<span class="text-[9px] bg-purple-100 text-purple-800 font-semibold px-1 py-0.2 rounded">Ngoại</span>' : ''}
-          <span class="w-2 h-2 rounded-full ${isDeceased ? 'bg-slate-300' : 'bg-emerald-500'}" title="${member.status || 'Còn sống'}"></span>
+          <span class="w-2 h-2 rounded-full ${isDeceased ? 'bg-slate-300' : 'bg-emerald-500'}" title="${escapeHTML(member.status || 'Còn sống')}"></span>
           <!-- STANDARDIZED ON-CARD DELETE BUTTON -->
           <button class="btn-node-delete-quick" title="Xóa người này">
             <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -311,12 +312,12 @@ export class TreeCanvas {
       </div>
       <div class="node-body">
         <div class="node-avatar ${member.gender === 'Nữ' ? 'avatar-female' : 'avatar-male'}">
-          ${avatarInitials}
+          ${escapeHTML(avatarInitials)}
         </div>
         <div class="node-info">
-          ${member.christian_name ? `<div class="node-christian-name">[${member.christian_name}]</div>` : ''}
-          <div class="node-full-name" title="Bấm đúp để sửa tên">${member.full_name}</div>
-          <div class="node-meta">${member.birth_date ? member.birth_date : ''} ${member.death_date ? '• ' + member.death_date : ''}</div>
+          ${member.christian_name ? `<div class="node-christian-name">[${escapeHTML(member.christian_name)}]</div>` : ''}
+          <div class="node-full-name" title="Bấm đúp để sửa tên">${escapeHTML(member.full_name)}</div>
+          <div class="node-meta">${escapeHTML(member.birth_date)} ${member.death_date ? '• ' + escapeHTML(member.death_date) : ''}</div>
         </div>
       </div>
       ${member.spouse_id && this.dataStore.members.has(member.spouse_id) ? (() => {
@@ -326,16 +327,16 @@ export class TreeCanvas {
         const spChristian = sp.christian_name ? `[${sp.christian_name}] ` : '';
         const spBirthYear = sp.birth_date ? sp.birth_date : '';
         return `
-        <div class="node-footer node-footer-spouse" data-spouse-id="${sp.id}" title="Nhấp để xem chi tiết ${sp.full_name}">
-          <div class="spouse-mini-avatar ${spGender}">${spInitials}</div>
+        <div class="node-footer node-footer-spouse" data-spouse-id="${escapeHTML(sp.id)}" title="Nhấp để xem chi tiết ${escapeHTML(sp.full_name)}">
+          <div class="spouse-mini-avatar ${spGender}">${escapeHTML(spInitials)}</div>
           <div class="spouse-mini-info">
-            <span class="spouse-mini-name">⚭ ${spChristian}${sp.full_name}</span>
-            <span class="spouse-mini-meta">${spBirthYear}</span>
+            <span class="spouse-mini-name">⚭ ${escapeHTML(spChristian)}${escapeHTML(sp.full_name)}</span>
+            <span class="spouse-mini-meta">${escapeHTML(spBirthYear)}</span>
           </div>
         </div>`;
       })() : (member.spouse ? `
         <div class="node-footer">
-          <span class="truncate">⚭ ${member.spouse}</span>
+          <span class="truncate">⚭ ${escapeHTML(member.spouse)}</span>
         </div>
       ` : '')}
       
@@ -549,7 +550,7 @@ export class TreeCanvas {
     links.forEach(l => l.classList.remove('highlighted'));
 
     if (selectedId) {
-      const node = this.container.querySelector(`.family-node[data-id="${selectedId}"]`);
+      const node = this.container.querySelector(`.family-node[data-id="${CSS.escape(selectedId)}"]`);
       if (node) {
         node.classList.add('selected');
       }

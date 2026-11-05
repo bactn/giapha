@@ -296,7 +296,7 @@ export class MindNodeTextEditor {
 
     // Auto trigger rename
     setTimeout(() => {
-      const row = this.container.querySelector(`.outline-node-wrapper[data-id="${newChild.id}"] .outline-node-row`);
+      const row = this.container.querySelector(`.outline-node-wrapper[data-id="${CSS.escape(newChild.id)}"] .outline-node-row`);
       const titleSpan = row?.querySelector('.outline-node-title');
       if (row && titleSpan) {
         this.startInlineRename(row, titleSpan, newChild);
@@ -351,7 +351,7 @@ export class MindNodeTextEditor {
     window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: newSibling.id }));
 
     setTimeout(() => {
-      const row = this.container.querySelector(`.outline-node-wrapper[data-id="${newSibling.id}"] .outline-node-row`);
+      const row = this.container.querySelector(`.outline-node-wrapper[data-id="${CSS.escape(newSibling.id)}"] .outline-node-row`);
       const titleSpan = row?.querySelector('.outline-node-title');
       if (row && titleSpan) {
         this.startInlineRename(row, titleSpan, newSibling);
@@ -394,7 +394,7 @@ export class MindNodeTextEditor {
     allRows.forEach(r => r.classList.remove('selected'));
 
     if (selectedId) {
-      const target = this.container.querySelector(`.outline-node-wrapper[data-id="${selectedId}"] > .outline-node-row`);
+      const target = this.container.querySelector(`.outline-node-wrapper[data-id="${CSS.escape(selectedId)}"] > .outline-node-row`);
       if (target) {
         target.classList.add('selected');
         target.scrollIntoView({ block: 'nearest', behavior: 'smooth' });

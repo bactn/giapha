@@ -5,12 +5,12 @@
   "main": "server.js",
   "scripts": {
     "check:supabase": "node scripts/check-supabase.cjs",
-    "test:supabase": "node --test tests/supabase-config.test.cjs tests/validate-lineage.test.cjs",
+    "test:supabase": "node --experimental-default-type=module --test tests/supabase-config.test.cjs tests/validate-lineage.test.cjs tests/supabase-services.test.mjs",
     "validate:lineage": "node scripts/validate-lineage.cjs",
     "build:pages": "node scripts/build-pages.cjs",
     "build:pages:docs": "node scripts/build-pages.cjs --docs",
-    "start": "node server.js",
-    "dev": "node server.js",
+    "start": "node scripts/serve.cjs",
+    "dev": "node scripts/serve.cjs",
     "be": "node server.js",
     "generate-excel": "python3 generate_excel.py"
   },

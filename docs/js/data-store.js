@@ -13,6 +13,7 @@ export class DataStore {
     this.future = [];
     this.maxHistory = 30;
     this.listeners = new Set();
+    this.readOnly = false;
     // ─── Change Tracking (co-working: editor → admin approval) ───
     this._originalState = null; // Baseline snapshot for diff calculation
   }
@@ -29,6 +30,7 @@ export class DataStore {
   }
 
   recordSnapshot() {
+    if (this.readOnly) throw new Error('Bạn chỉ có quyền xem. Hãy gửi đề xuất chỉnh sửa.');
     const snapshot = {
       lineageInfo: JSON.parse(JSON.stringify(this.lineageInfo)),
       members: Array.from(this.members.values()).map(m => ({ ...m }))
@@ -41,6 +43,7 @@ export class DataStore {
   }
 
   undo() {
+    if (this.readOnly) return false;
     if (this.history.length === 0) return false;
     const current = {
       lineageInfo: JSON.parse(JSON.stringify(this.lineageInfo)),
@@ -55,6 +58,7 @@ export class DataStore {
   }
 
   redo() {
+    if (this.readOnly) return false;
     if (this.future.length === 0) return false;
     const current = {
       lineageInfo: JSON.parse(JSON.stringify(this.lineageInfo)),
@@ -77,7 +81,11 @@ export class DataStore {
     this.members.clear();
     if (Array.isArray(state.members)) {
       for (const m of state.members) {
-        this.members.set(m.id, { ...m });
+        const member = { ...m };
+        for (const field of ['full_name', 'christian_name', 'gender', 'generation', 'branch', 'branch_type', 'status', 'birth_date', 'death_date', 'spouse', 'notes']) {
+          member[field] = String(member[field] ?? (field === 'full_name' ? member.id : ''));
+        }
+        this.members.set(m.id, member);
       }
     }
     this.recalculateStats();
@@ -152,9 +160,9 @@ export class DataStore {
    * Initialize the baseline snapshot after data load.
    * Call this once after loadState() to start tracking changes.
    */
-  initializeTracking() {
+  initializeTracking(members = Array.from(this.members.values())) {
     this._originalState = {
-      members: Array.from(this.members.values()).map(m => ({ ...m }))
+      members: JSON.parse(JSON.stringify(members))
     };
   }
 
@@ -181,7 +189,7 @@ export class DataStore {
         // Check for field-level updates
         const updatedFields = {};
         const oldFields = {};
-        for (const key of Object.keys(original)) {
+        for (const key of new Set([...Object.keys(original), ...Object.keys(current)])) {
           if (current[key] !== original[key]) {
             updatedFields[key] = current[key];
             oldFields[key] = original[key];

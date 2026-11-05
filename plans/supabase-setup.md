@@ -1,52 +1,102 @@
-# Kết nối Supabase — nhánh codex/supabase-integration
+# Supabase và GitHub Pages
 
-Project hiện có: `giapha` (`nwbozmxgdhouhzlpiskd`), Singapore.
+Project `giapha` (`nwbozmxgdhouhzlpiskd`), Singapore, Free.
 Dashboard: https://supabase.com/dashboard/project/nwbozmxgdhouhzlpiskd
 
-## Phạm vi hiện tại
+## Đã triển khai ngày 05/11/2026
 
-Đã có SDK, cấu hình public, kiểm tra Auth, build Pages và schema/RLS trên project.
-Xem `plans/supabase-phase1.md` cho các bảng, RPC và kết quả kiểm thử quyền.
-Giao diện đăng nhập/lưu gia phả vẫn đang dùng API Node.js cũ; chưa chuyển sang
-Supabase và chưa nhập dữ liệu thật. Website release chưa đổi.
+- Giao diện dùng Supabase Auth và Data API trực tiếp khi có cấu hình Supabase.
+- Đăng ký, xác nhận email, đăng nhập, khôi phục phiên và đặt lại mật khẩu.
+- Chọn/tạo gia phả; tải/lưu snapshot với revision. Lỗi xung đột giữ bản nháp;
+  không lấy revision mới rồi tự ghi đè dữ liệu.
+- Admin lưu chính thức; editor gửi thay đổi chờ duyệt; viewer có biểu mẫu đề xuất.
+- Duyệt/từ chối nguyên tử, chống duyệt hai lần, kiểm tra quan hệ và vòng lặp.
+- Mời viewer/editor một lần; liên kết khách chỉ xem có hạn 7 ngày, bỏ ghi chú.
+  Có danh sách/thu hồi liên kết; liên kết bị từ chối nếu người tạo mất quyền admin.
+- Quản lý quyền và thông báo đề xuất (poll 60 giây khi tab đang hiển thị).
+- RLS và RPC kiểm tra quyền trên database, không tin role trong user metadata.
+- Đã nhập 350 thành viên từ `data/current_lineage.json` cho tài khoản chủ được
+  xác nhận; đối chiếu toàn bộ JSON thành viên và giữ các trường mở rộng.
+- Không chuyển session, mật khẩu, mã chia sẻ hoặc tài khoản cũ tự động.
+- Bản gốc và manifest SHA-256 nằm trong `data/supabase-backups/`, được Git bỏ qua.
+  Không publish thư mục này lên Pages. Bản gốc JSON cũ giữ lại để đối chiếu.
 
-## Chạy và kiểm tra
+## Chạy cục bộ
 
-Dùng Node.js 22 trở lên (`.nvmrc`), sau đó:
+Dùng Node.js 22 trở lên (`.nvmrc`):
 
 ```sh
 npm ci
 npm run test:supabase
 npm run check:supabase
-npm run build:pages
+npm start
 ```
 
-`.env.local` đã được cấu hình cục bộ từ project qua plugin Supabase và được Git
-bỏ qua. Trên máy khác, copy `.env.example` thành `.env.local` và điền project URL
-và publishable key trong Dashboard → Settings → API Keys. Không dùng secret key
-hoặc legacy service-role JWT. Script chỉ chấp nhận key `sb_publishable_...`.
+`.env.local` chứa `SUPABASE_URL` và `SUPABASE_PUBLISHABLE_KEY`, đã được Git bỏ qua.
+Máy khác copy `.env.example` rồi điền URL và publishable key từ Dashboard.
+Không dùng secret/service-role key. Script chỉ chấp nhận `sb_publishable_...`.
 
-`check:supabase` gửi request chỉ đọc tới `/auth/v1/settings`; thành công có nghĩa
-là project URL và public key được Auth chấp nhận, không có nghĩa bảng/đăng nhập
-người dùng/phân quyền đã hoàn tất.
+Khi có cấu hình Supabase, `npm start` build và phục vụ frontend tĩnh tại
+http://localhost:8080/. Không chạy API JSON cũ. Dùng `npm run be` chỉ khi cần
+đối chiếu dữ liệu cũ; không tiếp tục nhập liệu đồng thời trên hai hệ thống.
 
-Build xuất SDK đã bundle và public config vào `dist/`; module
-`js/supabase-client.js` cung cấp `getSupabaseClient()` cho bước tích hợp tiếp theo.
-Không nạp SDK từ CDN, dependency được khóa trong package-lock.json.
-Chạy `npm run build:pages:docs` khi cần cập nhật artifact cho Pages; hiện tại chỉ
-kiểm tra `dist/` để không đưa cấu hình mới lên bản release đang phục vụ người dùng.
+```sh
+npm run build:pages       # dist/
+npm run build:pages:docs  # cập nhật docs/ cho Pages release + /docs
+```
 
-GitHub Actions dùng repository variables `SUPABASE_URL` và
-`SUPABASE_PUBLISHABLE_KEY` khi build. Đây là giá trị công khai, không phải secret
-quản trị. Workflow hiện chỉ chạy trên push release hoặc workflow_dispatch;
-nhánh Supabase không tự thay đổi website đang chạy.
+SDK được bundle tại chỗ, phiên bản khóa trong package-lock.json. Chỉ public assets
+được đưa vào dist/docs. Public config và publishable key được phép nằm trong
+frontend; quyền dữ liệu do Auth/RLS quyết định.
 
-## Các bước tiếp theo
+GitHub Pages dùng branch `release`, folder `/docs`. Workflow `pages.yml` kiểm tra
+build và xuất artifact, không tự commit docs và không tự deploy artifact.
+Nếu dùng workflow để build, khai báo repository variables `SUPABASE_URL` và
+`SUPABASE_PUBLISHABLE_KEY`; không khai báo service-role key.
 
-1. Đã viết và kiểm thử schema, RLS, RPC cơ bản theo `plans/supabase-migration.md`.
-2. Đã áp dụng migration và kiểm tra bằng role admin/editor/viewer/outsider/anon.
-3. Chuyển đăng nhập, tải/lưu gia phả sang các service Supabase.
-4. Chuyển duyệt, chia sẻ, thông báo; xác nhận tài khoản chủ dữ liệu và dry-run import.
-5. Kiểm thử trên branch rồi mới hợp nhất vào release và build docs.
+## Cấu hình Auth đã kiểm tra
 
-Không cần tạo Supabase development branch trả phí cho nhánh Git này.
+Site URL: `https://bactn.github.io/giapha/`
+
+Redirect URLs:
+
+- `https://bactn.github.io/giapha/index.html`
+- `http://localhost:8080/index.html`
+- `http://127.0.0.1:8092/index.html`
+- `http://localhost:8092/index.html`
+
+Sau khi kết thúc thử nghiệm có thể bỏ hai redirect cổng 8092. Nếu xác nhận email
+mở ở trình duyệt khác, đăng nhập bằng email/mật khẩu trên trình duyệt đang dùng.
+Tài khoản vừa tạo không tự có quyền gia phả khác; cần lời mời hoặc admin cấp quyền.
+
+## Vận hành còn cần hoàn tất
+
+1. **SMTP riêng** trước khi mời người ngoài nhóm Supabase đăng ký. Dashboard hiện
+   dùng email mặc định; dịch vụ này chỉ gửi tới email thành viên nhóm và giới hạn
+   thấp. Cấu hình host/port/user/password/sender tại Auth → Emails → SMTP Settings.
+   Chủ tài khoản tự nhập bí mật SMTP, không đưa vào repository/frontend.
+   https://supabase.com/docs/guides/auth/auth-smtp
+2. Định kỳ xuất JSON từ giao diện sau các đợt cập nhật, giữ bản sao ngoài máy đang
+   chạy. Lưu riêng bản sao database qua Supabase CLI khi đã cấu hình quyền truy cập
+   quản trị tin cậy. Free không thay thế quy trình sao lưu do chủ dữ liệu quản lý.
+3. Security Advisor còn cảnh báo kiểm tra mật khẩu rò rỉ đang tắt. Tính năng này
+   cần Pro trở lên; chưa nâng gói hoặc phát sinh chi phí.
+   https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection
+4. Chưa thêm upload ảnh/Storage; giao diện hiện dùng tên và thông tin gia phả.
+   Chưa kiểm thử email reset mật khẩu đầu cuối bằng tài khoản thật (người dùng tự
+   thao tác mật khẩu). Không tắt xác nhận email để vượt hạn chế SMTP.
+
+## Kiểm chứng
+
+- 13 kiểm tra cấu hình, validation, diff, giữ bản nháp, viewer và escape HTML.
+- 36 kiểm tra trực tiếp Auth/Data API/RPC trên tài khoản thử: lưu/duyệt/quyền,
+  stale revision HTTP 409, rollback, mời một lần, chia sẻ và thu hồi.
+- SQL `supabase/tests/genealogy_rls.sql`: cô lập gia phả, chống tự nâng quyền,
+  admin cuối cùng, reference/cycle, rollback; fixture trong transaction rollback.
+- SQL `supabase/tests/access_links.sql`: hết hạn và người tạo mất quyền admin.
+- Đã kiểm tra đăng nhập, tải/lưu và tải lại cây qua trình duyệt bằng dữ liệu thử;
+  tên chứa HTML được hiển thị thành chữ, không tạo phần tử trong DOM.
+- Máy chủ tĩnh trả 200 cho frontend và 404 cho `/api/lineage`.
+
+Không xóa schema để rollback khi có dữ liệu thật. Nếu cần quay lui, xuất và đối
+chiếu dữ liệu Supabase mới nhất trước khi chuyển lại hệ thống JSON cũ.

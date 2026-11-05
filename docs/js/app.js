@@ -9,6 +9,9 @@ import { LunarCalendarManager } from './lunar-calendar.js';
 import { Exporter } from './export.js';
 import { config } from './config.js';
 import { apiFetch, apiUrl, shareUrl } from './api.js';
+import { isSupabaseConfigured } from './supabase-client.js';
+import { SupabaseController } from './supabase-controller.js';
+import { escapeHTML } from './html.js';
 
 class App {
   constructor() {
@@ -40,6 +43,12 @@ class App {
 
   async init() {
     window.app = this;
+
+    if (isSupabaseConfigured()) {
+      this.supabase = new SupabaseController(this);
+      await this.supabase.init();
+      return;
+    }
 
     if (config.staticHosting && !config.apiBaseUrl) {
       ['auth-login-form', 'auth-create-form', 'auth-code-form'].forEach(id => {
@@ -416,6 +425,8 @@ class App {
     if (statsEl) {
       statsEl.textContent = `${this.dataStore.lineageInfo.generations} Thế Hệ | ${this.dataStore.lineageInfo.total_members} Thành Viên`;
     }
+    const badge = document.getElementById('outline-count-badge');
+    if (badge) badge.textContent = String(this.dataStore.members.size);
   }
 
   setupResponsiveDrawer() {
@@ -843,7 +854,7 @@ class App {
           importStatusBox.className = 'p-3 rounded-xl text-xs bg-emerald-50 text-emerald-800 border border-emerald-200';
           importStatusBox.innerHTML = `
             <strong>Đã đọc thành công ${result.members.length} thành viên!</strong><br>
-            File: <em>${file.name}</em> (Sẵn sàng nạp vào cây gia phả).
+            File: <em>${escapeHTML(file.name)}</em> (Sẵn sàng nạp vào cây gia phả).
           `;
         } else {
           pendingMembers = null;
@@ -851,7 +862,7 @@ class App {
           importStatusBox.className = 'p-3 rounded-xl text-xs bg-rose-50 text-rose-800 border border-rose-200';
           importStatusBox.innerHTML = `
             <strong>Có lỗi khi đọc file:</strong><br>
-            ${result.errors.join('<br>')}
+            ${result.errors.map(escapeHTML).join('<br>')}
           `;
         }
       };

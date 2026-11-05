@@ -47,7 +47,7 @@ begin
   begin
     perform public.save_lineage_state(first_lineage, 0, '{"name":"stale"}', '[]');
     raise exception 'FAIL: stale revision accepted';
-  exception when serialization_failure then null; end;
+  exception when sqlstate 'PT409' then null; end;
   begin
     perform public.save_lineage_state(first_lineage, 1, '{"name":"duplicate"}', '[{"id":"P001"},{"id":"P001"}]');
     raise exception 'FAIL: duplicate member IDs accepted';

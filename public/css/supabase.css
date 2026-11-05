@@ -1,0 +1,16 @@
+.sb-card { background: white; padding: 1.25rem; border: 1px solid #e2e8f0; border-radius: 1rem; }
+.sb-card h2 { font-size: 1.1rem; font-weight: 700; margin-bottom: .75rem; }
+.sb-card label { display: block; font-size: .8rem; font-weight: 600; margin-top: .75rem; }
+.sb-card input,.sb-card select,.sb-card textarea { width:100%; padding:.6rem .75rem; border:1px solid #cbd5e1; border-radius:.5rem; font:inherit; font-size:.85rem; background:white; }
+.sb-card button,.sb-button { padding:.55rem .8rem; border-radius:.5rem; background:#f1f5f9; font-size:.8rem; font-weight:600; cursor:pointer; }
+.sb-card button:disabled { opacity:.5; cursor:wait; }
+.sb-card .sb-primary { background:#b45309; color:white; }
+.sb-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.75rem; }
+.sb-message { margin:.75rem 0; font-size:.8rem; color:#92400e; white-space:pre-wrap; }
+.sb-row { padding:.75rem 0; border-bottom:1px solid #e2e8f0; overflow-wrap:anywhere; font-size:.8rem; }
+.sb-detail { white-space:pre-wrap; max-height:12rem; overflow:auto; background:#f8fafc; padding:.75rem; font-size:.75rem; }
+body[data-access="viewer"] .node-action-btn:not(.action-edit),
+body[data-access="viewer"] .btn-node-delete-quick,
+body[data-access="viewer"] .outline-node-row button:not(.outline-toggle) { display:none !important; }
+#auth-overlay { overflow:auto; }
+#sb-auth { max-height:75vh; overflow:auto; }

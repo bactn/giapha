@@ -31,24 +31,21 @@ Các tài liệu Markdown hiện có trong `docs/` được giữ lại và cũn
 truy cập trên website. Dữ liệu gia phả, tài khoản và phiên đăng nhập trong
 `data/` không được sao chép vào website.
 
-## Backend
+## Supabase
 
-GitHub Pages không chạy `server.js`. Khi chưa có backend, website hiển thị
-thông báo đang thiết lập; đăng nhập, chia sẻ và lưu gia phả chưa hoạt động.
+Website dùng Supabase Auth và Data API trực tiếp; không cần host `server.js`.
+Cấu hình `.env.local` với `SUPABASE_URL` và `SUPABASE_PUBLISHABLE_KEY`, rồi chạy
+build trước khi commit `docs/`. Chỉ dùng publishable key công khai; không đưa
+secret/service-role key vào website. Database áp dụng RLS và RPC kiểm tra quyền.
 
-Khi có backend HTTPS với lưu trữ bền vững cho `data/`, chạy:
+Auth Site URL là `https://bactn.github.io/giapha/`, cho phép redirect tới
+`https://bactn.github.io/giapha/index.html`. Lời mời và chia sẻ dùng URL fragment
+`#invite=...` / `#share=...` dưới `index.html`, phù hợp với project Pages.
 
-```sh
-API_BASE_URL=https://api.example.com npm run build:pages:docs
-```
-
-Sau đó commit và push `docs/` lên `release`. URL này là địa chỉ công khai,
-không được chứa mật khẩu hoặc token. Repository variable `API_BASE_URL`
-chỉ áp dụng cho job kiểm tra build, không thay đổi website từ branch;
-cần build lại và commit để cập nhật URL backend trên website.
-
-Backend đã cho phép CORS với header `Authorization` và phương thức `PATCH`.
-Link chia sẻ mới dùng `index.html?share=...` để hoạt động dưới `/giapha/`.
+Xem [hướng dẫn Supabase](../plans/supabase-setup.md) trong repository cho cấu hình
+Auth, SMTP, kiểm thử và sao lưu. SMTP riêng cần thiết khi mở đăng ký cho người
+ngoài nhóm quản lý Supabase. Không tiếp tục nhập liệu trên backend JSON cũ sau
+khi đã chuyển sang Supabase.
 
 ## Kiểm tra cục bộ
 
@@ -56,6 +53,6 @@ Link chia sẻ mới dùng `index.html?share=...` để hoạt động dưới `
 python3 -m http.server 8090 --directory docs
 ```
 
-Mở http://localhost:8090. Dùng `npm start` để chạy đầy đủ frontend và backend
-cục bộ; không mở trực tiếp `public/index.html` qua `file://` vì ứng dụng dùng
+Mở http://localhost:8090. Dùng `npm start` với `.env.local` để chạy frontend
+Supabase tại http://localhost:8080/; không mở trực tiếp `public/index.html` qua `file://` vì ứng dụng dùng
 JavaScript modules và API HTTP.
