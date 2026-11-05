@@ -1,44 +1,61 @@
-# Triển khai GitHub Pages
+# Triển khai GitHub Pages từ release/docs
 
-Workflow `.github/workflows/pages.yml` triển khai giao diện từ nhánh `release`.
-Chỉ thư mục `public/` được đóng gói; dữ liệu gia phả, tài khoản, phiên đăng nhập
-và file tài liệu trong repository không được đưa vào website.
+Website được xuất bản bằng **Deploy from a branch**, nhánh **release**,
+thư mục **/docs**. `docs/index.html`, `docs/css/`, `docs/js/` và
+`docs/.nojekyll` là các file được sinh từ `public/`.
 
-## Bật Pages lần đầu
+## Cấu hình GitHub
 
-1. Mở https://github.com/bactn/giapha/settings/pages bằng tài khoản có quyền quản trị.
-2. Trong **Build and deployment → Source**, chọn **GitHub Actions**.
-3. Mở tab **Actions → Deploy GitHub Pages**, chọn **Run workflow**, nhánh `release`.
-4. Chờ job `deploy` thành công và mở URL trong environment `github-pages`.
-   Với cấu hình mặc định, URL dự kiến là https://bactn.github.io/giapha/.
+1. Mở https://github.com/bactn/giapha/settings/pages.
+2. Chọn **Source → Deploy from a branch**.
+3. Chọn nhánh **release**, thư mục **/docs**, rồi **Save**.
+4. Chờ workflow **pages build and deployment** thành công.
+5. Mở https://bactn.github.io/giapha/.
 
-## Kết nối backend sau này
+Workflow `.github/workflows/pages.yml` chỉ kiểm tra build, không triển khai
+đè lên cấu hình xuất bản từ branch.
 
-GitHub Pages chỉ chạy giao diện tĩnh, không chạy `server.js`. Khi chưa cấu hình
-backend, website hiển thị thông báo đang thiết lập, không gửi yêu cầu đăng nhập.
+## Cập nhật website
 
-1. Triển khai backend Node.js lên máy chủ hỗ trợ HTTPS và lưu trữ bền vững cho
-   thư mục `data/`. Backend hiện lắng nghe trên `BE_PORT` (mặc định 3000).
-2. Trong **Settings → Secrets and variables → Actions → Variables**, tạo
-   repository variable `API_BASE_URL`, ví dụ `https://api.example.com`.
-   Giá trị này là URL công khai, không điền token hoặc mật khẩu.
-3. Chạy lại workflow. Toàn bộ API và link tải mẫu sẽ dùng URL backend đó.
+Sau khi sửa giao diện trong `public/`, chạy:
 
-Backend cho phép CORS với header `Authorization` và phương thức `PATCH`.
-Link chia sẻ mới dùng `index.html?share=...` để hoạt động trong thư mục con
-`/giapha/` của Pages mà không cần server chuyển hướng.
+```sh
+npm run build:pages:docs
+```
+
+Commit các thay đổi nguồn và file được sinh trong `docs/`, rồi push lên
+`release`. GitHub Pages tự cập nhật từ các file đã commit trong `docs/`.
+Không sửa trực tiếp HTML/CSS/JS được sinh trong `docs/`.
+
+Các tài liệu Markdown hiện có trong `docs/` được giữ lại và cũng có thể được
+truy cập trên website. Dữ liệu gia phả, tài khoản và phiên đăng nhập trong
+`data/` không được sao chép vào website.
+
+## Backend
+
+GitHub Pages không chạy `server.js`. Khi chưa có backend, website hiển thị
+thông báo đang thiết lập; đăng nhập, chia sẻ và lưu gia phả chưa hoạt động.
+
+Khi có backend HTTPS với lưu trữ bền vững cho `data/`, chạy:
+
+```sh
+API_BASE_URL=https://api.example.com npm run build:pages:docs
+```
+
+Sau đó commit và push `docs/` lên `release`. URL này là địa chỉ công khai,
+không được chứa mật khẩu hoặc token. Repository variable `API_BASE_URL`
+chỉ áp dụng cho job kiểm tra build, không thay đổi website từ branch;
+cần build lại và commit để cập nhật URL backend trên website.
+
+Backend đã cho phép CORS với header `Authorization` và phương thức `PATCH`.
+Link chia sẻ mới dùng `index.html?share=...` để hoạt động dưới `/giapha/`.
 
 ## Kiểm tra cục bộ
 
 ```sh
-npm run build:pages
-python3 -m http.server 8090 --directory dist
+python3 -m http.server 8090 --directory docs
 ```
 
-Mở http://localhost:8090. Để thử với backend đã triển khai:
-
-```sh
-API_BASE_URL=https://api.example.com npm run build:pages
-```
-
-`npm start` vẫn chạy frontend và backend cục bộ như trước.
+Mở http://localhost:8090. Dùng `npm start` để chạy đầy đủ frontend và backend
+cục bộ; không mở trực tiếp `public/index.html` qua `file://` vì ứng dụng dùng
+JavaScript modules và API HTTP.

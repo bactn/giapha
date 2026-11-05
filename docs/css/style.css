@@ -1,0 +1,299 @@
+/* style.css - Responsive Design, Typography, Standardized Icon Sizes & Drawer Transitions */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,700;1,600&display=swap');
+
+*, ::before, ::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --header-height: 52px;
+  --left-menu-width: 380px;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  color: #1e293b;
+  background-color: #f8fafc;
+  overflow: hidden;
+  height: 100vh;
+  height: 100dvh; /* Dynamic viewport height for mobile browsers */
+  width: 100vw;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Form Inputs */
+.form-input {
+  width: 100%;
+  padding: 0.45rem 0.65rem;
+  font-size: 0.8125rem;
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  color: #1e293b;
+  outline: none;
+  transition: all 0.15s ease-in-out;
+}
+.form-input:focus {
+  border-color: #d97706;
+  box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15);
+}
+
+/* Standardized Icon Utility Classes */
+.icon-xs {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+}
+.icon-sm {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+.icon-md {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+.icon-lg {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+}
+
+/* Modal styling */
+.modal-overlay {
+  transition: opacity 0.2s ease-in-out;
+}
+.modal-overlay.hidden {
+  display: none !important;
+}
+
+/* Toast Notifications */
+.toast {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  padding: 0.65rem 1rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: 0.75rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.2s ease;
+  max-width: 90vw;
+  width: max-content;
+}
+.toast-success {
+  background-color: #065f46;
+  color: #ffffff;
+}
+.toast-error {
+  background-color: #991b1b;
+  color: #ffffff;
+}
+.toast-info {
+  background-color: #1e293b;
+  color: #ffffff;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* MindNode Outline Item Styling */
+.outline-node-row {
+  display: flex;
+  align-items: center;
+  padding: 4px 6px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s;
+  user-select: none;
+  min-height: 28px;
+}
+.outline-node-row:hover {
+  background-color: #f1f5f9;
+}
+.outline-node-row.selected {
+  background-color: #fef3c7;
+  color: #92400e;
+  font-weight: 600;
+}
+.outline-node-row.active-drag-target {
+  background-color: #fde68a;
+  outline: 2px dashed #d97706;
+}
+
+/* Spouse row styling */
+.outline-spouse-row {
+  border-left: 2px solid #fda4af;
+  margin-left: 8px;
+  padding-left: 8px;
+}
+.outline-spouse-row:hover {
+  background-color: #fff1f2;
+}
+.outline-spouse-row.selected {
+  background-color: #ffe4e6;
+  color: #9f1239;
+  font-weight: 600;
+}
+
+/* Spouse label inline in outline tree */
+.outline-spouse-label {
+  color: #e11d48;
+  font-size: 11px;
+  margin-left: 2px;
+  font-weight: 500;
+}
+
+.outline-toggle-btn {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin-right: 3px;
+  color: #64748b;
+  flex-shrink: 0;
+}
+.outline-toggle-btn:hover {
+  background-color: #e2e8f0;
+  color: #0f172a;
+}
+.outline-node-title {
+  flex: 1;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+.outline-inline-input {
+  font-size: 12px;
+  padding: 2px 5px;
+  border: 1px solid #d97706;
+  border-radius: 4px;
+  outline: none;
+  background: #ffffff;
+  width: 100%;
+}
+
+/* RESPONSIVE LAYOUT STYLES & MOBILE OFF-CANVAS DRAWER */
+
+/* Mobile Backdrop for Left Menu */
+#left-menu-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background-color: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(2px);
+  z-index: 35;
+  transition: opacity 0.25s ease;
+}
+
+/* Desktop layout (>= 1024px) */
+@media (min-width: 1024px) {
+  #left-menu-pane {
+    position: relative;
+    width: var(--left-menu-width);
+    flex-shrink: 0;
+    z-index: 20;
+    transform: none !important;
+  }
+  #left-menu-backdrop {
+    display: none !important;
+  }
+}
+
+/* Tablet & Mobile layout (< 1024px) */
+@media (max-width: 1023px) {
+  :root {
+    --header-height: 48px;
+  }
+
+  /* Left Menu becomes an off-canvas drawer */
+  #left-menu-pane {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    height: 100%;
+    width: 340px;
+    max-width: 85vw;
+    z-index: 40;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    transform: translateX(-100%);
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #left-menu-pane.drawer-open {
+    transform: translateX(0) !important;
+  }
+
+  #left-menu-backdrop.drawer-open {
+    display: block !important;
+    opacity: 1;
+  }
+
+  /* Compact header on mobile */
+  .app-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+  
+  /* Compact canvas controls on small screens */
+  .canvas-floating-toolbar {
+    top: 8px !important;
+    left: 8px !important;
+    padding: 4px 6px !important;
+    gap: 4px !important;
+  }
+}
+
+/* Small mobile devices (< 640px) */
+@media (max-width: 639px) {
+  #global-search-wrapper {
+    display: none; /* Hide wide search bar, open on button if needed */
+  }
+  .hide-on-mobile {
+    display: none !important;
+  }
+  .app-header-title {
+    font-size: 13px !important;
+  }
+  .canvas-floating-toolbar {
+    transform: scale(0.9);
+    transform-origin: top left;
+  }
+}

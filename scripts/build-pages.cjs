@@ -26,3 +26,13 @@ fs.writeFileSync(path.join(output, 'js/config.js'),
   `export const config = ${JSON.stringify({ apiBaseUrl, staticHosting: true })};\n`);
 fs.writeFileSync(path.join(output, '.nojekyll'), '');
 console.log(`Built GitHub Pages assets in dist/ (backend ${apiBaseUrl ? 'configured' : 'not configured'}).`);
+
+if (process.argv.includes('--docs')) {
+  const docs = path.join(root, 'docs');
+  fs.mkdirSync(docs, { recursive: true });
+  // Preserve project documentation; update only generated website assets.
+  for (const entry of fs.readdirSync(output)) {
+    fs.cpSync(path.join(output, entry), path.join(docs, entry), { recursive: true });
+  }
+  console.log('Updated docs/ for branch-based GitHub Pages publishing.');
+}

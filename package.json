@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "build:pages": "node scripts/build-pages.cjs",
+    "build:pages:docs": "node scripts/build-pages.cjs --docs",
     "start": "node server.js",
     "dev": "node server.js",
     "be": "node server.js",
