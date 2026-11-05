@@ -7,6 +7,8 @@ import { ExcelParser } from './excel-parser.js';
 import { KinshipCalculator } from './kinship.js';
 import { LunarCalendarManager } from './lunar-calendar.js';
 import { Exporter } from './export.js';
+import { config } from './config.js';
+import { apiFetch, apiUrl, shareUrl } from './api.js';
 
 class App {
   constructor() {
@@ -38,6 +40,18 @@ class App {
 
   async init() {
     window.app = this;
+
+    if (config.staticHosting && !config.apiBaseUrl) {
+      ['auth-login-form', 'auth-create-form', 'auth-code-form'].forEach(id => {
+        document.getElementById(id)?.classList.add('hidden');
+      });
+      document.getElementById('backend-unavailable').classList.remove('hidden');
+      return;
+    }
+
+    document.querySelectorAll('a[href^="/api/"]').forEach(link => {
+      link.href = apiUrl(link.getAttribute('href'));
+    });
 
     // Check for share link in URL before auth
     await this.checkShareLink();
@@ -77,10 +91,11 @@ class App {
   async checkShareLink() {
     // Check if the URL is /share/<token>
     const pathParts = window.location.pathname.split('/').filter(Boolean);
-    if (pathParts[0] === 'share' && pathParts[1]) {
-      const token = pathParts[1];
+    const token = new URLSearchParams(window.location.search).get('share') ||
+      (pathParts[0] === 'share' ? pathParts[1] : null);
+    if (token) {
       try {
-        const res = await fetch(`/api/share/${token}`);
+        const res = await apiFetch(`/api/share/${token}`);
         const data = await res.json();
         if (res.ok) {
           // Store share link info for later use
@@ -117,7 +132,7 @@ class App {
     if (!sessionToken) return;
 
     try {
-      const res = await fetch('/api/auth/me', {
+      const res = await apiFetch('/api/auth/me', {
         headers: { 'Authorization': 'Bearer ' + sessionToken }
       });
       if (res.ok) {
@@ -182,7 +197,7 @@ class App {
           // Fetch the code to get the actual code value
           loginBody.share_code = this._pendingCodeAccess.code;
         }
-        const res = await fetch('/api/auth/login', {
+        const res = await apiFetch('/api/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(loginBody)
@@ -228,7 +243,7 @@ class App {
         if (this._pendingCodeAccess) {
           createBody.share_code = this._pendingCodeAccess.code;
         }
-        const res = await fetch('/api/auth/create', {
+        const res = await apiFetch('/api/auth/create', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(createBody)
@@ -270,7 +285,7 @@ class App {
         return;
       }
       try {
-        const res = await fetch('/api/share/code', {
+        const res = await apiFetch('/api/share/code', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })
@@ -361,7 +376,7 @@ class App {
         url = `/api/lineage?lineage_id=${this.lineageId}`;
       }
       // Always fetch fresh data from server (no cache), especially for share-link viewers
-      const res = await fetch(url + '&_t=' + Date.now(), {
+      const res = await apiFetch(url + (url.includes('?') ? '&' : '?') + '_t=' + Date.now(), {
         cache: 'no-store'
       });
       if (res.ok) {
@@ -535,7 +550,7 @@ class App {
         if (this.lineageId) {
           payload.lineage_id = this.lineageId;
         }
-        const res = await fetch('/api/lineage', {
+        const res = await apiFetch('/api/lineage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -737,7 +752,7 @@ class App {
         // Editor: submit as pending changes for admin approval
         if (this.userRole === 'editor') {
           const sessionToken = localStorage.getItem('session_token');
-          const res = await fetch(`/api/lineage/${this.lineageId}/pending-changes`, {
+          const res = await apiFetch(`/api/lineage/${this.lineageId}/pending-changes`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
             body: JSON.stringify({ changes })
@@ -760,7 +775,7 @@ class App {
         if (this.lineageId) {
           payload.lineage_id = this.lineageId;
         }
-        const res = await fetch('/api/lineage', {
+        const res = await apiFetch('/api/lineage', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
@@ -780,7 +795,7 @@ class App {
     // Reset Data
     document.getElementById('btn-reset-data').onclick = async () => {
       if (confirm('Bạn có chắc muốn khôi phục lại dữ liệu mẫu gốc Họ Trần Ngọc không?')) {
-        const res = await fetch('/api/lineage/reset', { method: 'POST' });
+        const res = await apiFetch('/api/lineage/reset', { method: 'POST' });
         if (res.ok) {
           await this.loadInitialData();
         }
@@ -1094,7 +1109,7 @@ class App {
     const ensureLineageId = async () => {
       if (this.lineageId) return this.lineageId;
       try {
-        const res = await fetch('/api/auth/me', {
+        const res = await apiFetch('/api/auth/me', {
           headers: { 'Authorization': 'Bearer ' + localStorage.getItem('session_token') }
         });
         if (res.ok) {
@@ -1115,7 +1130,7 @@ class App {
         return;
       }
       try {
-        const res = await fetch(`/api/lineage/${lineageId}/share-link`, {
+        const res = await apiFetch(`/api/lineage/${lineageId}/share-link`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('session_token') },
           body: JSON.stringify({ role })
@@ -1123,7 +1138,7 @@ class App {
         const data = await res.json();
         if (res.ok) {
           const token = data.share_link?.token || data.token;
-          const url = `${window.location.origin}/share/${token}`;
+          const url = shareUrl(token);
           document.getElementById('share-link-url').value = url;
           document.getElementById('share-link-result').classList.remove('hidden');
         } else {
@@ -1151,7 +1166,7 @@ class App {
         return;
       }
       try {
-        const res = await fetch(`/api/lineage/${lineageId}/share-code`, {
+        const res = await apiFetch(`/api/lineage/${lineageId}/share-code`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('session_token') },
           body: JSON.stringify({ role })
@@ -1184,7 +1199,7 @@ class App {
     container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Đang tải...</p>';
 
     try {
-      const res = await fetch(`/api/lineage/${this.lineageId}/access-list`, {
+      const res = await apiFetch(`/api/lineage/${this.lineageId}/access-list`, {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('session_token') }
       });
       const data = await res.json();
@@ -1232,7 +1247,7 @@ class App {
           const entry = data.access.find(a => a.user_id === uid);
           const nextRole = entry.role === 'viewer' ? 'editor' : 'admin';
           try {
-            const res = await fetch(`/api/lineage/${this.lineageId}/access/${uid}`, {
+            const res = await apiFetch(`/api/lineage/${this.lineageId}/access/${uid}`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('session_token') },
               body: JSON.stringify({ role: nextRole })
@@ -1257,7 +1272,7 @@ class App {
           const entry = data.access.find(a => a.user_id === uid);
           if (!confirm(`Xóa quyền truy cập của ${entry.username}?`)) return;
           try {
-            const res = await fetch(`/api/lineage/${this.lineageId}/access/${uid}`, {
+            const res = await apiFetch(`/api/lineage/${this.lineageId}/access/${uid}`, {
               method: 'DELETE',
               headers: { 'Authorization': 'Bearer ' + localStorage.getItem('session_token') }
             });
@@ -1284,7 +1299,7 @@ class App {
     container.innerHTML = '<p class="text-xs text-slate-400 text-center py-4">Đang tải...</p>';
 
     try {
-      const res = await fetch(`/api/lineage/${this.lineageId}/pending-changes`, {
+      const res = await apiFetch(`/api/lineage/${this.lineageId}/pending-changes`, {
         headers: { 'Authorization': 'Bearer ' + localStorage.getItem('session_token') }
       });
       const data = await res.json();
@@ -1356,7 +1371,7 @@ class App {
         btn.onclick = async () => {
           const id = btn.dataset.id;
           try {
-            const res = await fetch(`/api/lineage/${this.lineageId}/pending-changes/${id}/approve`, {
+            const res = await apiFetch(`/api/lineage/${this.lineageId}/pending-changes/${id}/approve`, {
               method: 'PATCH',
               headers: { 'Authorization': 'Bearer ' + localStorage.getItem('session_token') }
             });
@@ -1380,7 +1395,7 @@ class App {
           const id = btn.dataset.id;
           const reason = prompt('Lý do từ chối (tùy chọn):');
           try {
-            const res = await fetch(`/api/lineage/${this.lineageId}/pending-changes/${id}/reject`, {
+            const res = await apiFetch(`/api/lineage/${this.lineageId}/pending-changes/${id}/reject`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + localStorage.getItem('session_token') },
               body: JSON.stringify({ reason: reason || '' })
@@ -1960,7 +1975,7 @@ class App {
           });
         }
 
-        const res = await fetch(`/api/lineage/${this.lineageId}/edit-requests`, {
+        const res = await apiFetch(`/api/lineage/${this.lineageId}/edit-requests`, {
           method: 'POST',
           headers,
           body
@@ -2038,7 +2053,7 @@ class App {
     try {
       const sessionToken = localStorage.getItem('session_token');
       if (!sessionToken) return;
-      const res = await fetch(`/api/lineage/${this.lineageId}/edit-requests`, {
+      const res = await apiFetch(`/api/lineage/${this.lineageId}/edit-requests`, {
         headers: { 'Authorization': 'Bearer ' + sessionToken }
       });
       if (!res.ok) return;
@@ -2129,7 +2144,7 @@ class App {
   async approveEditRequest(requestId) {
     try {
       const sessionToken = localStorage.getItem('session_token');
-      const res = await fetch(`/api/lineage/${this.lineageId}/edit-requests/${requestId}/approve`, {
+      const res = await apiFetch(`/api/lineage/${this.lineageId}/edit-requests/${requestId}/approve`, {
         method: 'PATCH',
         headers: { 'Authorization': 'Bearer ' + sessionToken }
       });
@@ -2148,7 +2163,7 @@ class App {
     const reason = prompt('Lý do từ chối (tùy chọn):');
     try {
       const sessionToken = localStorage.getItem('session_token');
-      const res = await fetch(`/api/lineage/${this.lineageId}/edit-requests/${requestId}/reject`, {
+      const res = await apiFetch(`/api/lineage/${this.lineageId}/edit-requests/${requestId}/reject`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessionToken },
         body: JSON.stringify({ reason: reason || '' })
@@ -2199,7 +2214,7 @@ class App {
     btn.onclick = async () => {
       if (!confirm('Bạn có chắc muốn đăng xuất?')) return;
       try {
-        await fetch('/api/auth/logout', {
+        await apiFetch('/api/auth/logout', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + localStorage.getItem('session_token') }
         });
