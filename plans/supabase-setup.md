@@ -48,6 +48,8 @@ npm run build:pages:docs  # cập nhật docs/ cho Pages release + /docs
 SDK được bundle tại chỗ, phiên bản khóa trong package-lock.json. Chỉ public assets
 được đưa vào dist/docs. Public config và publishable key được phép nằm trong
 frontend; quyền dữ liệu do Auth/RLS quyết định.
+Ứng dụng được bundle cùng public config và gắn phiên bản theo SHA-256 trên URL,
+tránh trình duyệt giữ module cấu hình cũ sau khi GitHub Pages triển khai bản mới.
 
 GitHub Pages dùng branch `release`, folder `/docs`. Workflow `pages.yml` kiểm tra
 build và xuất artifact, không tự commit docs và không tự deploy artifact.

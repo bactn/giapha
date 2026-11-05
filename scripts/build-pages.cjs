@@ -1,5 +1,6 @@
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
 const { loadSupabaseConfig } = require('./supabase-config.cjs');
 
 const root = path.resolve(__dirname, '..');
@@ -26,6 +27,21 @@ const html = fs.readFileSync(indexPath, 'utf8')
 fs.writeFileSync(indexPath, html);
 fs.writeFileSync(path.join(output, 'js/config.js'),
   `export const config = ${JSON.stringify({ apiBaseUrl, staticHosting: true, supabase })};\n`);
+// Bundle the application from the generated directory so its config is included.
+// A content version prevents cached ES-module dependencies from retaining old
+// configuration after Pages deploys. Keep the SDK lazy-loaded separately.
+const appBundle = path.join(output, 'js/app.bundle.js');
+require('esbuild').buildSync({
+  entryPoints: [path.join(output, 'js/app.js')],
+  bundle: true,
+  format: 'esm',
+  platform: 'browser',
+  target: ['es2022'],
+  external: ['./vendor/supabase.js'],
+  outfile: appBundle
+});
+const appVersion = crypto.createHash('sha256').update(fs.readFileSync(appBundle)).digest('hex').slice(0, 16);
+fs.writeFileSync(indexPath, html.replace(/src="\.\/js\/app\.js[^" ]*"/, `src="./js/app.bundle.js?v=${appVersion}"`));
 require('esbuild').buildSync({
   stdin: {
     contents: "export { createClient } from '@supabase/supabase-js';",
