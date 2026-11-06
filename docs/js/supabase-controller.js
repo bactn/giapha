@@ -1,6 +1,7 @@
 import { getSupabaseClient, signInWithGoogle } from './supabase-client.js';
 import { GenealogyService, describeError, snapshotChanges } from './services/genealogy.js';
 import { oauthReturnMessage } from './services/auth.js';
+import { FamilyPortal } from './portal.js';
 
 const $ = id => document.getElementById(id);
 const copy = value => JSON.parse(JSON.stringify(value));
@@ -15,6 +16,8 @@ export class SupabaseController {
     this.authBox = document.createElement('div');
     this.authBox.id = 'sb-auth'; this.authBox.className = 'sb-card';
     $('auth-overlay').firstElementChild.appendChild(this.authBox);
+    this.portal = new FamilyPortal(this);
+    this.app.updateUserDisplay = () => this.portal.workspaceUser();
     ['auth-login-form', 'auth-create-form', 'auth-code-form', 'backend-unavailable'].forEach(id => $(id).style.display = 'none');
     this.app.loadInitialData = () => this.load();
     this.app.setupLogout = () => this.setupLogout();
@@ -56,7 +59,7 @@ export class SupabaseController {
       const params = new URLSearchParams(location.hash.slice(1));
       const query = new URLSearchParams(location.search);
       const invite = params.get('invite') || query.get('invite');
-      if (invite) sessionStorage.setItem('giapha_invite', invite);
+      if (invite) { sessionStorage.setItem('giapha_invite', invite); history.replaceState(null,'',this.callbackUrl()+'#mine'); }
       this.shareToken = params.get('share') || query.get('share');
       if (this.shareToken) {
         const { data } = await this.client.auth.getUser();
@@ -71,14 +74,16 @@ export class SupabaseController {
 
   async restore() {
     const { data, error } = await this.client.auth.getUser();
-    if (!data.user) { this.user = null; this.showLogin(error?.name === 'AuthSessionMissingError' ? '' : ''); return; }
+    if (!data.user) { this.user = null; await this.portal.route(); return; }
     if (error) throw error;
     this.user = data.user;
+    try { await this.portal.loadProfile(); } catch { this.profile = null; }
     if (this.recovery) { this.showRecovery(); return; }
     const invite = sessionStorage.getItem('giapha_invite');
     if (invite) {
       try {
         await this.service.redeem(invite);
+        sessionStorage.setItem('giapha_return','mine');
         sessionStorage.removeItem('giapha_invite');
         history.replaceState(null, '', new URL('index.html', location.href));
       } catch (error) {
@@ -86,10 +91,12 @@ export class SupabaseController {
         this.app.showToast(describeError(error), 'error');
       }
     }
-    await this.showPicker();
+    const destination = sessionStorage.getItem('giapha_return');
+    if (destination) { sessionStorage.removeItem('giapha_return'); history.replaceState(null,'',this.callbackUrl()+'#'+destination); }
+    await this.portal.route();
   }
 
-  overlay() { $('auth-overlay').style.display = 'flex'; }
+  overlay() { if (this.portal) this.portal.presentAuth(); else $('auth-overlay').style.display = 'flex'; }
   message(text) { const el = $('sb-message'); if (el) el.textContent = text; }
   async action(button, fn) {
     button.disabled = true;
@@ -100,28 +107,43 @@ export class SupabaseController {
 
   showLogin(message = '') {
     this.overlay();
-    this.authBox.innerHTML = `<h2>Đăng nhập hoặc tạo tài khoản</h2>
+    this.emailMode = 'login';
+    this.authBox.innerHTML = `<p class="portal-eyebrow">KẾT NỐI VỚI GIA ĐÌNH</p><h2>Chào mừng bạn trở về.</h2><p class="portal-auth-description">Đăng nhập để cùng lưu giữ câu chuyện dòng họ.</p><p class="portal-auth-section">1. Đăng nhập bằng mạng xã hội</p>
       <button id="sb-google" class="sb-google" type="button">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.18v5.14h6.61c3.87-3.56 6.08-8.81 6.08-14.82Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.82 13.53-4.95l-6.61-5.14c-1.83 1.23-4.17 1.96-6.92 1.96-5.32 0-9.83-3.59-11.44-8.42H5.73v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.56 27.45a12 12 0 0 1 0-6.9v-5.3H5.73a20 20 0 0 0 0 17.5l6.83-5.3Z"/><path fill="#EA4335" d="M24 12.13c3 0 5.69 1.03 7.8 3.05l5.86-5.86A19.6 19.6 0 0 0 24 4 20 20 0 0 0 5.73 15.25l6.83 5.3C14.17 15.72 18.68 12.13 24 12.13Z"/></svg>
         <span>Tiếp tục với Google</span>
       </button>
-      <p class="sb-auth-hint">Dùng tài khoản Google (Gmail) để đăng nhập hoặc đăng ký nhanh.</p>
+      <button class="portal-facebook" type="button" disabled><span>f</span> Tiếp tục với Facebook <small>Sắp có</small></button>
+      <p class="sb-auth-hint">Dùng tài khoản Google để đăng nhập hoặc đăng ký nhanh.</p>
       <div class="sb-auth-divider"><span>hoặc dùng email và mật khẩu</span></div>
+      <p class="portal-auth-section">2. Sử dụng email và mật khẩu</p>
+      <div class="portal-auth-tabs"><button type="button" id="sb-mode-login" aria-pressed="true">Đăng nhập</button><button type="button" id="sb-mode-signup" aria-pressed="false">Tạo tài khoản</button></div>
       <form id="sb-login">
       <label for="sb-email">Email</label><input id="sb-email" type="email" autocomplete="username" required>
       <label for="sb-password">Mật khẩu</label><input id="sb-password" type="password" autocomplete="current-password" minlength="8" required>
-      <label for="sb-name">Tên hiển thị (khi tạo tài khoản)</label><input id="sb-name" autocomplete="nickname" maxlength="200">
+      <div id="sb-name-wrapper" hidden><label for="sb-name">Tên hiển thị</label><input id="sb-name" autocomplete="nickname" maxlength="200"></div>
       <p id="sb-message" role="status" class="sb-message"></p>
       <div class="sb-actions"><button id="sb-signin" class="sb-primary" type="submit">Đăng nhập</button>
-      <button id="sb-signup" type="button">Tạo tài khoản</button><button id="sb-forgot" type="button">Quên mật khẩu</button></div></form>`;
+      <button id="sb-signup" class="sb-primary" type="button" hidden>Tạo tài khoản</button><button id="sb-forgot" type="button">Quên mật khẩu</button></div></form>`;
     this.message(message);
+    if (!sessionStorage.getItem('giapha_return')) sessionStorage.setItem('giapha_return','mine');
+    const mode = value => {
+      this.emailMode = value;
+      $('sb-name-wrapper').hidden = value !== 'signup'; $('sb-name').required = value === 'signup';
+      $('sb-signin').hidden = value === 'signup'; $('sb-signup').hidden = value !== 'signup'; $('sb-forgot').hidden = value === 'signup';
+      $('sb-password').autocomplete = value === 'signup' ? 'new-password' : 'current-password';
+      $('sb-mode-login').setAttribute('aria-pressed',String(value === 'login')); $('sb-mode-signup').setAttribute('aria-pressed',String(value === 'signup')); this.message('');
+    };
+    $('sb-mode-login').onclick = () => mode('login'); $('sb-mode-signup').onclick = () => mode('signup');
     $('sb-google').onclick = () => this.action($('sb-google'), () => signInWithGoogle(this.callbackUrl()));
     $('sb-login').onsubmit = event => {
       event.preventDefault();
+      if (this.emailMode === 'signup') { $('sb-signup').click(); return; }
       this.action($('sb-signin'), async () => {
         this.authenticating = true;
         try {
-          const { error } = await this.client.auth.signInWithPassword({ email: $('sb-email').value.trim(), password: $('sb-password').value });
+          const client = this.client || await getSupabaseClient();
+          const { error } = await client.auth.signInWithPassword({ email: $('sb-email').value.trim(), password: $('sb-password').value });
           if (error) throw error;
           await this.restore();
         } finally { this.authenticating = false; }
@@ -133,7 +155,8 @@ export class SupabaseController {
       const name = $('sb-name').value.trim() || email.split('@')[0];
       this.authenticating = true;
       try {
-        const { data, error } = await this.client.auth.signUp({ email, password: $('sb-password').value,
+        const client = this.client || await getSupabaseClient();
+        const { data, error } = await client.auth.signUp({ email, password: $('sb-password').value,
           options: { emailRedirectTo: this.callbackUrl(), data: { display_name: name } } });
         if (error) throw error;
         if (data.session) await this.restore();
@@ -143,7 +166,8 @@ export class SupabaseController {
     $('sb-forgot').onclick = () => this.action($('sb-forgot'), async () => {
       const email = $('sb-email');
       if (!email.reportValidity() || !email.value) { email.focus(); return; }
-      const { error } = await this.client.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: this.callbackUrl() });
+      const client = this.client || await getSupabaseClient();
+      const { error } = await client.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: this.callbackUrl() });
       if (error) throw error;
       this.message('Nếu email có tài khoản, hướng dẫn đặt lại mật khẩu sẽ được gửi đến hộp thư.');
     });
@@ -170,42 +194,13 @@ export class SupabaseController {
   hasDraft() { return Boolean(this.base && !this.guest && snapshotChanges(this.base, this.capture()).length); }
   canLeave() { return !this.saving && (!this.hasDraft() || confirm('Có bản nháp chưa lưu. Bạn có muốn rời gia phả này? Hãy xuất JSON trước nếu cần sao lưu.')); }
 
-  async showPicker() {
-    if (!this.user) { this.showLogin(); return; }
-    this.stopPoll(); this.overlay();
-    const pickerVersion = this.pickerVersion = (this.pickerVersion || 0) + 1;
-    this.authBox.innerHTML = `<h2>Gia phả của bạn</h2><div id="sb-lineages"></div><form id="sb-create-lineage">
-      <label for="sb-lineage-name">Tạo gia phả mới</label><input id="sb-lineage-name" placeholder="Tên dòng họ / chi nhánh" required maxlength="200">
-      <div class="sb-actions"><button id="sb-create" class="sb-primary">Tạo gia phả</button><button type="button" id="sb-picker-logout">Đăng xuất</button></div>
-      <p id="sb-message" role="status" class="sb-message"></p></form>`;
-    $('sb-picker-logout').onclick = () => this.logout();
-    $('sb-create-lineage').onsubmit = event => {
-      event.preventDefault();
-      this.action($('sb-create'), async () => {
-        const id = await this.service.create($('sb-lineage-name').value.trim());
-        await this.open(id, 'admin');
-      });
-    };
-    try {
-      const rows = await this.service.list(this.user.id);
-      if (pickerVersion !== this.pickerVersion) return;
-      if (!rows.length) $('sb-lineages').textContent = 'Bạn chưa có gia phả. Tạo mới hoặc mở liên kết mời của quản trị.';
-      for (const row of rows) {
-        const button = document.createElement('button');
-        button.dataset.lineageId = row.lineage_id;
-        button.className = 'sb-row'; button.style.width = '100%'; button.style.textAlign = 'left';
-        button.textContent = `${row.lineages?.info?.name || 'Gia phả'} · ${roles[row.role]}`;
-        button.onclick = () => this.action(button, () => this.open(row.lineage_id, row.role));
-        $('sb-lineages').appendChild(button);
-      }
-    } catch (error) { this.message(describeError(error)); }
-  }
+  async showPicker() { return this.portal.showMine(); }
 
   async open(id, role, state = null) {
     const snapshot = state || await this.service.load(id);
-    this.guest = Boolean(state && this.shareToken);
+    this.guest = Boolean(this.publicSlug || (state && this.shareToken));
     this.app.lineageId = id; this.app.userRole = role; this.app.isAuthenticated = true;
-    this.app.currentUser = { id: this.user?.id || null, username: this.guest ? 'Khách (liên kết)' : this.user.user_metadata?.display_name || this.user.user_metadata?.full_name || this.user.email };
+    this.app.currentUser = { id: this.user?.id || null, username: this.guest ? 'Khách (chỉ xem)' : this.profile?.display_name || this.user.user_metadata?.display_name || this.user.user_metadata?.full_name || this.user.email };
     if (!this.ready) {
       this.app.setupResponsiveDrawer(); this.app.setupLeftMenuTabs(); this.app.setupLeftInspector();
       this.app.setupToolbarButtons(); this.app.setupModals(); this.app.setupSearch();
@@ -225,6 +220,9 @@ export class SupabaseController {
     $('btn-save-lineage').onclick = () => this.save();
     $('btn-inspect-save').onclick = () => this.save();
     $('auth-overlay').style.display = 'none';
+    this.portal.screen('workspace');
+    if (state?.slug) history.replaceState(null,'',this.callbackUrl()+'#family='+encodeURIComponent(state.slug));
+    else if (!this.shareToken) history.replaceState(null,'',this.callbackUrl()+'#tree');
     this.setupNotifications();
   }
 
@@ -238,7 +236,7 @@ export class SupabaseController {
     setTimeout(() => this.app.canvas.zoomFit(), 100);
   }
   async load() {
-    const state = this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
+    const state = this.publicSlug ? await this.service.openPage(this.publicSlug) : this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
     this.applySnapshot(state);
   }
 
@@ -268,7 +266,8 @@ export class SupabaseController {
   installNavigation() {
     const host = $('user-display').parentElement;
     const switcher = document.createElement('button'); switcher.className = 'sb-button'; switcher.id = 'sb-switch'; switcher.textContent = 'Gia phả của tôi';
-    switcher.onclick = () => { if (this.canLeave()) { this.guest = false; this.shareToken = null; history.replaceState(null, '', this.callbackUrl()); this.showPicker(); } };
+    switcher.textContent = 'Trang chủ';
+    switcher.onclick = () => this.portal.go('home');
     const reload = document.createElement('button'); reload.className = 'sb-button'; reload.textContent = 'Tải lại';
     reload.onclick = () => this.action(reload, async () => { if (this.canLeave()) await this.load(); });
     host.append(switcher, reload);
@@ -278,27 +277,22 @@ export class SupabaseController {
     }
   }
 
-  setupLogout() {
-    $('btn-logout').textContent = this.guest ? (this.user ? 'Gia phả của tôi' : 'Đăng nhập') : 'Đăng xuất';
-    $('btn-logout').onclick = () => {
-      if (this.guest) {
-        this.guest = false; this.shareToken = null; history.replaceState(null, '', this.callbackUrl());
-        this.user ? this.showPicker() : this.showLogin();
-      } else this.logout();
-    };
-  }
+  setupLogout() { /* Account menu owns logout; it is not a persistent toolbar button. */ }
+
   async logout() {
     if (!this.canLeave()) return;
     this.signingOut = true;
     try {
       const { error } = await this.client.auth.signOut();
       if (error) throw error;
-      this.user = null; this.base = null; this.guest = false; this.stopPoll();
+      this.user = null; this.profile = null; this.base = null; this.guest = false; this.publicSlug = null; this.shareToken = null; this.stopPoll();
       this.app.dataStore.loadState({ lineageInfo: { name: '', total_members: 0, generations: 0 }, members: [] });
       this.app.isAuthenticated = false; this.app.lineageId = null;
       $('share-panel-overlay').classList.add('hidden'); $('edit-request-overlay').classList.add('hidden');
       $('notification-dropdown').classList.add('hidden');
-      this.showLogin();
+      sessionStorage.removeItem('giapha_return');
+      sessionStorage.removeItem('giapha_invite');
+      await this.portal.go('home');
     } catch (error) { this.app.showToast(describeError(error), 'error'); }
     finally { this.signingOut = false; }
   }
@@ -356,7 +350,7 @@ export class SupabaseController {
     if (!requests.length) this.row($('sb-requests'), 'Chưa có đề xuất.');
   }
 
-  renderRequest(container, request, admin) {
+  renderRequest(container, request, admin, onReviewed = null) {
     const status = { pending: 'Chờ duyệt', approved: 'Đã duyệt', rejected: 'Đã từ chối' };
     const row = this.row(container, `${request.title} · ${status[request.status]} · ${new Date(request.created_at).toLocaleString('vi-VN')}`);
     const details = document.createElement('details'); const summary = document.createElement('summary'); summary.textContent = `${request.changes.length} thay đổi · phiên bản ${request.base_revision}`;
@@ -373,11 +367,12 @@ export class SupabaseController {
     if (admin && request.status === 'pending') {
       this.button(row, 'Duyệt', async () => {
         if (this.hasDraft()) throw new Error('Hãy lưu hoặc xuất bản nháp trước khi duyệt đề xuất.');
-        await this.service.review(request.id, true); await this.load(); await this.refreshSharing();
+        await this.service.review(request.id, true);
+        if (onReviewed) await onReviewed(); else { await this.load(); await this.refreshSharing(); }
       });
       this.button(row, 'Từ chối', async () => {
         const reason = prompt('Lý do từ chối:', '');
-        if (reason !== null) { await this.service.review(request.id, false, reason); await this.refreshSharing(); }
+        if (reason !== null) { await this.service.review(request.id, false, reason); if (onReviewed) await onReviewed(); else await this.refreshSharing(); }
       });
     }
   }
@@ -426,7 +421,7 @@ export class SupabaseController {
     const host = $('notification-bell-wrapper');
     host.classList.toggle('hidden', Boolean(this.guest)); host.classList.toggle('flex', !this.guest);
     if (this.guest || !this.app.lineageId) return;
-    $('btn-notification-bell').onclick = () => { $('notification-dropdown').classList.toggle('hidden'); this.refreshNotifications(); };
+    $('btn-notification-bell').onclick = () => this.portal.go('requests');
     this.refreshNotifications();
     this.poll = setInterval(() => { if (!document.hidden && this.user) this.refreshNotifications(); }, 60000);
   }

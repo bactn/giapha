@@ -3023,6 +3023,35 @@ var GenealogyService = class {
   revoke(id) {
     return this.rpc("revoke_access_link", { p_link_id: id });
   }
+  publicLineages(search = "") {
+    return this.rpc("list_public_lineages", { p_search: search });
+  }
+  openPage(slug) {
+    return this.rpc("open_lineage_page", { p_slug: slug });
+  }
+  publish(id, fields) {
+    return this.rpc("set_lineage_publication", { p_lineage_id: id, p_slug: fields.slug, p_intro: fields.intro, p_region: fields.region, p_is_public: fields.is_public });
+  }
+  saveProfile(profile) {
+    return this.rpc("save_my_profile", { p_display_name: profile.display_name, p_phone: profile.phone, p_address: profile.address });
+  }
+  async profile(userId) {
+    const { data, error } = await this.client.from("profiles").select("display_name,phone,address").eq("id", userId).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  async publication(id) {
+    const { data, error } = await this.client.from("lineage_publications").select("slug,title,intro,region,is_public").eq("lineage_id", id).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  async requestPage(id, status, page = 0) {
+    let query = this.client.from("change_requests").select("id,lineage_id,title,submitted_by,base_revision,changes,status,created_at,reviewed_at,rejection_reason", { count: "exact" }).eq("lineage_id", id);
+    if (status !== "all") query = query.eq("status", status);
+    const { data, count, error } = await query.order("created_at", { ascending: false }).range(page * 20, page * 20 + 19);
+    if (error) throw error;
+    return { rows: data, count };
+  }
   access(id, userId, role) {
     return this.rpc("set_lineage_access", { p_lineage_id: id, p_user_id: userId, p_role: role });
   }
@@ -3038,8 +3067,356 @@ var GenealogyService = class {
   }
 };
 
-// dist/js/supabase-controller.js
+// dist/js/portal.js
 var $ = (id) => document.getElementById(id);
+var roleNames = { admin: "Qu\u1EA3n tr\u1ECB", editor: "Ch\u1EC9nh s\u1EEDa", viewer: "Ch\u1EC9 xem" };
+var slugify = (value) => String(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/Đ/g, "d").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80).replace(/-$/, "");
+function portalRoute(hash) {
+  const raw = hash.replace(/^#/, "");
+  for (const page of ["share", "invite"]) if (raw.startsWith(page + "=")) return { page, value: new URLSearchParams(raw).get(page) };
+  if (raw.startsWith("family=")) return { page: "family", value: new URLSearchParams(raw).get("family") };
+  if (raw.startsWith("publication=")) return { page: "publication", value: new URLSearchParams(raw).get("publication") };
+  return { page: ["login", "mine", "account", "requests", "tree"].includes(raw) ? raw : "home" };
+}
+var FamilyPortal = class {
+  constructor(controller) {
+    this.c = controller;
+    this.root = $("portal-root");
+    this.sequence = 0;
+    document.body.classList.add("portal-enabled");
+    document.addEventListener("click", (event) => {
+      const action = event.target.closest("[data-portal]");
+      if (action) this.handle(action).catch((error) => this.error(error));
+      else if (!event.target.closest(".portal-user")) this.closeMenus();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") this.closeMenus();
+    });
+    window.addEventListener("hashchange", () => this.route().catch((error) => this.error(error)));
+    this.screen("home");
+    if (portalRoute(location.hash).page === "home" && !/^#(share|invite)=/.test(location.hash)) this.home().catch((error) => this.error(error));
+    else this.root.innerHTML = '<div class="portal-loading"><span class="portal-brand-mark">GP</span><p>\u0110ang m\u1EDF kh\xF4ng gian gia \u0111\xECnh\u2026</p></div>';
+  }
+  get service() {
+    return this.c.service;
+  }
+  name() {
+    return this.c.profile?.display_name || this.c.user?.user_metadata?.display_name || this.c.user?.user_metadata?.full_name || this.c.user?.email || "T\xE0i kho\u1EA3n";
+  }
+  closeMenus() {
+    document.querySelectorAll(".portal-menu").forEach((el) => el.hidden = true);
+    document.querySelectorAll('[data-portal="menu"]').forEach((el) => el.setAttribute("aria-expanded", "false"));
+  }
+  menu(workspace = false) {
+    if (!this.c.user) return `<button class="portal-btn ${workspace ? "portal-small" : ""}" data-portal="login">\u0110\u0103ng nh\u1EADp</button>`;
+    return `<div class="portal-user"><button type="button" class="portal-user-trigger" data-portal="menu" aria-expanded="false" aria-label="Th\xF4ng tin t\xE0i kho\u1EA3n"><span class="portal-avatar">${escapeHTML(this.name().charAt(0).toUpperCase())}</span><span class="portal-user-name">${escapeHTML(this.name())}${workspace ? `<small>${roleNames[this.c.app.userRole] || "Ch\u1EC9 xem"}</small>` : ""}</span><span aria-hidden="true">\u2304</span></button>
+      <div class="portal-menu" hidden><span class="portal-menu-email">${escapeHTML(this.c.user.email)}</span><button data-portal="account">Th\xF4ng tin t\xE0i kho\u1EA3n</button><button data-portal="mine">Gia ph\u1EA3 c\u1EE7a t\xF4i</button><button data-portal="requests">Y\xEAu c\u1EA7u ph\xEA duy\u1EC7t</button><button data-portal="home">Trang ch\u1EE7</button><hr><button id="${workspace ? "btn-logout" : "portal-logout"}" data-portal="logout" class="portal-danger">\u0110\u0103ng xu\u1EA5t</button></div></div>`;
+  }
+  header() {
+    return `<header class="portal-header"><a class="portal-brand" href="#home"><span class="portal-brand-mark">GP</span><span>Gia ph\u1EA3<small>D\xD2NG H\u1ECC TR\u1EA6N NG\u1ECCC</small></span></a><nav aria-label="\u0110i\u1EC1u h\u01B0\u1EDBng ch\xEDnh"><a href="#about" data-anchor="about">C\u1ED9i ngu\u1ED3n</a><a href="#directory" data-anchor="directory">Gia ph\u1EA3 c\xF4ng khai</a><a href="#memories" data-anchor="memories">K\xFD \u1EE9c gia \u0111\xECnh</a></nav><div class="portal-header-actions">${this.c.user ? `<button class="portal-btn portal-outline portal-hide-mobile" data-portal="mine">V\xE0o gia ph\u1EA3 <span>\u2197</span></button>` : ""}${this.menu()}</div></header>`;
+  }
+  footer() {
+    return `<footer class="portal-footer"><a class="portal-brand" href="#home"><span class="portal-brand-mark">GP</span><span>Gia ph\u1EA3<small>G\xCCN GI\u1EEE C\u1ED8I NGU\u1ED2N \xB7 K\u1EBET N\u1ED0I TH\u1EBE H\u1EC6</small></span></a><p>M\u1ED7i ng\u01B0\u1EDDi m\u1ED9t c\xE2u chuy\u1EC7n. C\xF9ng nhau m\u1ED9t d\xF2ng h\u1ECD.</p><a href="#home">V\u1EC1 \u0111\u1EA7u trang \u2191</a></footer>`;
+  }
+  screen(name) {
+    this.sequence++;
+    document.body.dataset.screen = name;
+    $("workspace-shell").hidden = name !== "workspace";
+    this.root.hidden = name === "workspace";
+    $("auth-overlay").style.display = "none";
+    if (name !== "workspace") {
+      this.c.stopPoll();
+      ["share-panel-overlay", "edit-request-overlay", "notification-dropdown"].forEach((id) => $(id)?.classList.add("hidden"));
+      document.querySelectorAll('[id^="modal-"]').forEach((el) => el.classList.add("hidden"));
+      window.scrollTo(0, 0);
+    }
+  }
+  render(content, name = "portal") {
+    this.screen(name);
+    this.root.innerHTML = this.header() + content + this.footer();
+    return this.sequence;
+  }
+  error(error) {
+    const message = describeError(error);
+    const el = $("portal-message");
+    if (el) el.textContent = message;
+    this.c.app.showToast(message, "error");
+  }
+  async busy(button, fn) {
+    button.disabled = true;
+    try {
+      await fn();
+    } catch (error) {
+      this.error(error);
+    } finally {
+      button.disabled = false;
+    }
+  }
+  async go(page) {
+    history.pushState(null, "", `${this.c.callbackUrl()}#${page}`);
+    await this.route();
+  }
+  async handle(button) {
+    const action = button.dataset.portal;
+    if (action === "menu") {
+      const menu = button.parentElement.querySelector(".portal-menu");
+      const open = menu.hidden;
+      this.closeMenus();
+      menu.hidden = !open;
+      button.setAttribute("aria-expanded", String(open));
+      return;
+    }
+    this.closeMenus();
+    if (action === "logout") return this.c.logout();
+    if (action === "family") return this.go("family=" + encodeURIComponent(button.dataset.slug));
+    if (action === "open") {
+      if (!this.c.canLeave()) return;
+      return this.busy(button, async () => {
+        this.c.publicSlug = null;
+        this.c.shareToken = null;
+        await this.c.open(button.dataset.id, button.dataset.role);
+      });
+    }
+    if (action === "publication") return this.go("publication=" + button.dataset.id);
+    if (action === "tree") return this.backToTree();
+    if (["home", "mine", "login", "account", "requests"].includes(action)) return this.go(action);
+  }
+  async route() {
+    const route = portalRoute(location.hash);
+    if (route.page === "home") {
+      sessionStorage.removeItem("giapha_return");
+      return this.home();
+    }
+    if (route.page === "share") {
+      if (!this.c.canLeave() || !this.service) return;
+      try {
+        this.c.publicSlug = null;
+        this.c.shareToken = route.value;
+        const state = await this.service.shared(route.value);
+        await this.c.open(state.lineage_id, "viewer", state);
+      } catch {
+        this.c.showLogin("Li\xEAn k\u1EBFt chia s\u1EBB kh\xF4ng h\u1EE3p l\u1EC7, \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\xE3 \u0111\u01B0\u1EE3c thu h\u1ED3i.");
+      }
+      return;
+    }
+    if (route.page === "invite") {
+      if (!this.c.canLeave()) return;
+      sessionStorage.setItem("giapha_invite", route.value);
+      sessionStorage.setItem("giapha_return", "mine");
+      if (!this.c.user) this.c.showLogin("\u0110\u0103ng nh\u1EADp \u0111\u1EC3 nh\u1EADn l\u1EDDi m\u1EDDi tham gia gia ph\u1EA3.");
+      else await this.c.restore();
+      return;
+    }
+    if (route.page === "login") {
+      sessionStorage.setItem("giapha_return", "mine");
+      this.c.showLogin();
+      return;
+    }
+    if (route.page === "family") return this.openPublic(route.value);
+    if (route.page === "tree") return this.backToTree();
+    if (!this.c.user) {
+      sessionStorage.setItem("giapha_return", location.hash.slice(1));
+      this.c.showLogin("\u0110\u0103ng nh\u1EADp \u0111\u1EC3 ti\u1EBFp t\u1EE5c.");
+      return;
+    }
+    if (route.page === "mine") return this.showMine();
+    if (route.page === "account") return this.account();
+    if (route.page === "requests") return this.requests();
+    if (route.page === "publication") return this.publication(route.value);
+  }
+  async home() {
+    const seq = this.render(`<main class="portal-home"><section class="portal-hero"><div class="portal-hero-copy"><p class="portal-eyebrow"><span></span> M\u1ED8T D\xD2NG H\u1ECC \xB7 NHI\u1EC0U TH\u1EBE H\u1EC6</p><h1>G\xECn gi\u1EEF c\u1ED9i ngu\u1ED3n.<br><em>K\u1EBFt n\u1ED1i mai sau.</em></h1><p class="portal-lead">M\u1ED9t n\u01A1i \u0111\u1EC3 nh\u1EEFng c\xE2u chuy\u1EC7n \u0111\u01B0\u1EE3c l\u01B0u gi\u1EEF,<br class="portal-hide-mobile"> nh\u1EEFng th\u1EBF h\u1EC7 \u0111\u01B0\u1EE3c n\u1ED1i li\u1EC1n, v\xE0 m\u1ED7i ng\u01B0\u1EDDi t\xECm th\u1EA5y n\u01A1i m\xECnh thu\u1ED9c v\u1EC1.</p><div class="portal-hero-actions"><button class="portal-btn" data-portal="mine">Kh\xE1m ph\xE1 gia ph\u1EA3 <span>\u2197</span></button><a href="#about" data-anchor="about" class="portal-text-link">C\xE2u chuy\u1EC7n d\xF2ng h\u1ECD \u2193</a></div><div class="portal-hero-note"><span class="portal-tree-icon">\u2667</span><p>T\u1EEB nh\u1EEFng nh\xE1nh nh\u1ECF,<br><strong>c\xF9ng vun m\u1ED9t g\u1ED1c b\u1EC1n l\xE2u.</strong></p></div></div><figure class="portal-hero-image"><img src="./images/heritage-courtyard.jpg" alt="S\xE2n nh\xE0 truy\u1EC1n th\u1ED1ng Vi\u1EC7t Nam trong n\u1EAFng s\u1EDBm, \u1EA3nh minh ho\u1EA1" fetchpriority="high"><figcaption>Kh\xF4ng gian c\u1ED9i ngu\u1ED3n \xB7 \u1EA2nh minh ho\u1EA1 AI</figcaption><div class="portal-image-label"><span>GIA \u0110\xCCNH L\xC0 \u0110I\u1EC2M KH\u1EDEI \u0110\u1EA6U</span><p>\u0110i xa \u0111\u1EC3 l\u1EDBn.<br>Tr\u1EDF v\u1EC1 \u0111\u1EC3 nh\u1EDB.</p></div></figure></section>
+      <section class="portal-intro" id="about"><div><p class="portal-eyebrow">C\xC2U CHUY\u1EC6N C\u1EE6A CH\xDANG TA</p><h2>Bi\u1EBFt m\xECnh t\u1EEB \u0111\xE2u.<br>Hi\u1EC3u m\xECnh thu\u1ED9c v\u1EC1.</h2></div><div><p>Gia ph\u1EA3 d\xF2ng h\u1ECD Tr\u1EA7n Ng\u1ECDc l\xE0 kh\xF4ng gian c\xF9ng nhau g\xECn gi\u1EEF nh\u1EEFng m\u1ED1i n\u1ED1i gi\u1EEFa \xF4ng b\xE0, cha m\u1EB9, con ch\xE1u \u2014 \u0111\u1EC3 c\xE2u chuy\u1EC7n c\u1EE7a gia \u0111\xECnh \u0111\u01B0\u1EE3c ti\u1EBFp t\u1EE5c qua t\u1EEBng th\u1EBF h\u1EC7.</p><p>T\u1EEB vi\u1EC7c t\xECm m\u1ED9t nh\xE1nh h\u1ECD, ghi l\u1EA1i m\u1ED9t k\u1EF7 ni\u1EC7m \u0111\u1EBFn b\u1ED5 sung th\xF4ng tin c\xF2n thi\u1EBFu, m\u1ED7i \u0111\xF3ng g\xF3p \u0111\u1EC1u l\xE0m \u0111\u1EA7y th\xEAm k\xFD \u1EE9c chung.</p><a class="portal-text-link" href="#mine">G\xF3p th\xEAm m\u1ED9t m\u1EA3nh k\xFD \u1EE9c \u2197</a></div></section>
+      <section class="portal-directory" id="directory"><div class="portal-section-heading"><div><p class="portal-eyebrow">NH\u1EEENG NH\xC1NH H\u1ECC K\u1EBET N\u1ED0I</p><h2>Kh\xE1m ph\xE1 gia ph\u1EA3</h2></div><p>Gh\xE9 th\u0103m nh\u1EEFng gia ph\u1EA3 \u0111\u01B0\u1EE3c qu\u1EA3n tr\u1ECB<br>ch\u1EE7 \u0111\u1ED9ng chia s\u1EBB v\u1EDBi m\u1ECDi ng\u01B0\u1EDDi.</p></div><form id="portal-search" class="portal-search"><span aria-hidden="true">\u2315</span><input id="portal-search-input" aria-label="T\xECm d\xF2ng h\u1ECD ho\u1EB7c qu\xEA qu\xE1n" placeholder="T\xECm theo t\xEAn d\xF2ng h\u1ECD ho\u1EB7c qu\xEA qu\xE1n\u2026"><button class="portal-btn" type="submit">T\xECm ki\u1EBFm</button></form><div id="portal-public-list" class="portal-family-grid" aria-live="polite"><p class="portal-empty">\u0110ang t\u1EA3i c\xE1c gia ph\u1EA3 c\xF4ng khai\u2026</p></div><p id="portal-message" class="portal-feedback" role="status"></p></section>
+      <section class="portal-memories" id="memories"><figure><img src="./images/family-album.jpg" alt="Album gia \u0111\xECnh v\xE0 s\u1ED5 ghi ch\xE9p, \u1EA3nh minh ho\u1EA1" loading="lazy"><figcaption>Nh\u1EEFng trang k\xFD \u1EE9c \xB7 \u1EA2nh minh ho\u1EA1 AI</figcaption></figure><div><p class="portal-eyebrow">\u0110\u1EC2 K\xDD \u1EE8C KH\xD4NG PHAI</p><h2>C\xF3 nh\u1EEFng \u0111i\u1EC1u<br>ch\u1EC9 gia \u0111\xECnh m\u1EDBi k\u1EC3.</h2><p>M\u1ED9t m\xE1i nh\xE0 x\u01B0a. M\u1ED9t c\xE1i t\xEAn quen. M\u1ED9t c\xE2u chuy\u1EC7n \u0111\u01B0\u1EE3c k\u1EC3 l\u1EA1i trong nh\u1EEFng l\u1EA7n sum h\u1ECDp. Gi\u1EEF l\u1EA5y h\xF4m nay, \u0111\u1EC3 mai n\xE0y con ch\xE1u c\xF2n t\xECm th\u1EA5y.</p><div class="portal-memory-tags"><span>Ghi nh\u1EDB c\u1ED9i ngu\u1ED3n</span><span>G\u1EAFn k\u1EBFt th\u1EBF h\u1EC7</span><span>C\xF9ng nhau g\xECn gi\u1EEF</span></div><button class="portal-btn portal-outline" data-portal="mine">V\u1EC1 v\u1EDBi gia ph\u1EA3 c\u1EE7a b\u1EA1n \u2197</button></div></section><section class="portal-invite-banner"><span>TI\u1EBEP N\u1ED0I C\xC2U CHUY\u1EC6N GIA \u0110\xCCNH</span><h2>Gia ph\u1EA3 \u0111\u01B0\u1EE3c g\xECn gi\u1EEF<br>t\u1EEB nh\u1EEFng \u0111\xF3ng g\xF3p nh\u1ECF.</h2><button class="portal-btn portal-light" data-portal="mine">C\xF9ng nhau k\u1EBFt n\u1ED1i \u2197</button></section></main>`, "home");
+    this.root.querySelectorAll("[data-anchor]").forEach((link) => link.onclick = (event) => {
+      event.preventDefault();
+      $(link.dataset.anchor)?.scrollIntoView({ behavior: "smooth" });
+    });
+    let searchVersion = 0;
+    const load = async (search) => {
+      if (!this.service) return;
+      const version = ++searchVersion;
+      try {
+        const rows = await this.service.publicLineages(search);
+        if (seq !== this.sequence || version !== searchVersion) return;
+        this.publicCards(rows);
+      } catch (error) {
+        if (seq === this.sequence) {
+          $("portal-public-list").textContent = "Ch\u01B0a th\u1EC3 t\u1EA3i danh s\xE1ch. B\u1EA1n v\u1EABn c\xF3 th\u1EC3 v\xE0o gia ph\u1EA3 b\u1EB1ng li\xEAn k\u1EBFt \u0111\u01B0\u1EE3c chia s\u1EBB.";
+          this.error(error);
+        }
+      }
+    };
+    $("portal-search").onsubmit = (event) => {
+      event.preventDefault();
+      this.busy(event.submitter, () => load($("portal-search-input").value.trim()));
+    };
+    if (!this.service) return;
+    await load("");
+    if (seq === this.sequence && ["about", "directory", "memories"].includes(location.hash.slice(1))) $(location.hash.slice(1))?.scrollIntoView();
+  }
+  publicCards(rows) {
+    $("portal-public-list").innerHTML = rows.length ? rows.map((row) => `<article class="portal-family-card"><div class="portal-family-cover"><span>GP</span><small>GIA PH\u1EA2 C\xD4NG KHAI</small></div><div class="portal-family-content"><p class="portal-eyebrow">${escapeHTML(row.region || "C\u1ED8I NGU\u1ED2N GIA \u0110\xCCNH")}</p><h3>${escapeHTML(row.title)}</h3><p>${escapeHTML(row.intro || "C\xF9ng t\xECm hi\u1EC3u nh\u1EEFng nh\xE1nh h\u1ECD v\xE0 c\xE2u chuy\u1EC7n \u0111\u01B0\u1EE3c n\u1ED1i ti\u1EBFp qua c\xE1c th\u1EBF h\u1EC7.")}</p><div><span>${Number(row.member_count)} th\xE0nh vi\xEAn</span><button data-portal="family" data-slug="${escapeHTML(row.slug)}" class="portal-text-link">Xem gia ph\u1EA3 \u2197</button></div></div></article>`).join("") : `<div class="portal-empty"><span>\u2667</span><h3>Nh\u1EEFng k\u1EBFt n\u1ED1i b\u1EAFt \u0111\u1EA7u t\u1EEB s\u1EF1 s\u1EBB chia.</h3><p>Ch\u01B0a c\xF3 gia ph\u1EA3 \u0111\u01B0\u1EE3c b\u1EADt c\xF4ng khai. N\u1EBFu b\u1EA1n \u0111\xE3 nh\u1EADn \u0111\u01B0\u1EE3c li\xEAn k\u1EBFt ri\xEAng, h\xE3y m\u1EDF li\xEAn k\u1EBFt \u0111\xF3 \u0111\u1EC3 truy c\u1EADp.</p><button class="portal-text-link" data-portal="mine">V\xE0o gia ph\u1EA3 c\u1EE7a t\xF4i \u2197</button></div>`;
+  }
+  presentAuth() {
+    this.render(`<main class="portal-auth"><section class="portal-auth-story"><img src="./images/heritage-courtyard.jpg" alt="M\xE1i nh\xE0 truy\u1EC1n th\u1ED1ng, \u1EA3nh minh ho\u1EA1"><div><p class="portal-eyebrow">CH\xC0O M\u1EEANG B\u1EA0N TR\u1EDE V\u1EC0</p><h1>M\u1ED7i k\u1EBFt n\u1ED1i<br>l\xE0 m\u1ED9t l\u1EA7n<br><em>g\u1EA7n nhau h\u01A1n.</em></h1><p>C\xF9ng l\u01B0u gi\u1EEF c\xE2u chuy\u1EC7n d\xF2ng h\u1ECD,<br>cho h\xF4m nay v\xE0 nh\u1EEFng th\u1EBF h\u1EC7 mai sau.</p><small>\u1EA2nh minh ho\u1EA1 AI</small></div></section><section class="portal-auth-panel"><a href="#home" class="portal-text-link">\u2190 V\u1EC1 trang ch\u1EE7</a><div id="portal-auth-slot"></div><p class="portal-auth-footnote">Gia ph\u1EA3 ri\xEAng t\u01B0 ch\u1EC9 hi\u1EC3n th\u1ECB v\u1EDBi ng\u01B0\u1EDDi c\xF3 quy\u1EC1n truy c\u1EADp.</p></section></main>`, "auth");
+    $("portal-auth-slot").appendChild(this.c.authBox);
+  }
+  async loadProfile() {
+    if (!this.c.user) return;
+    const saved = await this.service.profile(this.c.user.id);
+    this.c.profile = { display_name: saved?.display_name || this.c.user.user_metadata?.display_name || this.c.user.user_metadata?.full_name || this.c.user.email.split("@")[0], phone: saved?.phone || "", address: saved?.address || "" };
+  }
+  workspaceUser() {
+    const host = $("user-display");
+    host.classList.remove("hidden");
+    host.classList.add("flex");
+    host.innerHTML = this.menu(true);
+  }
+  backToTree() {
+    if (!this.c.base || !this.c.app.lineageId) return this.showMine();
+    this.screen("workspace");
+    history.replaceState(null, "", this.c.callbackUrl() + "#" + (this.c.shareToken ? "share=" + encodeURIComponent(this.c.shareToken) : this.c.publicSlug ? "family=" + encodeURIComponent(this.c.publicSlug) : "tree"));
+    this.c.setupNotifications();
+    setTimeout(() => this.c.app.canvas.zoomFit(), 50);
+  }
+  async showMine() {
+    if (!this.c.user) {
+      sessionStorage.setItem("giapha_return", "mine");
+      return this.c.showLogin();
+    }
+    const seq = this.render(`<main class="portal-dashboard"><div class="portal-dashboard-heading"><div><p class="portal-eyebrow">KH\xD4NG GIAN GIA \u0110\xCCNH</p><h1>Gia ph\u1EA3 c\u1EE7a t\xF4i</h1><p>Nh\u1EEFng d\xF2ng h\u1ECD b\u1EA1n \u0111ang c\xF9ng g\xECn gi\u1EEF.</p></div>${this.c.base ? '<button class="portal-btn portal-outline" data-portal="tree">Tr\u1EDF l\u1EA1i c\xE2y \u0111ang m\u1EDF \u2197</button>' : ""}</div><p id="portal-message" class="portal-feedback" role="status"></p><div id="portal-my-list" class="portal-family-grid"><p>\u0110ang t\u1EA3i gia ph\u1EA3\u2026</p></div><section class="portal-create"><div><p class="portal-eyebrow">M\u1ED8T KH\u1EDEI \u0110\u1EA6U M\u1EDAI</p><h2>Th\xEAm m\u1ED9t nh\xE1nh k\u1EBFt n\u1ED1i.</h2><p>T\u1EA1o kh\xF4ng gian ri\xEAng cho gia \u0111\xECnh. Ch\u1EC9 ng\u01B0\u1EDDi \u0111\u01B0\u1EE3c c\u1EA5p quy\u1EC1n m\u1EDBi c\xF3 th\u1EC3 xem.</p></div><form id="portal-create-form"><label for="portal-family-name">T\xEAn d\xF2ng h\u1ECD / chi nh\xE1nh</label><input id="portal-family-name" required maxlength="200" placeholder="T\xEAn d\xF2ng h\u1ECD c\u1EE7a b\u1EA1n"><button class="portal-btn" type="submit">T\u1EA1o gia ph\u1EA3 ri\xEAng \u2197</button></form></section></main>`);
+    const rows = await this.service.list(this.c.user.id);
+    if (seq !== this.sequence) return;
+    this.myRows = rows;
+    $("portal-my-list").innerHTML = rows.length ? rows.map((row) => `<article class="portal-owned-card"><div class="portal-owned-symbol">\u2667</div><span class="portal-role">${roleNames[row.role]}</span><h2>${escapeHTML(row.lineages?.info?.name || "Gia ph\u1EA3")}</h2><p>${escapeHTML(row.lineages?.info?.origin || "Kh\xF4ng gian gia \u0111\xECnh")}</p><div class="portal-owned-actions"><button class="portal-btn" data-portal="open" data-id="${row.lineage_id}" data-role="${row.role}">M\u1EDF gia ph\u1EA3 \u2197</button>${row.role === "admin" ? `<button class="portal-text-link" data-portal="publication" data-id="${row.lineage_id}">Gi\u1EDBi thi\u1EC7u & c\xF4ng khai</button>` : ""}</div></article>`).join("") : '<div class="portal-empty"><h2>B\u1EA1n ch\u01B0a tham gia gia ph\u1EA3 n\xE0o.</h2><p>M\u1EDF l\u1EDDi m\u1EDDi c\u1EE7a gia \u0111\xECnh ho\u1EB7c t\u1EA1o m\u1ED9t gia ph\u1EA3 m\u1EDBi b\xEAn d\u01B0\u1EDBi.</p></div>';
+    $("portal-create-form").onsubmit = (event) => {
+      event.preventDefault();
+      if (!this.c.canLeave()) return;
+      this.busy(event.submitter, async () => {
+        const id = await this.service.create($("portal-family-name").value.trim());
+        this.c.publicSlug = null;
+        this.c.shareToken = null;
+        await this.c.open(id, "admin");
+      });
+    };
+  }
+  async account() {
+    const version = this.sequence;
+    await this.loadProfile();
+    if (version !== this.sequence) return;
+    const p = this.c.profile;
+    this.render(`<main class="portal-dashboard portal-narrow"><p class="portal-eyebrow">T\xC0I KHO\u1EA2N C\u1EE6A B\u1EA0N</p><h1>Th\xF4ng tin c\xE1 nh\xE2n</h1><p class="portal-page-intro">Th\xF4ng tin li\xEAn h\u1EC7 ch\u1EC9 b\u1EA1n c\xF3 th\u1EC3 xem v\xE0 ch\u1EC9nh s\u1EEDa.</p><form id="portal-profile-form" class="portal-form-card"><div class="portal-profile-heading"><span class="portal-avatar portal-avatar-large">${escapeHTML(this.name().charAt(0))}</span><div><h2>${escapeHTML(this.name())}</h2><p>H\u1ED3 s\u01A1 th\xE0nh vi\xEAn</p></div></div><label for="profile-email">Email \u0111\u0103ng nh\u1EADp <small>\u0110\u01B0\u1EE3c qu\u1EA3n l\xFD b\u1EDFi t\xE0i kho\u1EA3n \u0111\u0103ng nh\u1EADp</small></label><input id="profile-email" type="email" value="${escapeHTML(this.c.user.email)}" readonly><label for="profile-name">T\xEAn hi\u1EC3n th\u1ECB</label><input id="profile-name" value="${escapeHTML(p.display_name)}" maxlength="200" required><div class="portal-form-grid"><div><label for="profile-phone">S\u1ED1 \u0111i\u1EC7n tho\u1EA1i</label><input id="profile-phone" type="tel" autocomplete="tel" maxlength="40" value="${escapeHTML(p.phone)}"></div><div><label for="profile-address">\u0110\u1ECBa ch\u1EC9</label><input id="profile-address" autocomplete="street-address" maxlength="1000" value="${escapeHTML(p.address)}"></div></div><p id="portal-message" class="portal-feedback" role="status"></p><div class="portal-form-actions"><button class="portal-btn" type="submit">L\u01B0u th\xF4ng tin</button><button class="portal-text-link" data-portal="mine" type="button">V\u1EC1 gia ph\u1EA3 c\u1EE7a t\xF4i</button></div></form></main>`);
+    $("portal-profile-form").onsubmit = (event) => {
+      event.preventDefault();
+      this.busy(event.submitter, async () => {
+        const profile = { display_name: $("profile-name").value.trim(), phone: $("profile-phone").value.trim(), address: $("profile-address").value.trim() };
+        if (!profile.display_name) throw new Error("Vui l\xF2ng nh\u1EADp t\xEAn hi\u1EC3n th\u1ECB.");
+        await this.service.saveProfile(profile);
+        this.c.profile = profile;
+        this.c.app.currentUser && (this.c.app.currentUser.username = this.name());
+        const header = this.root.querySelector(".portal-header");
+        if (header) header.outerHTML = this.header();
+        const heading = this.root.querySelector(".portal-profile-heading h2");
+        if (heading) heading.textContent = this.name();
+        if (this.c.app.currentUser) this.workspaceUser();
+        $("portal-message").textContent = "\u0110\xE3 l\u01B0u th\xF4ng tin t\xE0i kho\u1EA3n.";
+        this.c.app.showToast("\u0110\xE3 c\u1EADp nh\u1EADt h\u1ED3 s\u01A1.", "success");
+      });
+    };
+  }
+  async publication(id) {
+    const rows = await this.service.list(this.c.user.id);
+    const own = rows.find((row) => row.lineage_id === id && row.role === "admin");
+    if (!own) throw new Error("B\u1EA1n c\u1EA7n quy\u1EC1n qu\u1EA3n tr\u1ECB \u0111\u1EC3 thay \u0111\u1ED5i c\xF4ng khai gia ph\u1EA3.");
+    const saved = await this.service.publication(id);
+    const p = saved || { slug: slugify(own.lineages.info.name) + "-" + id.slice(0, 8), intro: "", region: own.lineages.info.origin || "", is_public: false };
+    this.render(`<main class="portal-dashboard portal-narrow"><p class="portal-eyebrow">CHIA S\u1EBA V\u1EDAI C\u1ED8NG \u0110\u1ED2NG</p><h1>Gi\u1EDBi thi\u1EC7u & c\xF4ng khai</h1><p class="portal-page-intro">${escapeHTML(own.lineages.info.name)}</p><form id="portal-publication-form" class="portal-form-card"><label for="publication-slug">\u0110\u01B0\u1EDDng d\u1EABn gia ph\u1EA3</label><input id="publication-slug" value="${escapeHTML(p.slug)}" pattern="[a-z0-9]+(-[a-z0-9]+)*" minlength="3" maxlength="100" required><small>Ch\u1EEF th\u01B0\u1EDDng kh\xF4ng d\u1EA5u, s\u1ED1 v\xE0 d\u1EA5u g\u1EA1ch n\u1ED1i.</small><label for="publication-region">Qu\xEA qu\xE1n / khu v\u1EF1c</label><input id="publication-region" value="${escapeHTML(p.region)}" maxlength="200"><label for="publication-intro">Gi\u1EDBi thi\u1EC7u d\xF2ng h\u1ECD</label><textarea id="publication-intro" rows="5" maxlength="2000">${escapeHTML(p.intro)}</textarea><label class="portal-check"><input id="publication-public" type="checkbox" ${p.is_public ? "checked" : ""}><span><strong>C\xF4ng khai c\xE2y gia ph\u1EA3</strong><small>Hi\u1EC7n trong danh s\xE1ch c\xF4ng khai, m\u1ECDi ng\u01B0\u1EDDi c\xF3 th\u1EC3 xem t\xEAn, quan h\u1EC7 v\xE0 ng\xE0y sinh/m\u1EA5t. Ghi ch\xFA, s\u1ED1 \u0111i\u1EC7n tho\u1EA1i, email v\xE0 \u0111\u1ECBa ch\u1EC9 kh\xF4ng \u0111\u01B0\u1EE3c c\xF4ng khai.</small></span></label><p id="portal-message" class="portal-feedback" role="status"></p><div class="portal-form-actions"><button class="portal-btn">L\u01B0u thi\u1EBFt l\u1EADp</button><button type="button" class="portal-text-link" id="publication-copy" ${saved ? "" : "disabled"}>Sao ch\xE9p li\xEAn k\u1EBFt</button></div></form></main>`);
+    $("publication-copy").onclick = () => this.busy($("publication-copy"), async () => {
+      if ($("publication-slug").value !== p.slug) throw new Error("L\u01B0u thi\u1EBFt l\u1EADp tr\u01B0\u1EDBc khi sao ch\xE9p li\xEAn k\u1EBFt m\u1EDBi.");
+      await navigator.clipboard.writeText(this.c.callbackUrl() + "#family=" + encodeURIComponent(p.slug));
+      $("portal-message").textContent = p.is_public ? "\u0110\xE3 sao ch\xE9p li\xEAn k\u1EBFt c\xF4ng khai." : "\u0110\xE3 sao ch\xE9p. Gia ph\u1EA3 ri\xEAng t\u01B0 v\u1EABn y\xEAu c\u1EA7u quy\u1EC1n truy c\u1EADp.";
+    });
+    $("portal-publication-form").onsubmit = (event) => {
+      event.preventDefault();
+      this.busy(event.submitter, async () => {
+        const fields = { slug: $("publication-slug").value.trim(), intro: $("publication-intro").value.trim(), region: $("publication-region").value.trim(), is_public: $("publication-public").checked };
+        if (fields.is_public && !p.is_public && !confirm("B\u1EADt c\xF4ng khai \u0111\u1EC3 m\u1ECDi ng\u01B0\u1EDDi c\xF3 th\u1EC3 xem c\xE2y gia ph\u1EA3 v\xE0 ng\xE0y sinh/m\u1EA5t? Ch\u1EC9 b\u1EADt khi gia \u0111\xECnh \u0111\xE3 \u0111\u1ED3ng \xFD.")) return;
+        try {
+          await this.service.publish(id, fields);
+        } catch (error) {
+          if (error.code === "23505") throw new Error("\u0110\u01B0\u1EDDng d\u1EABn n\xE0y \u0111\xE3 \u0111\u01B0\u1EE3c s\u1EED d\u1EE5ng. Vui l\xF2ng ch\u1ECDn \u0111\u01B0\u1EDDng d\u1EABn kh\xE1c.");
+          throw error;
+        }
+        Object.assign(p, fields);
+        if ($("publication-copy")) $("publication-copy").disabled = false;
+        $("portal-message").textContent = fields.is_public ? "\u0110\xE3 c\xF4ng khai gia ph\u1EA3. B\u1EA1n c\xF3 th\u1EC3 sao ch\xE9p li\xEAn k\u1EBFt \u0111\u1EC3 chia s\u1EBB." : "\u0110\xE3 l\u01B0u. Gia ph\u1EA3 \u0111\u01B0\u1EE3c gi\u1EEF ri\xEAng t\u01B0.";
+      });
+    };
+  }
+  async openPublic(slug) {
+    if (!this.c.canLeave()) return;
+    try {
+      const state = await this.service.openPage(slug);
+      this.c.publicSlug = state.public_read ? slug : null;
+      this.c.shareToken = null;
+      await this.c.open(state.lineage_id, state.access_role, state);
+    } catch (error) {
+      this.c.showLogin("Gia ph\u1EA3 \u0111ang ri\xEAng t\u01B0 ho\u1EB7c kh\xF4ng c\xF2n \u0111\u01B0\u1EE3c chia s\u1EBB. \u0110\u0103ng nh\u1EADp t\xE0i kho\u1EA3n c\xF3 quy\u1EC1n r\u1ED3i m\u1EDF l\u1EA1i li\xEAn k\u1EBFt.");
+      sessionStorage.setItem("giapha_return", "family=" + encodeURIComponent(slug));
+    }
+  }
+  async requests() {
+    const rows = await this.service.list(this.c.user.id);
+    const selected = rows.find((row) => row.lineage_id === this.c.app.lineageId) || rows[0];
+    this.render(`<main class="portal-dashboard"><p class="portal-eyebrow">C\xD9NG G\xCCN GI\u1EEE TH\xD4NG TIN CH\xCDNH X\xC1C</p><h1>Y\xEAu c\u1EA7u ph\xEA duy\u1EC7t</h1><p class="portal-page-intro">Qu\u1EA3n tr\u1ECB xem x\xE9t c\xE1c \u0111\xF3ng g\xF3p. Th\xE0nh vi\xEAn theo d\xF5i y\xEAu c\u1EA7u c\u1EE7a m\xECnh.</p><div class="portal-request-toolbar"><label>Gia ph\u1EA3<select id="requests-lineage">${rows.map((row) => `<option value="${row.lineage_id}" ${selected?.lineage_id === row.lineage_id ? "selected" : ""}>${escapeHTML(row.lineages?.info?.name || "Gia ph\u1EA3")}</option>`).join("")}</select></label><label>Tr\u1EA1ng th\xE1i<select id="requests-status"><option value="pending">Ch\u1EDD duy\u1EC7t</option><option value="approved">\u0110\xE3 duy\u1EC7t</option><option value="rejected">\u0110\xE3 t\u1EEB ch\u1ED1i</option><option value="all">T\u1EA5t c\u1EA3</option></select></label></div><p id="portal-message" class="portal-feedback" role="status"></p><div id="portal-requests-list" class="portal-request-list"></div><div class="portal-pagination"><button id="requests-prev">\u2190 Tr\u01B0\u1EDBc</button><span id="requests-count"></span><button id="requests-next">Sau \u2192</button></div></main>`);
+    const screenVersion = this.sequence;
+    let page = 0;
+    let requestVersion = 0;
+    const refresh = async () => {
+      if (screenVersion !== this.sequence || !$("requests-lineage")) return;
+      const version = ++requestVersion;
+      const id = $("requests-lineage").value;
+      const status = $("requests-status").value;
+      if (!id) {
+        $("portal-requests-list").innerHTML = '<div class="portal-empty">B\u1EA1n ch\u01B0a tham gia gia ph\u1EA3 n\xE0o.</div>';
+        $("requests-prev").disabled = true;
+        $("requests-next").disabled = true;
+        return;
+      }
+      const result = await this.service.requestPage(id, status, page);
+      if (version !== requestVersion || screenVersion !== this.sequence || !$("portal-requests-list")) return;
+      const list = $("portal-requests-list");
+      list.replaceChildren();
+      const isAdmin = rows.find((row) => row.lineage_id === id)?.role === "admin";
+      for (const request of result.rows) this.c.renderRequest(list, request, isAdmin, async () => {
+        if (this.c.app.lineageId === id && this.c.base && !this.c.hasDraft()) await this.c.load();
+        await refresh();
+      });
+      if (!result.rows.length) list.innerHTML = '<div class="portal-empty"><span>\u2713</span><h3>Kh\xF4ng c\xF3 y\xEAu c\u1EA7u trong m\u1EE5c n\xE0y.</h3><p>C\xE1c \u0111\xF3ng g\xF3p m\u1EDBi s\u1EBD xu\u1EA5t hi\u1EC7n t\u1EA1i \u0111\xE2y.</p></div>';
+      $("requests-count").textContent = `${result.count} y\xEAu c\u1EA7u \xB7 Trang ${page + 1}`;
+      $("requests-prev").disabled = page === 0;
+      $("requests-next").disabled = (page + 1) * 20 >= result.count;
+    };
+    $("requests-lineage").onchange = $("requests-status").onchange = () => {
+      page = 0;
+      refresh().catch((error) => this.error(error));
+    };
+    $("requests-prev").onclick = () => {
+      page--;
+      refresh().catch((error) => this.error(error));
+    };
+    $("requests-next").onclick = () => {
+      page++;
+      refresh().catch((error) => this.error(error));
+    };
+    await refresh();
+  }
+};
+
+// dist/js/supabase-controller.js
+var $2 = (id) => document.getElementById(id);
 var copy = (value) => JSON.parse(JSON.stringify(value));
 var roles = { admin: "Qu\u1EA3n tr\u1ECB", editor: "Ch\u1EC9nh s\u1EEDa", viewer: "Ch\u1EC9 xem" };
 var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "Ph\u1ED1i ng\u1EABu", generation: "Th\u1EBF h\u1EC7" };
@@ -3054,8 +3431,10 @@ var SupabaseController = class {
     this.authBox = document.createElement("div");
     this.authBox.id = "sb-auth";
     this.authBox.className = "sb-card";
-    $("auth-overlay").firstElementChild.appendChild(this.authBox);
-    ["auth-login-form", "auth-create-form", "auth-code-form", "backend-unavailable"].forEach((id) => $(id).style.display = "none");
+    $2("auth-overlay").firstElementChild.appendChild(this.authBox);
+    this.portal = new FamilyPortal(this);
+    this.app.updateUserDisplay = () => this.portal.workspaceUser();
+    ["auth-login-form", "auth-create-form", "auth-code-form", "backend-unavailable"].forEach((id) => $2(id).style.display = "none");
     this.app.loadInitialData = () => this.load();
     this.app.setupLogout = () => this.setupLogout();
     this.app.setupNotificationBell = () => this.setupNotifications();
@@ -3063,11 +3442,11 @@ var SupabaseController = class {
     this.app.setupEditRequestModal = () => this.setupProposal();
     this.app.setupAuthUI = () => this.showLogin();
     this.app.dataStore.subscribe(() => this.app.updateStatsDisplay());
-    $("lineage-religion").style.display = "none";
-    $("lineage-origin").textContent = "";
-    $("lineage-title").textContent = "C\xE2y gia ph\u1EA3";
-    $("stats-summary").textContent = "";
-    $("outline-count-badge").textContent = "0";
+    $2("lineage-religion").style.display = "none";
+    $2("lineage-origin").textContent = "";
+    $2("lineage-title").textContent = "C\xE2y gia ph\u1EA3";
+    $2("stats-summary").textContent = "";
+    $2("outline-count-badge").textContent = "0";
     window.addEventListener("beforeunload", (event) => {
       if (this.hasDraft()) {
         event.preventDefault();
@@ -3100,7 +3479,10 @@ var SupabaseController = class {
       const params = new URLSearchParams(location.hash.slice(1));
       const query = new URLSearchParams(location.search);
       const invite = params.get("invite") || query.get("invite");
-      if (invite) sessionStorage.setItem("giapha_invite", invite);
+      if (invite) {
+        sessionStorage.setItem("giapha_invite", invite);
+        history.replaceState(null, "", this.callbackUrl() + "#mine");
+      }
       this.shareToken = params.get("share") || query.get("share");
       if (this.shareToken) {
         const { data } = await this.client.auth.getUser();
@@ -3119,11 +3501,16 @@ var SupabaseController = class {
     const { data, error } = await this.client.auth.getUser();
     if (!data.user) {
       this.user = null;
-      this.showLogin(error?.name === "AuthSessionMissingError" ? "" : "");
+      await this.portal.route();
       return;
     }
     if (error) throw error;
     this.user = data.user;
+    try {
+      await this.portal.loadProfile();
+    } catch {
+      this.profile = null;
+    }
     if (this.recovery) {
       this.showRecovery();
       return;
@@ -3132,6 +3519,7 @@ var SupabaseController = class {
     if (invite) {
       try {
         await this.service.redeem(invite);
+        sessionStorage.setItem("giapha_return", "mine");
         sessionStorage.removeItem("giapha_invite");
         history.replaceState(null, "", new URL("index.html", location.href));
       } catch (error2) {
@@ -3139,13 +3527,19 @@ var SupabaseController = class {
         this.app.showToast(describeError(error2), "error");
       }
     }
-    await this.showPicker();
+    const destination = sessionStorage.getItem("giapha_return");
+    if (destination) {
+      sessionStorage.removeItem("giapha_return");
+      history.replaceState(null, "", this.callbackUrl() + "#" + destination);
+    }
+    await this.portal.route();
   }
   overlay() {
-    $("auth-overlay").style.display = "flex";
+    if (this.portal) this.portal.presentAuth();
+    else $2("auth-overlay").style.display = "flex";
   }
   message(text) {
-    const el = $("sb-message");
+    const el = $2("sb-message");
     if (el) el.textContent = text;
   }
   async action(button, fn) {
@@ -3164,28 +3558,52 @@ var SupabaseController = class {
   }
   showLogin(message = "") {
     this.overlay();
-    this.authBox.innerHTML = `<h2>\u0110\u0103ng nh\u1EADp ho\u1EB7c t\u1EA1o t\xE0i kho\u1EA3n</h2>
+    this.emailMode = "login";
+    this.authBox.innerHTML = `<p class="portal-eyebrow">K\u1EBET N\u1ED0I V\u1EDAI GIA \u0110\xCCNH</p><h2>Ch\xE0o m\u1EEBng b\u1EA1n tr\u1EDF v\u1EC1.</h2><p class="portal-auth-description">\u0110\u0103ng nh\u1EADp \u0111\u1EC3 c\xF9ng l\u01B0u gi\u1EEF c\xE2u chuy\u1EC7n d\xF2ng h\u1ECD.</p><p class="portal-auth-section">1. \u0110\u0103ng nh\u1EADp b\u1EB1ng m\u1EA1ng x\xE3 h\u1ED9i</p>
       <button id="sb-google" class="sb-google" type="button">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.18v5.14h6.61c3.87-3.56 6.08-8.81 6.08-14.82Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.82 13.53-4.95l-6.61-5.14c-1.83 1.23-4.17 1.96-6.92 1.96-5.32 0-9.83-3.59-11.44-8.42H5.73v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.56 27.45a12 12 0 0 1 0-6.9v-5.3H5.73a20 20 0 0 0 0 17.5l6.83-5.3Z"/><path fill="#EA4335" d="M24 12.13c3 0 5.69 1.03 7.8 3.05l5.86-5.86A19.6 19.6 0 0 0 24 4 20 20 0 0 0 5.73 15.25l6.83 5.3C14.17 15.72 18.68 12.13 24 12.13Z"/></svg>
         <span>Ti\u1EBFp t\u1EE5c v\u1EDBi Google</span>
       </button>
-      <p class="sb-auth-hint">D\xF9ng t\xE0i kho\u1EA3n Google (Gmail) \u0111\u1EC3 \u0111\u0103ng nh\u1EADp ho\u1EB7c \u0111\u0103ng k\xFD nhanh.</p>
+      <button class="portal-facebook" type="button" disabled><span>f</span> Ti\u1EBFp t\u1EE5c v\u1EDBi Facebook <small>S\u1EAFp c\xF3</small></button>
+      <p class="sb-auth-hint">D\xF9ng t\xE0i kho\u1EA3n Google \u0111\u1EC3 \u0111\u0103ng nh\u1EADp ho\u1EB7c \u0111\u0103ng k\xFD nhanh.</p>
       <div class="sb-auth-divider"><span>ho\u1EB7c d\xF9ng email v\xE0 m\u1EADt kh\u1EA9u</span></div>
+      <p class="portal-auth-section">2. S\u1EED d\u1EE5ng email v\xE0 m\u1EADt kh\u1EA9u</p>
+      <div class="portal-auth-tabs"><button type="button" id="sb-mode-login" aria-pressed="true">\u0110\u0103ng nh\u1EADp</button><button type="button" id="sb-mode-signup" aria-pressed="false">T\u1EA1o t\xE0i kho\u1EA3n</button></div>
       <form id="sb-login">
       <label for="sb-email">Email</label><input id="sb-email" type="email" autocomplete="username" required>
       <label for="sb-password">M\u1EADt kh\u1EA9u</label><input id="sb-password" type="password" autocomplete="current-password" minlength="8" required>
-      <label for="sb-name">T\xEAn hi\u1EC3n th\u1ECB (khi t\u1EA1o t\xE0i kho\u1EA3n)</label><input id="sb-name" autocomplete="nickname" maxlength="200">
+      <div id="sb-name-wrapper" hidden><label for="sb-name">T\xEAn hi\u1EC3n th\u1ECB</label><input id="sb-name" autocomplete="nickname" maxlength="200"></div>
       <p id="sb-message" role="status" class="sb-message"></p>
       <div class="sb-actions"><button id="sb-signin" class="sb-primary" type="submit">\u0110\u0103ng nh\u1EADp</button>
-      <button id="sb-signup" type="button">T\u1EA1o t\xE0i kho\u1EA3n</button><button id="sb-forgot" type="button">Qu\xEAn m\u1EADt kh\u1EA9u</button></div></form>`;
+      <button id="sb-signup" class="sb-primary" type="button" hidden>T\u1EA1o t\xE0i kho\u1EA3n</button><button id="sb-forgot" type="button">Qu\xEAn m\u1EADt kh\u1EA9u</button></div></form>`;
     this.message(message);
-    $("sb-google").onclick = () => this.action($("sb-google"), () => signInWithGoogle(this.callbackUrl()));
-    $("sb-login").onsubmit = (event) => {
+    if (!sessionStorage.getItem("giapha_return")) sessionStorage.setItem("giapha_return", "mine");
+    const mode = (value) => {
+      this.emailMode = value;
+      $2("sb-name-wrapper").hidden = value !== "signup";
+      $2("sb-name").required = value === "signup";
+      $2("sb-signin").hidden = value === "signup";
+      $2("sb-signup").hidden = value !== "signup";
+      $2("sb-forgot").hidden = value === "signup";
+      $2("sb-password").autocomplete = value === "signup" ? "new-password" : "current-password";
+      $2("sb-mode-login").setAttribute("aria-pressed", String(value === "login"));
+      $2("sb-mode-signup").setAttribute("aria-pressed", String(value === "signup"));
+      this.message("");
+    };
+    $2("sb-mode-login").onclick = () => mode("login");
+    $2("sb-mode-signup").onclick = () => mode("signup");
+    $2("sb-google").onclick = () => this.action($2("sb-google"), () => signInWithGoogle(this.callbackUrl()));
+    $2("sb-login").onsubmit = (event) => {
       event.preventDefault();
-      this.action($("sb-signin"), async () => {
+      if (this.emailMode === "signup") {
+        $2("sb-signup").click();
+        return;
+      }
+      this.action($2("sb-signin"), async () => {
         this.authenticating = true;
         try {
-          const { error } = await this.client.auth.signInWithPassword({ email: $("sb-email").value.trim(), password: $("sb-password").value });
+          const client = this.client || await getSupabaseClient();
+          const { error } = await client.auth.signInWithPassword({ email: $2("sb-email").value.trim(), password: $2("sb-password").value });
           if (error) throw error;
           await this.restore();
         } finally {
@@ -3193,15 +3611,16 @@ var SupabaseController = class {
         }
       });
     };
-    $("sb-signup").onclick = () => this.action($("sb-signup"), async () => {
-      if (!$("sb-login").reportValidity()) return;
-      const email = $("sb-email").value.trim();
-      const name = $("sb-name").value.trim() || email.split("@")[0];
+    $2("sb-signup").onclick = () => this.action($2("sb-signup"), async () => {
+      if (!$2("sb-login").reportValidity()) return;
+      const email = $2("sb-email").value.trim();
+      const name = $2("sb-name").value.trim() || email.split("@")[0];
       this.authenticating = true;
       try {
-        const { data, error } = await this.client.auth.signUp({
+        const client = this.client || await getSupabaseClient();
+        const { data, error } = await client.auth.signUp({
           email,
-          password: $("sb-password").value,
+          password: $2("sb-password").value,
           options: { emailRedirectTo: this.callbackUrl(), data: { display_name: name } }
         });
         if (error) throw error;
@@ -3211,13 +3630,14 @@ var SupabaseController = class {
         this.authenticating = false;
       }
     });
-    $("sb-forgot").onclick = () => this.action($("sb-forgot"), async () => {
-      const email = $("sb-email");
+    $2("sb-forgot").onclick = () => this.action($2("sb-forgot"), async () => {
+      const email = $2("sb-email");
       if (!email.reportValidity() || !email.value) {
         email.focus();
         return;
       }
-      const { error } = await this.client.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: this.callbackUrl() });
+      const client = this.client || await getSupabaseClient();
+      const { error } = await client.auth.resetPasswordForEmail(email.value.trim(), { redirectTo: this.callbackUrl() });
       if (error) throw error;
       this.message("N\u1EBFu email c\xF3 t\xE0i kho\u1EA3n, h\u01B0\u1EDBng d\u1EABn \u0111\u1EB7t l\u1EA1i m\u1EADt kh\u1EA9u s\u1EBD \u0111\u01B0\u1EE3c g\u1EEDi \u0111\u1EBFn h\u1ED9p th\u01B0.");
     });
@@ -3227,10 +3647,10 @@ var SupabaseController = class {
     this.authBox.innerHTML = `<h2>\u0110\u1EB7t m\u1EADt kh\u1EA9u m\u1EDBi</h2><form id="sb-recovery"><label for="sb-new-password">M\u1EADt kh\u1EA9u m\u1EDBi</label>
       <input id="sb-new-password" type="password" minlength="8" required autocomplete="new-password"><p id="sb-message" class="sb-message" role="status"></p>
       <div class="sb-actions"><button id="sb-update-password" class="sb-primary">L\u01B0u m\u1EADt kh\u1EA9u</button></div></form>`;
-    $("sb-recovery").onsubmit = (event) => {
+    $2("sb-recovery").onsubmit = (event) => {
       event.preventDefault();
-      this.action($("sb-update-password"), async () => {
-        const { error } = await this.client.auth.updateUser({ password: $("sb-new-password").value });
+      this.action($2("sb-update-password"), async () => {
+        const { error } = await this.client.auth.updateUser({ password: $2("sb-new-password").value });
         if (error) throw error;
         this.recovery = false;
         history.replaceState(null, "", this.callbackUrl());
@@ -3248,50 +3668,15 @@ var SupabaseController = class {
     return !this.saving && (!this.hasDraft() || confirm("C\xF3 b\u1EA3n nh\xE1p ch\u01B0a l\u01B0u. B\u1EA1n c\xF3 mu\u1ED1n r\u1EDDi gia ph\u1EA3 n\xE0y? H\xE3y xu\u1EA5t JSON tr\u01B0\u1EDBc n\u1EBFu c\u1EA7n sao l\u01B0u."));
   }
   async showPicker() {
-    if (!this.user) {
-      this.showLogin();
-      return;
-    }
-    this.stopPoll();
-    this.overlay();
-    const pickerVersion = this.pickerVersion = (this.pickerVersion || 0) + 1;
-    this.authBox.innerHTML = `<h2>Gia ph\u1EA3 c\u1EE7a b\u1EA1n</h2><div id="sb-lineages"></div><form id="sb-create-lineage">
-      <label for="sb-lineage-name">T\u1EA1o gia ph\u1EA3 m\u1EDBi</label><input id="sb-lineage-name" placeholder="T\xEAn d\xF2ng h\u1ECD / chi nh\xE1nh" required maxlength="200">
-      <div class="sb-actions"><button id="sb-create" class="sb-primary">T\u1EA1o gia ph\u1EA3</button><button type="button" id="sb-picker-logout">\u0110\u0103ng xu\u1EA5t</button></div>
-      <p id="sb-message" role="status" class="sb-message"></p></form>`;
-    $("sb-picker-logout").onclick = () => this.logout();
-    $("sb-create-lineage").onsubmit = (event) => {
-      event.preventDefault();
-      this.action($("sb-create"), async () => {
-        const id = await this.service.create($("sb-lineage-name").value.trim());
-        await this.open(id, "admin");
-      });
-    };
-    try {
-      const rows = await this.service.list(this.user.id);
-      if (pickerVersion !== this.pickerVersion) return;
-      if (!rows.length) $("sb-lineages").textContent = "B\u1EA1n ch\u01B0a c\xF3 gia ph\u1EA3. T\u1EA1o m\u1EDBi ho\u1EB7c m\u1EDF li\xEAn k\u1EBFt m\u1EDDi c\u1EE7a qu\u1EA3n tr\u1ECB.";
-      for (const row of rows) {
-        const button = document.createElement("button");
-        button.dataset.lineageId = row.lineage_id;
-        button.className = "sb-row";
-        button.style.width = "100%";
-        button.style.textAlign = "left";
-        button.textContent = `${row.lineages?.info?.name || "Gia ph\u1EA3"} \xB7 ${roles[row.role]}`;
-        button.onclick = () => this.action(button, () => this.open(row.lineage_id, row.role));
-        $("sb-lineages").appendChild(button);
-      }
-    } catch (error) {
-      this.message(describeError(error));
-    }
+    return this.portal.showMine();
   }
   async open(id, role, state = null) {
     const snapshot = state || await this.service.load(id);
-    this.guest = Boolean(state && this.shareToken);
+    this.guest = Boolean(this.publicSlug || state && this.shareToken);
     this.app.lineageId = id;
     this.app.userRole = role;
     this.app.isAuthenticated = true;
-    this.app.currentUser = { id: this.user?.id || null, username: this.guest ? "Kh\xE1ch (li\xEAn k\u1EBFt)" : this.user.user_metadata?.display_name || this.user.user_metadata?.full_name || this.user.email };
+    this.app.currentUser = { id: this.user?.id || null, username: this.guest ? "Kh\xE1ch (ch\u1EC9 xem)" : this.profile?.display_name || this.user.user_metadata?.display_name || this.user.user_metadata?.full_name || this.user.email };
     if (!this.ready) {
       this.app.setupResponsiveDrawer();
       this.app.setupLeftMenuTabs();
@@ -3312,12 +3697,15 @@ var SupabaseController = class {
     document.querySelectorAll("#inspector-form-wrapper input,#inspector-form-wrapper select,#inspector-form-wrapper textarea").forEach((el) => {
       el.disabled = role === "viewer";
     });
-    if (role === "viewer") $("lineage-title").ondblclick = null;
-    $("btn-open-import").style.display = role === "viewer" ? "none" : "";
-    $("btn-reset-data").style.display = "none";
-    $("btn-save-lineage").onclick = () => this.save();
-    $("btn-inspect-save").onclick = () => this.save();
-    $("auth-overlay").style.display = "none";
+    if (role === "viewer") $2("lineage-title").ondblclick = null;
+    $2("btn-open-import").style.display = role === "viewer" ? "none" : "";
+    $2("btn-reset-data").style.display = "none";
+    $2("btn-save-lineage").onclick = () => this.save();
+    $2("btn-inspect-save").onclick = () => this.save();
+    $2("auth-overlay").style.display = "none";
+    this.portal.screen("workspace");
+    if (state?.slug) history.replaceState(null, "", this.callbackUrl() + "#family=" + encodeURIComponent(state.slug));
+    else if (!this.shareToken) history.replaceState(null, "", this.callbackUrl() + "#tree");
     this.setupNotifications();
   }
   applySnapshot(snapshot) {
@@ -3326,12 +3714,12 @@ var SupabaseController = class {
     this.app.dataStore.initializeTracking();
     this.base = this.capture();
     this.lastSubmitted = null;
-    $("lineage-origin").textContent = String(snapshot.lineageInfo?.origin || "");
+    $2("lineage-origin").textContent = String(snapshot.lineageInfo?.origin || "");
     this.app.updateStatsDisplay();
     setTimeout(() => this.app.canvas.zoomFit(), 100);
   }
   async load() {
-    const state = this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
+    const state = this.publicSlug ? await this.service.openPage(this.publicSlug) : this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
     this.applySnapshot(state);
   }
   async save() {
@@ -3366,19 +3754,13 @@ var SupabaseController = class {
     }
   }
   installNavigation() {
-    const host = $("user-display").parentElement;
+    const host = $2("user-display").parentElement;
     const switcher = document.createElement("button");
     switcher.className = "sb-button";
     switcher.id = "sb-switch";
     switcher.textContent = "Gia ph\u1EA3 c\u1EE7a t\xF4i";
-    switcher.onclick = () => {
-      if (this.canLeave()) {
-        this.guest = false;
-        this.shareToken = null;
-        history.replaceState(null, "", this.callbackUrl());
-        this.showPicker();
-      }
-    };
+    switcher.textContent = "Trang ch\u1EE7";
+    switcher.onclick = () => this.portal.go("home");
     const reload = document.createElement("button");
     reload.className = "sb-button";
     reload.textContent = "T\u1EA3i l\u1EA1i";
@@ -3393,15 +3775,6 @@ var SupabaseController = class {
     }
   }
   setupLogout() {
-    $("btn-logout").textContent = this.guest ? this.user ? "Gia ph\u1EA3 c\u1EE7a t\xF4i" : "\u0110\u0103ng nh\u1EADp" : "\u0110\u0103ng xu\u1EA5t";
-    $("btn-logout").onclick = () => {
-      if (this.guest) {
-        this.guest = false;
-        this.shareToken = null;
-        history.replaceState(null, "", this.callbackUrl());
-        this.user ? this.showPicker() : this.showLogin();
-      } else this.logout();
-    };
   }
   async logout() {
     if (!this.canLeave()) return;
@@ -3410,16 +3783,21 @@ var SupabaseController = class {
       const { error } = await this.client.auth.signOut();
       if (error) throw error;
       this.user = null;
+      this.profile = null;
       this.base = null;
       this.guest = false;
+      this.publicSlug = null;
+      this.shareToken = null;
       this.stopPoll();
       this.app.dataStore.loadState({ lineageInfo: { name: "", total_members: 0, generations: 0 }, members: [] });
       this.app.isAuthenticated = false;
       this.app.lineageId = null;
-      $("share-panel-overlay").classList.add("hidden");
-      $("edit-request-overlay").classList.add("hidden");
-      $("notification-dropdown").classList.add("hidden");
-      this.showLogin();
+      $2("share-panel-overlay").classList.add("hidden");
+      $2("edit-request-overlay").classList.add("hidden");
+      $2("notification-dropdown").classList.add("hidden");
+      sessionStorage.removeItem("giapha_return");
+      sessionStorage.removeItem("giapha_invite");
+      await this.portal.go("home");
     } catch (error) {
       this.app.showToast(describeError(error), "error");
     } finally {
@@ -3427,7 +3805,7 @@ var SupabaseController = class {
     }
   }
   setupSharing() {
-    const overlay = $("share-panel-overlay");
+    const overlay = $2("share-panel-overlay");
     overlay.innerHTML = `<div class="sb-card" style="width:min(95vw,640px);max-height:85vh;overflow:auto">
       <h2>Chia s\u1EBB v\xE0 ph\xEA duy\u1EC7t</h2><p class="sb-message">Link ch\u1EC9 xem c\xF3 h\u1EA1n 7 ng\xE0y v\xE0 kh\xF4ng hi\u1EC3n th\u1ECB ghi ch\xFA. Link m\u1EDDi d\xF9ng m\u1ED9t l\u1EA7n, c\u1EA7n \u0111\u0103ng nh\u1EADp.</p>
       <div class="sb-actions"><button id="sb-share-view">T\u1EA1o link ch\u1EC9 xem</button><select id="sb-invite-role" style="width:auto"><option value="viewer">M\u1EDDi ng\u01B0\u1EDDi xem</option><option value="editor">M\u1EDDi ng\u01B0\u1EDDi ch\u1EC9nh s\u1EEDa</option></select><button id="sb-invite">T\u1EA1o link m\u1EDDi</button><button id="sb-share-close">\u0110\xF3ng</button></div>
@@ -3438,11 +3816,11 @@ var SupabaseController = class {
       overlay.classList.add("hidden");
       overlay.classList.remove("flex");
     };
-    $("sb-share-close").onclick = close;
+    $2("sb-share-close").onclick = close;
     overlay.onclick = (event) => {
       if (event.target === overlay) close();
     };
-    $("btn-open-share").onclick = async () => {
+    $2("btn-open-share").onclick = async () => {
       overlay.classList.remove("hidden");
       overlay.classList.add("flex");
       try {
@@ -3455,14 +3833,14 @@ var SupabaseController = class {
       const token = await this.service.link(this.app.lineageId, kind, role);
       const url = new URL(this.callbackUrl());
       url.hash = new URLSearchParams({ [kind === "share" ? "share" : "invite"]: token });
-      $("sb-link-result").value = url.href;
+      $2("sb-link-result").value = url.href;
       await this.refreshSharing();
     });
-    $("sb-share-view").onclick = () => create($("sb-share-view"), "share", "viewer");
-    $("sb-invite").onclick = () => create($("sb-invite"), "invite", $("sb-invite-role").value);
-    $("sb-copy-link").onclick = () => this.action($("sb-copy-link"), async () => {
-      if ($("sb-link-result").value) {
-        await navigator.clipboard.writeText($("sb-link-result").value);
+    $2("sb-share-view").onclick = () => create($2("sb-share-view"), "share", "viewer");
+    $2("sb-invite").onclick = () => create($2("sb-invite"), "invite", $2("sb-invite-role").value);
+    $2("sb-copy-link").onclick = () => this.action($2("sb-copy-link"), async () => {
+      if ($2("sb-link-result").value) {
+        await navigator.clipboard.writeText($2("sb-link-result").value);
         this.app.showToast("\u0110\xE3 sao ch\xE9p.");
       }
     });
@@ -3486,18 +3864,18 @@ var SupabaseController = class {
   async refreshSharing() {
     const id = this.app.lineageId;
     const [links, access, requests] = await Promise.all([this.service.links(id), this.service.accessList(id), this.service.requests(id)]);
-    $("sb-links").replaceChildren();
-    $("sb-access").replaceChildren();
-    $("sb-requests").replaceChildren();
+    $2("sb-links").replaceChildren();
+    $2("sb-access").replaceChildren();
+    $2("sb-requests").replaceChildren();
     for (const link of links) {
-      const row = this.row($("sb-links"), `${link.kind === "share" ? "Ch\u1EC9 xem" : "L\u1EDDi m\u1EDDi"} \xB7 ${roles[link.role]} \xB7 h\u1EBFt h\u1EA1n ${new Date(link.expires_at).toLocaleString("vi-VN")} \xB7 ${link.revoked ? "\u0110\xE3 thu h\u1ED3i" : link.used_at ? "\u0110\xE3 d\xF9ng" : "Ch\u01B0a thu h\u1ED3i"}`);
+      const row = this.row($2("sb-links"), `${link.kind === "share" ? "Ch\u1EC9 xem" : "L\u1EDDi m\u1EDDi"} \xB7 ${roles[link.role]} \xB7 h\u1EBFt h\u1EA1n ${new Date(link.expires_at).toLocaleString("vi-VN")} \xB7 ${link.revoked ? "\u0110\xE3 thu h\u1ED3i" : link.used_at ? "\u0110\xE3 d\xF9ng" : "Ch\u01B0a thu h\u1ED3i"}`);
       if (!link.revoked) this.button(row, "Thu h\u1ED3i", async () => {
         await this.service.revoke(link.id);
         await this.refreshSharing();
       });
     }
     for (const item of access) {
-      const row = this.row($("sb-access"), `${item.user_id === this.user.id ? "B\u1EA1n" : "Th\xE0nh vi\xEAn " + item.user_id} \xB7 ${roles[item.role]}`);
+      const row = this.row($2("sb-access"), `${item.user_id === this.user.id ? "B\u1EA1n" : "Th\xE0nh vi\xEAn " + item.user_id} \xB7 ${roles[item.role]}`);
       const select = document.createElement("select");
       select.style.width = "auto";
       for (const [value, label] of Object.entries(roles)) {
@@ -3512,7 +3890,7 @@ var SupabaseController = class {
         await this.service.access(id, item.user_id, select.value);
         if (item.user_id === this.user.id) {
           await this.showPicker();
-          $("share-panel-overlay").classList.add("hidden");
+          $2("share-panel-overlay").classList.add("hidden");
         } else await this.refreshSharing();
       });
       this.button(row, "X\xF3a quy\u1EC1n", async () => {
@@ -3520,15 +3898,15 @@ var SupabaseController = class {
           await this.service.access(id, item.user_id, null);
           if (item.user_id === this.user.id) {
             await this.showPicker();
-            $("share-panel-overlay").classList.add("hidden");
+            $2("share-panel-overlay").classList.add("hidden");
           } else await this.refreshSharing();
         }
       });
     }
-    for (const request of requests) this.renderRequest($("sb-requests"), request, true);
-    if (!requests.length) this.row($("sb-requests"), "Ch\u01B0a c\xF3 \u0111\u1EC1 xu\u1EA5t.");
+    for (const request of requests) this.renderRequest($2("sb-requests"), request, true);
+    if (!requests.length) this.row($2("sb-requests"), "Ch\u01B0a c\xF3 \u0111\u1EC1 xu\u1EA5t.");
   }
-  renderRequest(container, request, admin) {
+  renderRequest(container, request, admin, onReviewed = null) {
     const status = { pending: "Ch\u1EDD duy\u1EC7t", approved: "\u0110\xE3 duy\u1EC7t", rejected: "\u0110\xE3 t\u1EEB ch\u1ED1i" };
     const row = this.row(container, `${request.title} \xB7 ${status[request.status]} \xB7 ${new Date(request.created_at).toLocaleString("vi-VN")}`);
     const details = document.createElement("details");
@@ -3547,20 +3925,24 @@ var SupabaseController = class {
       this.button(row, "Duy\u1EC7t", async () => {
         if (this.hasDraft()) throw new Error("H\xE3y l\u01B0u ho\u1EB7c xu\u1EA5t b\u1EA3n nh\xE1p tr\u01B0\u1EDBc khi duy\u1EC7t \u0111\u1EC1 xu\u1EA5t.");
         await this.service.review(request.id, true);
-        await this.load();
-        await this.refreshSharing();
+        if (onReviewed) await onReviewed();
+        else {
+          await this.load();
+          await this.refreshSharing();
+        }
       });
       this.button(row, "T\u1EEB ch\u1ED1i", async () => {
         const reason = prompt("L\xFD do t\u1EEB ch\u1ED1i:", "");
         if (reason !== null) {
           await this.service.review(request.id, false, reason);
-          await this.refreshSharing();
+          if (onReviewed) await onReviewed();
+          else await this.refreshSharing();
         }
       });
     }
   }
   setupProposal() {
-    const overlay = $("edit-request-overlay");
+    const overlay = $2("edit-request-overlay");
     overlay.innerHTML = `<div class="sb-card" style="width:min(95vw,460px);max-height:85vh;overflow:auto"><h2>\u0110\u1EC1 xu\u1EA5t ch\u1EC9nh s\u1EEDa</h2><form id="sb-proposal">
       <label for="sb-proposal-type">Thao t\xE1c</label><select id="sb-proposal-type"><option value="update_member">S\u1EEDa th\xF4ng tin</option><option value="add_member">Th\xEAm th\xE0nh vi\xEAn</option><option value="delete_member">X\xF3a th\xE0nh vi\xEAn</option></select>
       <label for="sb-proposal-member">Th\xE0nh vi\xEAn / m\xE3 cha m\u1EB9 khi th\xEAm</label><select id="sb-proposal-member"></select>
@@ -3568,16 +3950,16 @@ var SupabaseController = class {
       <label for="sb-proposal-value">Gi\xE1 tr\u1ECB m\u1EDBi / h\u1ECD t\xEAn ng\u01B0\u1EDDi th\xEAm</label><input id="sb-proposal-value" maxlength="5000">
       <label for="sb-proposal-reason">L\xFD do</label><textarea id="sb-proposal-reason" required maxlength="500"></textarea>
       <p id="sb-proposal-error" class="sb-message" role="status"></p><div class="sb-actions"><button id="sb-proposal-send" class="sb-primary">G\u1EEDi \u0111\u1EC1 xu\u1EA5t</button><button id="sb-proposal-close" type="button">\u0110\xF3ng</button></div></form></div>`;
-    $("sb-proposal-close").onclick = () => {
+    $2("sb-proposal-close").onclick = () => {
       overlay.classList.add("hidden");
       overlay.classList.remove("flex");
     };
-    $("btn-request-edit").onclick = () => {
+    $2("btn-request-edit").onclick = () => {
       if (this.guest || !this.user) {
         this.app.showToast("H\xE3y \u0111\u0103ng nh\u1EADp v\xE0 nh\u1EADn quy\u1EC1n qua li\xEAn k\u1EBFt m\u1EDDi \u0111\u1EC3 g\u1EEDi \u0111\u1EC1 xu\u1EA5t.", "error");
         return;
       }
-      const select = $("sb-proposal-member");
+      const select = $2("sb-proposal-member");
       select.replaceChildren();
       const root = document.createElement("option");
       root.value = "";
@@ -3590,17 +3972,17 @@ var SupabaseController = class {
         select.appendChild(option);
       }
       select.value = this.app.dataStore.selectedMemberId || "";
-      $("sb-proposal-error").textContent = "";
+      $2("sb-proposal-error").textContent = "";
       overlay.classList.remove("hidden");
       overlay.classList.add("flex");
     };
-    $("sb-proposal").onsubmit = (event) => {
+    $2("sb-proposal").onsubmit = (event) => {
       event.preventDefault();
-      this.action($("sb-proposal-send"), async () => {
+      this.action($2("sb-proposal-send"), async () => {
         try {
-          const type = $("sb-proposal-type").value;
-          const id = $("sb-proposal-member").value;
-          const value = $("sb-proposal-value").value.trim();
+          const type = $2("sb-proposal-type").value;
+          const id = $2("sb-proposal-member").value;
+          const value = $2("sb-proposal-value").value.trim();
           if (type !== "add_member" && !id) throw new Error("Vui l\xF2ng ch\u1ECDn th\xE0nh vi\xEAn.");
           if (type !== "delete_member" && !value) throw new Error("Vui l\xF2ng nh\u1EADp gi\xE1 tr\u1ECB m\u1EDBi.");
           let change;
@@ -3608,12 +3990,12 @@ var SupabaseController = class {
             const parent = this.app.dataStore.getMember(id);
             change = { type, new_value: { id: "P" + crypto.randomUUID(), full_name: value, parent_id: id || "-", generation: String(Number(parent?.generation || 0) + 1), gender: "Nam" } };
           } else if (type === "delete_member") change = { type, member_id: id };
-          else change = { type, member_id: id, new_value: { [$("sb-proposal-field").value]: value } };
-          await this.service.submit(this.app.lineageId, this.revision, [change], $("sb-proposal-reason").value.trim());
+          else change = { type, member_id: id, new_value: { [$2("sb-proposal-field").value]: value } };
+          await this.service.submit(this.app.lineageId, this.revision, [change], $2("sb-proposal-reason").value.trim());
           overlay.classList.add("hidden");
           this.app.showToast("\u0110\xE3 g\u1EEDi \u0111\u1EC1 xu\u1EA5t ch\u1EDD qu\u1EA3n tr\u1ECB duy\u1EC7t.", "success");
         } catch (error) {
-          $("sb-proposal-error").textContent = describeError(error);
+          $2("sb-proposal-error").textContent = describeError(error);
           throw error;
         }
       });
@@ -3625,14 +4007,11 @@ var SupabaseController = class {
   }
   setupNotifications() {
     this.stopPoll();
-    const host = $("notification-bell-wrapper");
+    const host = $2("notification-bell-wrapper");
     host.classList.toggle("hidden", Boolean(this.guest));
     host.classList.toggle("flex", !this.guest);
     if (this.guest || !this.app.lineageId) return;
-    $("btn-notification-bell").onclick = () => {
-      $("notification-dropdown").classList.toggle("hidden");
-      this.refreshNotifications();
-    };
+    $2("btn-notification-bell").onclick = () => this.portal.go("requests");
     this.refreshNotifications();
     this.poll = setInterval(() => {
       if (!document.hidden && this.user) this.refreshNotifications();
@@ -3644,12 +4023,12 @@ var SupabaseController = class {
       const requests = await this.service.requests(id);
       if (id !== this.app.lineageId) return;
       const pending = requests.filter((r) => r.status === "pending").length;
-      $("notification-badge").textContent = String(pending);
-      $("notification-badge").classList.toggle("hidden", !pending);
-      $("notification-count").textContent = `${pending} \u0111\u1EC1 xu\u1EA5t ch\u1EDD duy\u1EC7t`;
-      $("notification-list").replaceChildren();
-      for (const request of requests.slice(0, 20)) this.renderRequest($("notification-list"), request, false);
-      if (!requests.length) this.row($("notification-list"), "Ch\u01B0a c\xF3 \u0111\u1EC1 xu\u1EA5t.");
+      $2("notification-badge").textContent = String(pending);
+      $2("notification-badge").classList.toggle("hidden", !pending);
+      $2("notification-count").textContent = `${pending} \u0111\u1EC1 xu\u1EA5t ch\u1EDD duy\u1EC7t`;
+      $2("notification-list").replaceChildren();
+      for (const request of requests.slice(0, 20)) this.renderRequest($2("notification-list"), request, false);
+      if (!requests.length) this.row($2("notification-list"), "Ch\u01B0a c\xF3 \u0111\u1EC1 xu\u1EA5t.");
     } catch (error) {
     }
   }

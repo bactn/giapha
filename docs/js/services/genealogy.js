@@ -62,6 +62,27 @@ export class GenealogyService {
   shared(token) { return this.rpc('read_shared_lineage', { p_token: token }); }
   links(id) { return this.rpc('list_access_links', { p_lineage_id: id }); }
   revoke(id) { return this.rpc('revoke_access_link', { p_link_id: id }); }
+  publicLineages(search = '') { return this.rpc('list_public_lineages', { p_search: search }); }
+  openPage(slug) { return this.rpc('open_lineage_page', { p_slug: slug }); }
+  publish(id, fields) { return this.rpc('set_lineage_publication', { p_lineage_id: id, p_slug: fields.slug, p_intro: fields.intro, p_region: fields.region, p_is_public: fields.is_public }); }
+  saveProfile(profile) { return this.rpc('save_my_profile', { p_display_name: profile.display_name, p_phone: profile.phone, p_address: profile.address }); }
+  async profile(userId) {
+    const { data, error } = await this.client.from('profiles').select('display_name,phone,address').eq('id', userId).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  async publication(id) {
+    const { data, error } = await this.client.from('lineage_publications').select('slug,title,intro,region,is_public').eq('lineage_id', id).maybeSingle();
+    if (error) throw error;
+    return data;
+  }
+  async requestPage(id, status, page = 0) {
+    let query = this.client.from('change_requests').select('id,lineage_id,title,submitted_by,base_revision,changes,status,created_at,reviewed_at,rejection_reason', { count: 'exact' }).eq('lineage_id', id);
+    if (status !== 'all') query = query.eq('status', status);
+    const { data, count, error } = await query.order('created_at', { ascending: false }).range(page * 20, page * 20 + 19);
+    if (error) throw error;
+    return { rows: data, count };
+  }
   access(id, userId, role) { return this.rpc('set_lineage_access', { p_lineage_id: id, p_user_id: userId, p_role: role }); }
 
   async accessList(id) {

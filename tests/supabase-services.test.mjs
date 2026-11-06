@@ -4,6 +4,7 @@ import { snapshotChanges, describeError } from '../public/js/services/genealogy.
 import { DataStore } from '../public/js/data-store.js';
 import { escapeHTML } from '../public/js/html.js';
 import { startGoogleOAuth, oauthReturnMessage } from '../public/js/services/auth.js';
+import { slugify, portalRoute } from '../public/js/portal.js';
 
 test('snapshot diff includes new fields and info changes without derived statistics noise', () => {
   const before = { lineageInfo: { name: 'Family', total_members: 1 }, members: [{ id: 'A', full_name: 'Old' }] };
@@ -76,4 +77,13 @@ test('OAuth cancellation is readable and does not echo untrusted callback descri
   assert.match(oauthReturnMessage('https://bactn.github.io/giapha/index.html?error=server_error&error_description=private-data'), /Không thể/);
   assert(!oauthReturnMessage('https://bactn.github.io/giapha/index.html#error=server_error&error_description=private-data').includes('private-data'));
   assert.equal(oauthReturnMessage('https://bactn.github.io/giapha/index.html#invite=token'), '');
+});
+
+test('portal links remain compatible with Pages, including Vietnamese slugs and old share links', () => {
+  assert.equal(slugify('Họ Trần Ngọc — Chi 2'), 'ho-tran-ngoc-chi-2');
+  assert.deepEqual(portalRoute('#family=ho-tran-ngoc'), { page: 'family', value: 'ho-tran-ngoc' });
+  assert.equal(portalRoute('#account').page, 'account');
+  assert.equal(portalRoute('#requests').page, 'requests');
+  assert.deepEqual(portalRoute('#share=legacy-token'), { page: 'share', value: 'legacy-token' });
+  assert.deepEqual(portalRoute('#invite=invitation'), { page: 'invite', value: 'invitation' });
 });
