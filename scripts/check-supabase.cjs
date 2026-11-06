@@ -14,6 +14,7 @@ async function main() {
     throw new Error('Unexpected response from Supabase Auth. Check the project URL.');
   }
   console.log(`Connected to Supabase Auth: ${new URL(config.url).host}`);
+  console.log(`Google sign-in provider: ${settings.external.google === true ? 'enabled' : 'disabled'}.`);
   console.log('Project URL and public key accepted. This check does not verify database migrations, RLS or user permissions.');
 }
 

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { snapshotChanges, describeError } from '../public/js/services/genealogy.js';
 import { DataStore } from '../public/js/data-store.js';
 import { escapeHTML } from '../public/js/html.js';
+import { startGoogleOAuth, oauthReturnMessage } from '../public/js/services/auth.js';
 
 test('snapshot diff includes new fields and info changes without derived statistics noise', () => {
   const before = { lineageInfo: { name: 'Family', total_members: 1 }, members: [{ id: 'A', full_name: 'Old' }] };
@@ -45,4 +46,34 @@ test('untrusted text is escaped for HTML and quoted attributes', () => {
 test('business conflicts instruct users to keep drafts and reconcile', () => {
   assert.match(describeError({ code: 'PT409' }), /Bản nháp vẫn được giữ/);
   assert.match(describeError({ code: '40001' }), /đối chiếu/);
+});
+
+test('Google login stays on the app when the hosted provider is disabled', async () => {
+  let redirected = false;
+  const client = { auth: { signInWithOAuth: async () => { redirected = true; } } };
+  await assert.rejects(startGoogleOAuth(client, { url: 'https://project.supabase.co', publishableKey: 'public-key' },
+    'https://bactn.github.io/giapha/index.html', async () => ({ ok: true, json: async () => ({ external: { google: false } }) })), /chưa sẵn sàng/);
+  assert.equal(redirected, false);
+});
+
+test('Google OAuth returns to the Pages subpath and only requests basic identity scopes', async () => {
+  let request;
+  const client = { auth: { signInWithOAuth: async options => { request = options; return { error: null }; } } };
+  await startGoogleOAuth(client, { url: 'https://project.supabase.co', publishableKey: 'public-key' },
+    'https://bactn.github.io/giapha/index.html', async (url, options) => {
+      assert.equal(url, 'https://project.supabase.co/auth/v1/settings');
+      assert.deepEqual(options.headers, { apikey: 'public-key' });
+      return { ok: true, json: async () => ({ external: { google: true } }) };
+    });
+  assert.equal(request.provider, 'google');
+  assert.equal(request.options.redirectTo, 'https://bactn.github.io/giapha/index.html');
+  assert.equal(request.options.scopes, 'openid email profile');
+  assert.equal(request.options.queryParams.prompt, 'select_account');
+});
+
+test('OAuth cancellation is readable and does not echo untrusted callback descriptions', () => {
+  assert.match(oauthReturnMessage('https://bactn.github.io/giapha/index.html#error=access_denied'), /hủy/);
+  assert.match(oauthReturnMessage('https://bactn.github.io/giapha/index.html?error=server_error&error_description=private-data'), /Không thể/);
+  assert(!oauthReturnMessage('https://bactn.github.io/giapha/index.html#error=server_error&error_description=private-data').includes('private-data'));
+  assert.equal(oauthReturnMessage('https://bactn.github.io/giapha/index.html#invite=token'), '');
 });

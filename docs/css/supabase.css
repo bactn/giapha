@@ -5,6 +5,12 @@
 .sb-card button,.sb-button { padding:.55rem .8rem; border-radius:.5rem; background:#f1f5f9; font-size:.8rem; font-weight:600; cursor:pointer; }
 .sb-card button:disabled { opacity:.5; cursor:wait; }
 .sb-card .sb-primary { background:#b45309; color:white; }
+.sb-card .sb-google { width:100%; display:flex; align-items:center; justify-content:center; gap:.75rem; min-height:44px; background:white; color:#1f2937; border:1px solid #cbd5e1; }
+.sb-card .sb-google:hover { background:#f8fafc; border-color:#94a3b8; }
+.sb-card button:focus-visible { outline:2px solid #2563eb; outline-offset:2px; }
+.sb-auth-hint { font-size:.75rem; color:#64748b; line-height:1.5; margin:.5rem 0 1rem; }
+.sb-auth-divider { display:flex; align-items:center; gap:.75rem; color:#64748b; font-size:.72rem; }
+.sb-auth-divider::before,.sb-auth-divider::after { content:''; flex:1; height:1px; background:#e2e8f0; }
 .sb-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.75rem; }
 .sb-message { margin:.75rem 0; font-size:.8rem; color:#92400e; white-space:pre-wrap; }
 .sb-row { padding:.75rem 0; border-bottom:1px solid #e2e8f0; overflow-wrap:anywhere; font-size:.8rem; }

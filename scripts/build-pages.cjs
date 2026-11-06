@@ -24,7 +24,11 @@ const indexPath = path.join(output, 'index.html');
 const html = fs.readFileSync(indexPath, 'utf8')
   .replaceAll('href="/css/', 'href="./css/')
   .replaceAll('src="/js/', 'src="./js/');
-fs.writeFileSync(indexPath, html);
+const versionedHtml = html.replace(/href="\.\/css\/([^"?]+\.css)(?:\?[^\"]*)?"/g, (attribute, filename) => {
+  const version = crypto.createHash('sha256').update(fs.readFileSync(path.join(output, 'css', filename))).digest('hex').slice(0, 16);
+  return `href="./css/${filename}?v=${version}"`;
+});
+fs.writeFileSync(indexPath, versionedHtml);
 fs.writeFileSync(path.join(output, 'js/config.js'),
   `export const config = ${JSON.stringify({ apiBaseUrl, staticHosting: true, supabase })};\n`);
 // Bundle the application from the generated directory so its config is included.
@@ -41,7 +45,7 @@ require('esbuild').buildSync({
   outfile: appBundle
 });
 const appVersion = crypto.createHash('sha256').update(fs.readFileSync(appBundle)).digest('hex').slice(0, 16);
-fs.writeFileSync(indexPath, html.replace(/src="\.\/js\/app\.js[^" ]*"/, `src="./js/app.bundle.js?v=${appVersion}"`));
+fs.writeFileSync(indexPath, versionedHtml.replace(/src="\.\/js\/app\.js[^" ]*"/, `src="./js/app.bundle.js?v=${appVersion}"`));
 require('esbuild').buildSync({
   stdin: {
     contents: "export { createClient } from '@supabase/supabase-js';",

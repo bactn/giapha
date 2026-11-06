@@ -71,9 +71,24 @@ Sau khi kết thúc thử nghiệm có thể bỏ hai redirect cổng 8092. Nế
 mở ở trình duyệt khác, đăng nhập bằng email/mật khẩu trên trình duyệt đang dùng.
 Tài khoản vừa tạo không tự có quyền gia phả khác; cần lời mời hoặc admin cấp quyền.
 
+## Đăng nhập Google
+
+Giao diện có nút **Tiếp tục với Google** cho đăng nhập và đăng ký. Chỉ yêu cầu
+`openid email profile`; không xin quyền đọc thư Gmail. Google provider đã bật
+trên Supabase khi kiểm tra ngày 06/11/2026. Hướng dẫn cấu hình và nghiệm thu tại
+[google-login-setup.md](google-login-setup.md).
+
+OAuth trở về `index.html` dưới cùng thư mục Pages; SDK tiếp nhận phiên đăng nhập.
+Lời mời đang mở được giữ trong sessionStorage qua bước chuyển trang. Nếu người
+dùng hủy hoặc provider chưa bật, giao diện báo lỗi và vẫn cho dùng email/mật khẩu.
+Danh tính cùng email đã xác minh được Supabase xử lý liên kết; client không tự
+gộp tài khoản hoặc cấp quyền gia phả theo email/tên Google.
+
 ## Vận hành còn cần hoàn tất
 
-1. **SMTP riêng** trước khi mời người ngoài nhóm Supabase đăng ký. Dashboard hiện
+1. **SMTP riêng** cho đăng ký/xác nhận bằng email và khôi phục mật khẩu của người
+   ngoài nhóm Supabase. Đăng nhập Google không cần gửi email xác nhận qua SMTP.
+   Dashboard hiện
    dùng email mặc định; dịch vụ này chỉ gửi tới email thành viên nhóm và giới hạn
    thấp. Cấu hình host/port/user/password/sender tại Auth → Emails → SMTP Settings.
    Chủ tài khoản tự nhập bí mật SMTP, không đưa vào repository/frontend.
@@ -90,7 +105,7 @@ Tài khoản vừa tạo không tự có quyền gia phả khác; cần lời m�
 
 ## Kiểm chứng
 
-- 13 kiểm tra cấu hình, validation, diff, giữ bản nháp, viewer và escape HTML.
+- 16 kiểm tra cấu hình, validation, diff, giữ bản nháp, viewer, escape HTML và OAuth.
 - 36 kiểm tra trực tiếp Auth/Data API/RPC trên tài khoản thử: lưu/duyệt/quyền,
   stale revision HTTP 409, rollback, mời một lần, chia sẻ và thu hồi.
 - SQL `supabase/tests/genealogy_rls.sql`: cô lập gia phả, chống tự nâng quyền,

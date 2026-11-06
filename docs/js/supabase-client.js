@@ -1,6 +1,11 @@
 import { config } from './config.js';
+import { startGoogleOAuth } from './services/auth.js';
 
 let clientPromise;
+
+export async function signInWithGoogle(redirectTo) {
+  return startGoogleOAuth(await getSupabaseClient(), config.supabase, redirectTo);
+}
 
 export function isSupabaseConfigured() {
   return Boolean(config.supabase?.url && config.supabase?.publishableKey);

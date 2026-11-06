@@ -2898,8 +2898,37 @@ function shareUrl(token) {
   return url.href;
 }
 
+// dist/js/services/auth.js
+async function startGoogleOAuth(client, project, redirectTo, fetchImpl = fetch) {
+  const response = await fetchImpl(`${project.url}/auth/v1/settings`, {
+    headers: { apikey: project.publishableKey },
+    signal: AbortSignal.timeout(1e4)
+  });
+  if (!response.ok) throw new Error("Kh\xF4ng th\u1EC3 k\u1EBFt n\u1ED1i d\u1ECBch v\u1EE5 \u0111\u0103ng nh\u1EADp. Vui l\xF2ng th\u1EED l\u1EA1i.");
+  const settings = await response.json();
+  if (settings.external?.google !== true) {
+    throw new Error("\u0110\u0103ng nh\u1EADp Google ch\u01B0a s\u1EB5n s\xE0ng. Vui l\xF2ng d\xF9ng email v\xE0 m\u1EADt kh\u1EA9u ho\u1EB7c th\u1EED l\u1EA1i sau.");
+  }
+  const { error } = await client.auth.signInWithOAuth({
+    provider: "google",
+    options: { redirectTo, scopes: "openid email profile", queryParams: { prompt: "select_account" } }
+  });
+  if (error) throw error;
+}
+function oauthReturnMessage(href) {
+  const url = new URL(href);
+  const hash = new URLSearchParams(url.hash.slice(1));
+  const code = hash.get("error_code") || hash.get("error") || url.searchParams.get("error_code") || url.searchParams.get("error");
+  if (!code) return "";
+  if (code === "access_denied") return "\u0110\u0103ng nh\u1EADp Google \u0111\xE3 b\u1ECB h\u1EE7y ho\u1EB7c ch\u01B0a \u0111\u01B0\u1EE3c cho ph\xE9p. B\u1EA1n c\xF3 th\u1EC3 th\u1EED l\u1EA1i.";
+  return "Kh\xF4ng th\u1EC3 ho\xE0n t\u1EA5t \u0111\u0103ng nh\u1EADp Google. Vui l\xF2ng th\u1EED l\u1EA1i ho\u1EB7c d\xF9ng email v\xE0 m\u1EADt kh\u1EA9u.";
+}
+
 // dist/js/supabase-client.js
 var clientPromise;
+async function signInWithGoogle(redirectTo) {
+  return startGoogleOAuth(await getSupabaseClient(), config.supabase, redirectTo);
+}
 function isSupabaseConfigured() {
   return Boolean(config.supabase?.url && config.supabase?.publishableKey);
 }
@@ -3045,6 +3074,7 @@ var SupabaseController = class {
         event.returnValue = "";
       }
     });
+    const oauthMessage = oauthReturnMessage(location.href);
     try {
       this.client = await getSupabaseClient();
       this.service = new GenealogyService(this.client);
@@ -3062,6 +3092,11 @@ var SupabaseController = class {
           queueMicrotask(() => this.restore().catch((error) => this.showLogin(describeError(error))));
         }
       });
+      if (oauthMessage) {
+        history.replaceState(null, "", this.callbackUrl());
+        this.showLogin(oauthMessage);
+        return;
+      }
       const params = new URLSearchParams(location.hash.slice(1));
       const query = new URLSearchParams(location.search);
       const invite = params.get("invite") || query.get("invite");
@@ -3129,7 +3164,14 @@ var SupabaseController = class {
   }
   showLogin(message = "") {
     this.overlay();
-    this.authBox.innerHTML = `<h2>\u0110\u0103ng nh\u1EADp gia ph\u1EA3</h2><form id="sb-login">
+    this.authBox.innerHTML = `<h2>\u0110\u0103ng nh\u1EADp ho\u1EB7c t\u1EA1o t\xE0i kho\u1EA3n</h2>
+      <button id="sb-google" class="sb-google" type="button">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.18v5.14h6.61c3.87-3.56 6.08-8.81 6.08-14.82Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.82 13.53-4.95l-6.61-5.14c-1.83 1.23-4.17 1.96-6.92 1.96-5.32 0-9.83-3.59-11.44-8.42H5.73v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.56 27.45a12 12 0 0 1 0-6.9v-5.3H5.73a20 20 0 0 0 0 17.5l6.83-5.3Z"/><path fill="#EA4335" d="M24 12.13c3 0 5.69 1.03 7.8 3.05l5.86-5.86A19.6 19.6 0 0 0 24 4 20 20 0 0 0 5.73 15.25l6.83 5.3C14.17 15.72 18.68 12.13 24 12.13Z"/></svg>
+        <span>Ti\u1EBFp t\u1EE5c v\u1EDBi Google</span>
+      </button>
+      <p class="sb-auth-hint">D\xF9ng t\xE0i kho\u1EA3n Google (Gmail) \u0111\u1EC3 \u0111\u0103ng nh\u1EADp ho\u1EB7c \u0111\u0103ng k\xFD nhanh.</p>
+      <div class="sb-auth-divider"><span>ho\u1EB7c d\xF9ng email v\xE0 m\u1EADt kh\u1EA9u</span></div>
+      <form id="sb-login">
       <label for="sb-email">Email</label><input id="sb-email" type="email" autocomplete="username" required>
       <label for="sb-password">M\u1EADt kh\u1EA9u</label><input id="sb-password" type="password" autocomplete="current-password" minlength="8" required>
       <label for="sb-name">T\xEAn hi\u1EC3n th\u1ECB (khi t\u1EA1o t\xE0i kho\u1EA3n)</label><input id="sb-name" autocomplete="nickname" maxlength="200">
@@ -3137,6 +3179,7 @@ var SupabaseController = class {
       <div class="sb-actions"><button id="sb-signin" class="sb-primary" type="submit">\u0110\u0103ng nh\u1EADp</button>
       <button id="sb-signup" type="button">T\u1EA1o t\xE0i kho\u1EA3n</button><button id="sb-forgot" type="button">Qu\xEAn m\u1EADt kh\u1EA9u</button></div></form>`;
     this.message(message);
+    $("sb-google").onclick = () => this.action($("sb-google"), () => signInWithGoogle(this.callbackUrl()));
     $("sb-login").onsubmit = (event) => {
       event.preventDefault();
       this.action($("sb-signin"), async () => {
@@ -3248,7 +3291,7 @@ var SupabaseController = class {
     this.app.lineageId = id;
     this.app.userRole = role;
     this.app.isAuthenticated = true;
-    this.app.currentUser = { id: this.user?.id || null, username: this.guest ? "Kh\xE1ch (li\xEAn k\u1EBFt)" : this.user.user_metadata?.display_name || this.user.email };
+    this.app.currentUser = { id: this.user?.id || null, username: this.guest ? "Kh\xE1ch (li\xEAn k\u1EBFt)" : this.user.user_metadata?.display_name || this.user.user_metadata?.full_name || this.user.email };
     if (!this.ready) {
       this.app.setupResponsiveDrawer();
       this.app.setupLeftMenuTabs();
