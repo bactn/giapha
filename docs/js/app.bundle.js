@@ -3021,6 +3021,9 @@ var GenealogyService = class {
   revoke(id) {
     return this.rpc("revoke_access_link", { p_link_id: id });
   }
+  canRead(id, shareToken = null, publicSlug = null) {
+    return this.rpc("can_read_lineage", { p_lineage_id: id, p_share_token: shareToken, p_public_slug: publicSlug });
+  }
   publicLineages(search = "") {
     return this.rpc("list_public_lineages", { p_search: search });
   }
@@ -4070,9 +4073,8 @@ var SupabaseController = class {
     const screen = this.portal.sequence;
     if (!id || document.body.dataset.screen !== "workspace") return;
     try {
-      if (this.publicSlug) await this.service.openPage(this.publicSlug);
-      else if (this.guest) await this.service.shared(this.shareToken);
-      else await this.service.load(id);
+      const allowed = await this.service.canRead(id, this.guest ? this.shareToken || null : null, this.publicSlug || null);
+      if (!allowed) throw { code: "42501" };
       if (id === this.app.lineageId && screen === this.portal.sequence && !this.guest) await this.refreshNotifications();
     } catch (error) {
       if (error.code === "42501" && id === this.app.lineageId && screen === this.portal.sequence) this.invalidateAccess("Li\xEAn k\u1EBFt ho\u1EB7c quy\u1EC1n truy c\u1EADp \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\xE3 \u0111\u01B0\u1EE3c thu h\u1ED3i.");

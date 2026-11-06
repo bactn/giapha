@@ -463,9 +463,8 @@ export class SupabaseController {
     const screen = this.portal.sequence;
     if (!id || document.body.dataset.screen !== 'workspace') return;
     try {
-      if (this.publicSlug) await this.service.openPage(this.publicSlug);
-      else if (this.guest) await this.service.shared(this.shareToken);
-      else await this.service.load(id);
+      const allowed = await this.service.canRead(id, this.guest ? this.shareToken || null : null, this.publicSlug || null);
+      if (!allowed) throw { code:'42501' };
       if (id === this.app.lineageId && screen === this.portal.sequence && !this.guest) await this.refreshNotifications();
     } catch(error) { if (error.code === '42501' && id === this.app.lineageId && screen === this.portal.sequence) this.invalidateAccess('Liên kết hoặc quyền truy cập đã hết hạn hoặc đã được thu hồi.'); }
   }

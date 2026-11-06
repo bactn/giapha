@@ -122,4 +122,6 @@ test('link duration defaults to seven days and explicit unlimited duration reach
   await service.link('family','invite','editor','forever');
   assert.equal(calls[0].args.p_duration,'7days'); assert.equal(calls[1].args.p_duration,'forever');
   await service.list(); assert.equal(calls[2].name,'list_my_lineages');
+  await service.canRead('family','token');
+  assert.deepEqual(calls[3],{name:'can_read_lineage',args:{p_lineage_id:'family',p_share_token:'token',p_public_slug:null}});
 });

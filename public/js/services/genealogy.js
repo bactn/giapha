@@ -57,6 +57,7 @@ export class GenealogyService {
   shared(token) { return this.rpc('read_shared_lineage', { p_token: token }); }
   links(id) { return this.rpc('list_access_links', { p_lineage_id: id }); }
   revoke(id) { return this.rpc('revoke_access_link', { p_link_id: id }); }
+  canRead(id, shareToken = null, publicSlug = null) { return this.rpc('can_read_lineage', { p_lineage_id:id, p_share_token:shareToken, p_public_slug:publicSlug }); }
   publicLineages(search = '') { return this.rpc('list_public_lineages', { p_search: search }); }
   openPage(slug) { return this.rpc('open_lineage_page', { p_slug: slug }); }
   publish(id, fields) { return this.rpc('set_lineage_publication', { p_lineage_id: id, p_slug: fields.slug, p_intro: fields.intro, p_region: fields.region, p_is_public: fields.is_public }); }

@@ -15,7 +15,7 @@ Mọi thay đổi thêm, sửa, xóa, quan hệ và thông tin gia phả là b�
 - Mặc định 7 ngày; có thể chọn **Không hết hạn — đến khi admin thu hồi** khi tạo link.
 - Quản lý chỉ liệt kê link còn hiệu lực với loại quyền, thời hạn và nút **Thu hồi**. Link đã thu hồi, hết hạn hoặc do người không còn là admin cấp sẽ bị ẩn.
 - Thu hồi không xóa bản ghi kiểm toán; các lần đọc, nhận link và gửi đề xuất tiếp theo bị chặn ngay ở database.
-- Trang đang mở kiểm tra lại quyền mỗi 30 giây khi hiển thị, khi quay lại tab hoặc bấm tải lại. Khi phát hiện bị thu hồi, dữ liệu cây trong bộ nhớ được dọn và chuyển sang màn không thể truy cập. Không thể thu hồi thông tin đã được người xem tải/xuất trước đó.
+- Trang đang mở kiểm tra lại quyền mỗi 30 giây bằng phản hồi boolean nhỏ (không tải lại cả cây), khi quay lại tab hoặc bấm tải lại. Khi phát hiện bị thu hồi, dữ liệu cây trong bộ nhớ được dọn và chuyển sang màn không thể truy cập. Không thể thu hồi thông tin đã được người xem tải/xuất trước đó.
 - Quyền admin cấp **trực tiếp cho tài khoản** độc lập với link. Nếu người đó có cả hai nguồn quyền, thu hồi link chỉ gỡ quyền qua link; quản trị có thể xóa quyền trực tiếp trong phần tương ứng.
 - Yêu cầu đã gửi vẫn nằm trong hàng đợi để admin xem xét sau khi link bị thu hồi; không tự động phê duyệt.
 - Liên kết chỉ giữ bản băm trên server; URL mới chỉ hiển thị một lần để sao chép, không đưa token vào danh sách hay log.

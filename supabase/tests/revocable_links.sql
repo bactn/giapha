@@ -22,6 +22,7 @@ begin
   begin perform public.create_access_link(family,'invite','admin','7days'); raise exception 'FAIL: admin invitation'; exception when check_violation then null; end;
   perform set_config('request.jwt.claim.sub','',true);
   set local role anon;
+  if not public.can_read_lineage(family,token) or public.can_read_lineage(family) then raise exception 'FAIL: guest access probe'; end if;
   if public.read_shared_lineage(token)->'members'->0->>'full_name'<>'Before'
     or public.read_shared_lineage(token)->'members'->0 ? 'notes' then raise exception 'FAIL: anonymous limited view'; end if;
   begin perform public.redeem_invite(token); raise exception 'FAIL: anonymous redemption'; exception when insufficient_privilege then null; end;
@@ -31,6 +32,7 @@ begin
   if exists(select 1 from public.list_access_links(family)) then raise exception 'FAIL: revoked list visible'; end if;
   perform set_config('request.jwt.claim.sub','',true);
   set local role anon;
+  if public.can_read_lineage(family,token) then raise exception 'FAIL: revoked probe'; end if;
   begin perform public.read_shared_lineage(token); raise exception 'FAIL: revoked guest read'; exception when insufficient_privilege then null; end;
   set local role authenticated;
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
@@ -45,6 +47,7 @@ begin
   perform set_config('request.jwt.claim.sub',editor_id::text,true);
   perform public.redeem_invite(edit_token);
   perform public.redeem_invite(edit_token); -- Reopening the same link is safe.
+  if not public.can_read_lineage(family) then raise exception 'FAIL: link editor probe'; end if;
   if giapha_private.lineage_role(family)<>'editor' or jsonb_array_length(public.list_my_lineages())<>1 then raise exception 'FAIL: link editor role/list'; end if;
   begin perform public.save_lineage_state(family,1,'{"name":"bypass"}','[]'); raise exception 'FAIL: direct edit'; exception when insufficient_privilege then null; end;
   request_id:=public.submit_changes(family,1,'[{"type":"update_member","member_id":"A","new_value":{"full_name":"Approved"}},
@@ -61,12 +64,26 @@ begin
   if jsonb_array_length(public.get_lineage_state(family)->'members')<>2 or public.get_lineage_state(family)->'lineageInfo'->>'name'<>'Approved family' then raise exception 'FAIL: full proposal approval'; end if;
   perform public.revoke_access_link(edit_link);
   perform set_config('request.jwt.claim.sub',editor_id::text,true);
+  if public.can_read_lineage(family) then raise exception 'FAIL: revoked editor probe'; end if;
   if giapha_private.lineage_role(family) is not null or public.list_my_lineages()<>'[]'::jsonb then raise exception 'FAIL: revoked link role persists'; end if;
   begin perform public.get_lineage_state(family); raise exception 'FAIL: revoked editor read'; exception when insufficient_privilege then null; end;
   begin perform public.submit_changes(family,2,'[{"type":"delete_member","member_id":"A"}]','Revoked'); raise exception 'FAIL: revoked proposal'; exception when insufficient_privilege then null; end;
   begin perform public.redeem_invite(edit_token); raise exception 'FAIL: revoked redemption'; exception when insufficient_privilege then null; end;
   perform set_config('request.jwt.claim.sub',other_id::text,true);
   if giapha_private.lineage_role(family) is not null then raise exception 'FAIL: second user retained link role'; end if;
+  perform set_config('request.jwt.claim.sub',owner_id::text,true);
+  perform public.set_lineage_publication(family,'fixture-'||family::text,'','',true);
+  perform set_config('request.jwt.claim.sub','',true);
+  set local role anon;
+  if not public.can_read_lineage(family,null,'fixture-'||family::text)
+    or public.can_read_lineage(gen_random_uuid(),null,'fixture-'||family::text) then raise exception 'FAIL: public page probe isolation'; end if;
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub',owner_id::text,true);
+  perform public.set_lineage_publication(family,'fixture-'||family::text,'','',false);
+  perform set_config('request.jwt.claim.sub','',true);
+  set local role anon;
+  if public.can_read_lineage(family,null,'fixture-'||family::text) then raise exception 'FAIL: private page probe'; end if;
+  set local role authenticated;
   perform set_config('request.jwt.claim.sub',owner_id::text,true);
   edit_token:=public.create_access_link(family,'invite','editor','7days');
   select id into edit_link from public.list_access_links(family) where kind='invite';
