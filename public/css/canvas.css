@@ -299,6 +299,8 @@
   gap: 3px;
   white-space: nowrap;
 }
+.node-action-btn:disabled,.workspace-icon-button:disabled { opacity:.35; cursor:default; }
+.family-node:focus-within .node-actions,.family-node.selected .node-actions { display:flex; }
 .node-action-btn:hover {
   background-color: #334155;
   color: #fbbf24;

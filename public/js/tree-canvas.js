@@ -340,6 +340,8 @@ export class TreeCanvas {
       
       <!-- Quick Action Hover Bar -->
       <div class="node-actions">
+        <button class="node-action-btn action-move-left" title="Đưa sang trái trong nhóm anh/chị/em" aria-label="Đưa sang trái trong nhóm anh/chị/em" ${this.dataStore.canMoveSibling(member.id,-1)?'':'disabled'}>←</button>
+        <button class="node-action-btn action-move-right" title="Đưa sang phải trong nhóm anh/chị/em" aria-label="Đưa sang phải trong nhóm anh/chị/em" ${this.dataStore.canMoveSibling(member.id,1)?'':'disabled'}>→</button>
         <button class="node-action-btn action-add-child" title="Thêm con">
           <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
           <span>Con</span>
@@ -359,6 +361,15 @@ export class TreeCanvas {
     `;
 
     // Click to select
+    for (const [selector,step] of [['.action-move-left',-1],['.action-move-right',1]]) {
+      card.querySelector(selector).onclick=event=>{
+        event.stopPropagation();
+        if(this.dataStore.moveSibling(member.id,step)) {
+          this.dataStore.selectMember(member.id);
+          window.dispatchEvent(new CustomEvent('node-selected-for-inspector',{detail:member.id}));
+        }
+      };
+    }
     card.onclick = (e) => {
       e.stopPropagation();
       this.dataStore.selectMember(member.id);

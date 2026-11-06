@@ -76,10 +76,11 @@ export class KinshipCalculator {
 
     // 2. Siblings (distA = 1, distB = 1)
     if (distA === 1 && distB === 1) {
-      const genA = parseInt(a.birth_date, 10) || 0;
-      const genB = parseInt(b.birth_date, 10) || 0;
-      if (genA && genB) {
-        if (genA < genB) {
+      const explicitOrder = typeof a.sibling_order === 'number' && typeof b.sibling_order === 'number' && a.sibling_order !== b.sibling_order;
+      const year = value => Number(String(value || '').match(/^(?:\d{1,2}[/. -]\d{1,2}[/. -])?(\d{4})(?:\b|$)/)?.[1]) || 0;
+      const genA = year(a.birth_date), genB = year(b.birth_date);
+      if (explicitOrder || (genA && genB && genA !== genB)) {
+        if (explicitOrder ? a.sibling_order < b.sibling_order : genA < genB) {
           return `<strong>${escapeHTML(a.full_name)}</strong> là <strong>${isMaleA ? 'Anh ruột' : 'Chị ruột'}</strong> của <strong>${escapeHTML(b.full_name)}</strong> (Cùng cha/mẹ là ${escapeHTML(lcaMember.full_name)}).`;
         } else {
           return `<strong>${escapeHTML(a.full_name)}</strong> là <strong>${isMaleA ? 'Em trai ruột' : 'Em gái ruột'}</strong> của <strong>${escapeHTML(b.full_name)}</strong>.`;

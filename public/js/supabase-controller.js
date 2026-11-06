@@ -6,7 +6,7 @@ import { FamilyPortal } from './portal.js';
 const $ = id => document.getElementById(id);
 const copy = value => JSON.parse(JSON.stringify(value));
 const roles = { admin: 'Quản trị', editor: 'Chỉnh sửa', viewer: 'Chỉ xem' };
-const fieldNames = { full_name: 'Họ tên', christian_name: 'Tên thánh', birth_date: 'Ngày sinh', death_date: 'Ngày mất', notes: 'Ghi chú', parent_id: 'Cha/mẹ', spouse_id: 'Phối ngẫu', generation: 'Thế hệ' };
+const fieldNames = { full_name: 'Họ tên', christian_name: 'Tên thánh', birth_date: 'Ngày sinh', death_date: 'Ngày mất', notes: 'Ghi chú', parent_id: 'Cha/mẹ', spouse_id: 'Phối ngẫu', generation: 'Thế hệ', sibling_order:'Thứ tự anh/chị/em' };
 
 export class SupabaseController {
   constructor(app) { this.app = app; this.user = null; this.base = null; }
@@ -410,7 +410,7 @@ export class SupabaseController {
       const line = document.createElement('p'); line.className = 'sb-detail';
       line.textContent = change.type === 'add_member' ? `Thêm: ${change.new_value.full_name || ''} (${change.new_value.id})` :
         change.type === 'delete_member' ? `Xóa: ${change.member_id}` : change.type === 'update_info' ? `Đổi thông tin gia phả: ${change.new_value.name}` :
-        `Sửa ${change.member_id}: ` + Object.entries(change.new_value).map(([key, value]) => `${fieldNames[key] || key} → ${value ?? ''}`).join('; ');
+        `Sửa ${change.member_id}: ` + Object.entries(change.new_value).map(([key, value]) => `${fieldNames[key] || key} → ${key === 'sibling_order' && typeof value === 'number' ? value+1 : value ?? ''}`).join('; ');
       details.appendChild(line);
     }
     row.appendChild(details);

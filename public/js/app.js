@@ -348,7 +348,7 @@ class App {
 
   applyRoleRestrictions() {
     // Show/hide edit controls based on role
-    const editControls = document.querySelectorAll('#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected');
+    const editControls = document.querySelectorAll('#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-inspect-move-left, #btn-inspect-move-right, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected');
     const viewerOnly = document.getElementById('btn-request-edit');
     const shareBtn = document.getElementById('btn-open-share');
 
@@ -507,6 +507,12 @@ class App {
   }
 
   setupLeftInspector() {
+    for (const [id,step] of [['btn-inspect-move-left',-1],['btn-inspect-move-right',1]]) {
+      document.getElementById(id).onclick=()=>{
+        const selected=this.dataStore.selectedMemberId;
+        if(this.dataStore.moveSibling(selected,step)) { this.populateInspector(selected); this.canvas.focusOnMember(selected); }
+      };
+    }
     const emptyState = document.getElementById('inspector-empty-state');
     const formWrapper = document.getElementById('inspector-form-wrapper');
     const btnDelete = document.getElementById('btn-inspect-delete');
@@ -643,6 +649,8 @@ class App {
     indicator.classList.remove('hidden');
 
     document.getElementById('inspect-header-name').textContent = m.full_name;
+    document.getElementById('btn-inspect-move-left').disabled=!this.dataStore.canMoveSibling(m.id,-1);
+    document.getElementById('btn-inspect-move-right').disabled=!this.dataStore.canMoveSibling(m.id,1);
     document.getElementById('inspect-header-meta').textContent = `Mã: ${m.id} • Đời ${m.generation} • ${m.branch || 'Ngành II'}`;
     document.getElementById('inspect-avatar').innerHTML = avatarSVG(m.gender);
 
@@ -657,7 +665,6 @@ class App {
     // Populate spouse selector with all other members
     const spouseSelect = document.getElementById('inspect-spouse-select');
     if (spouseSelect) {
-      const currentVal = spouseSelect.value;
       spouseSelect.innerHTML = '<option value="">— Chưa liên kết —</option>';
       for (const other of this.dataStore.members.values()) {
         if (other.id === m.id) continue;
@@ -669,8 +676,6 @@ class App {
       // Restore selection
       if (m.spouse_id && this.dataStore.members.has(m.spouse_id)) {
         spouseSelect.value = m.spouse_id;
-      } else if (currentVal && this.dataStore.members.has(currentVal)) {
-        spouseSelect.value = currentVal;
       } else {
         spouseSelect.value = '';
       }

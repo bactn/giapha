@@ -9,7 +9,7 @@
   <!-- Tailwind CSS CDN for instant JIT responsive styling -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="./css/style.css?v=ad6bd83c07e4c10f">
-  <link rel="stylesheet" href="./css/canvas.css?v=b8ee2d7480dcc4e2">
+  <link rel="stylesheet" href="./css/canvas.css?v=dc165ec7f77f1107">
   <link rel="stylesheet" href="./css/supabase.css?v=b1ad7fc76035536c">
   <link rel="stylesheet" href="./css/portal.css?v=f7ed0d67abb38b45">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -352,6 +352,11 @@
             <textarea id="inspect-notes" rows="3" placeholder="Số con, cháu, tiểu sử..." class="form-input resize-none"></textarea>
           </div>
 
+          <div class="pt-2 flex items-center gap-2 border-t border-slate-100">
+            <button type="button" id="btn-inspect-move-left" class="workspace-icon-button" title="Đưa sang trái trong nhóm anh/chị/em" aria-label="Đưa sang trái trong nhóm anh/chị/em">←</button>
+            <button type="button" id="btn-inspect-move-right" class="workspace-icon-button" title="Đưa sang phải trong nhóm anh/chị/em" aria-label="Đưa sang phải trong nhóm anh/chị/em">→</button>
+          </div>
+          <p class="text-[11px] text-slate-500">Bên trái là anh/chị, bên phải là em trong nhóm cùng bố/mẹ. Ngày sinh và quan hệ bố/mẹ, vợ/chồng được giữ nguyên.</p>
           <div class="pt-2 flex items-center gap-2 border-t border-slate-100">
             <button type="button" id="btn-inspect-save" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg shadow-xs flex items-center justify-center space-x-1">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -937,6 +942,6 @@
   </div>
 
   <!-- SCRIPTS -->
-  <script type="module" src="./js/app.bundle.js?v=07fa8ec12bab72f4"></script>
+  <script type="module" src="./js/app.bundle.js?v=5c11c24ee1c3566a"></script>
 </body>
 </html>

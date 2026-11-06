@@ -10,6 +10,7 @@ import { GenealogyService } from '../public/js/services/genealogy.js';
 import { lifeDates, spouseRole, avatarSVG } from '../public/js/member-presentation.js';
 import { AutoLayout } from '../public/js/auto-layout.js';
 import { Exporter } from '../public/js/export.js';
+import { KinshipCalculator } from '../public/js/kinship.js';
 
 test('snapshot diff includes new fields and info changes without derived statistics noise', () => {
   const before = { lineageInfo: { name: 'Family', total_members: 1 }, members: [{ id: 'A', full_name: 'Old' }] };
@@ -177,4 +178,45 @@ test('SVG export retains avatar and date/spouse labels while escaping member nam
   assert.match(text,/Avatar nam/); assert.match(text,/Avatar nữ/);
   assert.match(text,/SN 1990 - Mất sớm/); assert.match(text,/Vợ: B &amp; C/);
   assert.match(text,/A &lt;script&gt;/); assert(!text.includes('<script>'));
+});
+
+test('adding children and spouses after deletions never overwrites an existing ID or changes parent/spouse links', () => {
+  const store=new DataStore(); store.loadState({members:[
+    {id:'P001',full_name:'Father',spouse_id:'P004'},
+    {id:'P003',full_name:'Existing child',parent_id:'P001'},
+    {id:'P004',full_name:'Mother',spouse_id:'P001',branch_type:'Ngoại tộc (Phối ngẫu)'}]});
+  const child=store.addMember({parent_id:'P001',full_name:'New child'});
+  assert.equal(child.id,'P005'); assert.equal(store.members.size,4);
+  assert.equal(child.parent_id,'P001'); assert.equal(child.spouse_id,'');
+  assert.equal(store.getSpouseMember('P001').full_name,'Mother');
+  assert.throws(()=>store.addMember({id:'P004',full_name:'Overwrite'}),/đã tồn tại/);
+  const newPartner=store.addSpouseAsMember('P003'); assert.equal(newPartner.id,'P006');
+  assert.equal(store.getMember('P005').parent_id,'P001');
+  const mothersChild=store.addMember({parent_id:'P004',full_name:'Child linked to mother'});
+  assert.equal(mothersChild.spouse_id,''); assert.equal(mothersChild.parent_id,'P004');
+  assert(store.getRootMembers().some(m=>m.id==='P004'));
+  assert.equal(store.getSpouseMember('P001').id,'P004');
+});
+test('sibling movement changes the whole branch order, persists in snapshots and supports undo without changing relations', () => {
+  const store=new DataStore(); store.loadState({members:[
+    {id:'R',full_name:'Parent'},
+    {id:'A',full_name:'First',parent_id:'R',gender:'Nam',birth_date:'1990',spouse_id:'S'},
+    {id:'B',full_name:'Second',parent_id:'R',gender:'Nữ',birth_date:'1992'},
+    {id:'C',full_name:'Grandchild',parent_id:'A'},
+    {id:'S',full_name:'Partner',spouse_id:'A'}]});
+  store.initializeTracking();
+  const order=()=>store.getChildren('R').map(m=>m.id);
+  assert.deepEqual(order(),['A','B']); assert.equal(store.moveSibling('A',-1),false);
+  assert.equal(store.history.length,0);
+  assert.equal(store.moveSibling('B',-1),true); assert.deepEqual(order(),['B','A']);
+  assert.equal(store.getMember('A').parent_id,'R'); assert.equal(store.getMember('A').spouse_id,'S');
+  assert.equal(store.getMember('C').parent_id,'A');
+  assert.match(KinshipCalculator.calculateRelationship(store,'B','A'),/Chị ruột/);
+  const layout=new AutoLayout().calculateLayout(store);
+  assert(layout.positions.get('B').x<layout.positions.get('A').x);
+  const reloaded=new DataStore(); reloaded.loadState({members:JSON.parse(JSON.stringify(store.getAllMembers()))});
+  assert.deepEqual(reloaded.getChildren('R').map(m=>m.id),['B','A']);
+  assert(store.getTrackedChanges().every(c=>c.type==='update_member' && 'sibling_order' in c.new_value));
+  assert(store.undo()); assert.deepEqual(order(),['A','B']); assert(store.redo()); assert.deepEqual(order(),['B','A']);
+  store.readOnly=true; assert.equal(store.moveSibling('A',-1),false); assert.deepEqual(order(),['B','A']);
 });

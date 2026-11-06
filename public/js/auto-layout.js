@@ -1,4 +1,5 @@
 // auto-layout.js - Hierarchical Genealogy Layout Engine supporting Subtree/Branch Filtering
+import { compareSiblings } from './member-order.js';
 export class AutoLayout {
   constructor(options = {}) {
     this.nodeWidth = options.nodeWidth || 230;
@@ -85,7 +86,7 @@ export class AutoLayout {
 
     rootList.sort((a, b) => (parseInt(a.generation, 10) || 1) - (parseInt(b.generation, 10) || 1));
     for (const children of childrenMap.values()) {
-      children.sort((a, b) => a.id.localeCompare(b.id));
+      children.sort(compareSiblings);
     }
 
     const positions = new Map();

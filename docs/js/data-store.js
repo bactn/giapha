@@ -1,4 +1,5 @@
 // data-store.js - Graph Data Store with Undo/Redo & Cycle Detection
+import { compareSiblings } from './member-order.js';
 export class DataStore {
   constructor() {
     this.lineageInfo = {
@@ -114,7 +115,7 @@ export class DataStore {
     const roots = [];
     for (const m of this.members.values()) {
       // Only explicitly classified partners are inline; a spouse link must not hide an ancestor.
-      if (m.branch_type?.includes('Phối ngẫu') && m.spouse_id && this.members.has(m.spouse_id)) continue;
+      if (m.branch_type?.includes('Phối ngẫu') && m.spouse_id && this.members.has(m.spouse_id) && this.getChildren(m.id).length === 0) continue;
       if (!m.parent_id || m.parent_id === '-' || !this.members.has(m.parent_id)) {
         roots.push(m);
       }
@@ -130,7 +131,41 @@ export class DataStore {
         children.push(m);
       }
     }
-    return children;
+    return children.sort(compareSiblings);
+  }
+
+  nextMemberId() {
+    let largest = 0n;
+    for (const id of this.members.keys()) {
+      const match = /^P(\d+)$/.exec(id);
+      if (match && BigInt(match[1]) > largest) largest = BigInt(match[1]);
+    }
+    return 'P'+String(largest+1n).padStart(3,'0');
+  }
+
+  canMoveSibling(id, step) {
+    const member=this.members.get(id);
+    if(this.readOnly || ![-1,1].includes(step) || !member || !this.members.has(member.parent_id)) return false;
+    const siblings=this.getChildren(member.parent_id); const index=siblings.findIndex(m=>m.id===id);
+    return index+step>=0 && index+step<siblings.length;
+  }
+
+  moveSibling(id, step) {
+    if(!this.canMoveSibling(id,step)) return false;
+    const siblings=this.getChildren(this.members.get(id).parent_id);
+    const index=siblings.findIndex(m=>m.id===id);
+    this.recordSnapshot();
+    [siblings[index],siblings[index+step]]=[siblings[index+step],siblings[index]];
+    siblings.forEach((member,order)=>this.members.set(member.id,{...member,sibling_order:order}));
+    this.notify('update',this.members.get(id));
+    return true;
+  }
+
+  appendSiblingOrder(parentId, excludeId = null) {
+    if(!this.members.has(parentId)) return undefined;
+    const siblings=this.getChildren(parentId).filter(m=>m.id!==excludeId);
+    siblings.forEach((member,order)=>this.members.set(member.id,{...member,sibling_order:order}));
+    return siblings.length;
   }
 
   getDescendants(id, set = new Set()) {
@@ -234,9 +269,10 @@ export class DataStore {
   }
 
   addMember(memberData) {
+    const id = memberData.id || this.nextMemberId();
+    if (this.members.has(id)) throw new Error('Mã thành viên đã tồn tại. Không thể ghi đè thành viên cũ.');
+    if(memberData.parent_id && memberData.parent_id!=='-' && !this.members.has(memberData.parent_id)) throw new Error('Không tìm thấy bố/mẹ đã chọn.');
     this.recordSnapshot();
-
-    const id = memberData.id || `P${String(this.members.size + 1).padStart(3, '0')}`;
     let generation = memberData.generation;
     if (!generation && memberData.parent_id && this.members.has(memberData.parent_id)) {
       const parent = this.members.get(memberData.parent_id);
@@ -253,6 +289,7 @@ export class DataStore {
       branch_type: memberData.branch_type || 'Nội tộc (Trực hệ)',
       parent_id: memberData.parent_id || '-',
       parent_name: memberData.parent_name || '',
+      sibling_order: this.appendSiblingOrder(memberData.parent_id),
       spouse: memberData.spouse || '',
       spouse_id: memberData.spouse_id || '',
       birth_date: memberData.birth_date || '',
@@ -285,6 +322,7 @@ export class DataStore {
         throw new Error(`Không thể đổi cha/mẹ thành ${updates.parent_id} vì sẽ tạo chu trình vòng lặp thế hệ!`);
       }
       if (updates.parent_id !== '-' && this.members.has(updates.parent_id)) {
+        updates.sibling_order = this.appendSiblingOrder(updates.parent_id,id);
         updates.parent_name = this.members.get(updates.parent_id).full_name;
         // Update generation
         const parentGen = parseInt(this.members.get(updates.parent_id).generation, 10) || 1;
@@ -379,7 +417,7 @@ export class DataStore {
     const oppositeGender = member.gender === 'Nam' ? 'Nữ' : 'Nam';
 
     // Generate new ID for spouse
-    const spouseId = `P${String(this.members.size + 1).padStart(3, '0')}`;
+    const spouseId = this.nextMemberId();
 
     // Create spouse as a full member (inline, no extra snapshots)
     const spouse = {
@@ -443,7 +481,7 @@ export class DataStore {
       const oppositeGender = member.gender === 'Nam' ? 'Nữ' : 'Nam';
 
       // Generate new ID
-      const spouseId = `P${String(this.members.size + 1).padStart(3, '0')}`;
+      const spouseId = this.nextMemberId();
 
       // Create spouse as a full member
       const spouse = {

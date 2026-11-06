@@ -1,3 +1,10 @@
+// dist/js/member-order.js
+function compareSiblings(a, b) {
+  const rank = (m) => typeof m.sibling_order === "number" && Number.isFinite(m.sibling_order) ? m.sibling_order : Infinity;
+  const first = rank(a), second = rank(b);
+  return first !== second ? first < second ? -1 : 1 : String(a.id).localeCompare(String(b.id), "vi", { numeric: true });
+}
+
 // dist/js/data-store.js
 var DataStore = class {
   constructor() {
@@ -100,7 +107,7 @@ var DataStore = class {
   getRootMembers() {
     const roots = [];
     for (const m of this.members.values()) {
-      if (m.branch_type?.includes("Ph\u1ED1i ng\u1EABu") && m.spouse_id && this.members.has(m.spouse_id)) continue;
+      if (m.branch_type?.includes("Ph\u1ED1i ng\u1EABu") && m.spouse_id && this.members.has(m.spouse_id) && this.getChildren(m.id).length === 0) continue;
       if (!m.parent_id || m.parent_id === "-" || !this.members.has(m.parent_id)) {
         roots.push(m);
       }
@@ -114,7 +121,38 @@ var DataStore = class {
         children.push(m);
       }
     }
-    return children;
+    return children.sort(compareSiblings);
+  }
+  nextMemberId() {
+    let largest = 0n;
+    for (const id of this.members.keys()) {
+      const match = /^P(\d+)$/.exec(id);
+      if (match && BigInt(match[1]) > largest) largest = BigInt(match[1]);
+    }
+    return "P" + String(largest + 1n).padStart(3, "0");
+  }
+  canMoveSibling(id, step) {
+    const member = this.members.get(id);
+    if (this.readOnly || ![-1, 1].includes(step) || !member || !this.members.has(member.parent_id)) return false;
+    const siblings = this.getChildren(member.parent_id);
+    const index = siblings.findIndex((m) => m.id === id);
+    return index + step >= 0 && index + step < siblings.length;
+  }
+  moveSibling(id, step) {
+    if (!this.canMoveSibling(id, step)) return false;
+    const siblings = this.getChildren(this.members.get(id).parent_id);
+    const index = siblings.findIndex((m) => m.id === id);
+    this.recordSnapshot();
+    [siblings[index], siblings[index + step]] = [siblings[index + step], siblings[index]];
+    siblings.forEach((member, order) => this.members.set(member.id, { ...member, sibling_order: order }));
+    this.notify("update", this.members.get(id));
+    return true;
+  }
+  appendSiblingOrder(parentId, excludeId = null) {
+    if (!this.members.has(parentId)) return void 0;
+    const siblings = this.getChildren(parentId).filter((m) => m.id !== excludeId);
+    siblings.forEach((member, order) => this.members.set(member.id, { ...member, sibling_order: order }));
+    return siblings.length;
   }
   getDescendants(id, set = /* @__PURE__ */ new Set()) {
     const children = this.getChildren(id);
@@ -202,8 +240,10 @@ var DataStore = class {
     };
   }
   addMember(memberData) {
+    const id = memberData.id || this.nextMemberId();
+    if (this.members.has(id)) throw new Error("M\xE3 th\xE0nh vi\xEAn \u0111\xE3 t\u1ED3n t\u1EA1i. Kh\xF4ng th\u1EC3 ghi \u0111\xE8 th\xE0nh vi\xEAn c\u0169.");
+    if (memberData.parent_id && memberData.parent_id !== "-" && !this.members.has(memberData.parent_id)) throw new Error("Kh\xF4ng t\xECm th\u1EA5y b\u1ED1/m\u1EB9 \u0111\xE3 ch\u1ECDn.");
     this.recordSnapshot();
-    const id = memberData.id || `P${String(this.members.size + 1).padStart(3, "0")}`;
     let generation = memberData.generation;
     if (!generation && memberData.parent_id && this.members.has(memberData.parent_id)) {
       const parent = this.members.get(memberData.parent_id);
@@ -219,6 +259,7 @@ var DataStore = class {
       branch_type: memberData.branch_type || "N\u1ED9i t\u1ED9c (Tr\u1EF1c h\u1EC7)",
       parent_id: memberData.parent_id || "-",
       parent_name: memberData.parent_name || "",
+      sibling_order: this.appendSiblingOrder(memberData.parent_id),
       spouse: memberData.spouse || "",
       spouse_id: memberData.spouse_id || "",
       birth_date: memberData.birth_date || "",
@@ -244,6 +285,7 @@ var DataStore = class {
         throw new Error(`Kh\xF4ng th\u1EC3 \u0111\u1ED5i cha/m\u1EB9 th\xE0nh ${updates.parent_id} v\xEC s\u1EBD t\u1EA1o chu tr\xECnh v\xF2ng l\u1EB7p th\u1EBF h\u1EC7!`);
       }
       if (updates.parent_id !== "-" && this.members.has(updates.parent_id)) {
+        updates.sibling_order = this.appendSiblingOrder(updates.parent_id, id);
         updates.parent_name = this.members.get(updates.parent_id).full_name;
         const parentGen = parseInt(this.members.get(updates.parent_id).generation, 10) || 1;
         updates.generation = String(parentGen + 1);
@@ -317,7 +359,7 @@ var DataStore = class {
     if (!member) return null;
     this.recordSnapshot();
     const oppositeGender = member.gender === "Nam" ? "N\u1EEF" : "Nam";
-    const spouseId = `P${String(this.members.size + 1).padStart(3, "0")}`;
+    const spouseId = this.nextMemberId();
     const spouse = {
       id: spouseId,
       christian_name: "",
@@ -361,7 +403,7 @@ var DataStore = class {
       const spouseName = spouseNames[0];
       if (!spouseName) continue;
       const oppositeGender = member.gender === "Nam" ? "N\u1EEF" : "Nam";
-      const spouseId = `P${String(this.members.size + 1).padStart(3, "0")}`;
+      const spouseId = this.nextMemberId();
       const spouse = {
         id: spouseId,
         christian_name: "",
@@ -467,7 +509,7 @@ var AutoLayout = class {
     }
     rootList.sort((a, b) => (parseInt(a.generation, 10) || 1) - (parseInt(b.generation, 10) || 1));
     for (const children of childrenMap.values()) {
-      children.sort((a, b) => a.id.localeCompare(b.id));
+      children.sort(compareSiblings);
     }
     const positions = /* @__PURE__ */ new Map();
     const subtreeWidths = /* @__PURE__ */ new Map();
@@ -949,6 +991,8 @@ var TreeCanvas = class {
       
       <!-- Quick Action Hover Bar -->
       <div class="node-actions">
+        <button class="node-action-btn action-move-left" title="\u0110\u01B0a sang tr\xE1i trong nh\xF3m anh/ch\u1ECB/em" aria-label="\u0110\u01B0a sang tr\xE1i trong nh\xF3m anh/ch\u1ECB/em" ${this.dataStore.canMoveSibling(member.id, -1) ? "" : "disabled"}>\u2190</button>
+        <button class="node-action-btn action-move-right" title="\u0110\u01B0a sang ph\u1EA3i trong nh\xF3m anh/ch\u1ECB/em" aria-label="\u0110\u01B0a sang ph\u1EA3i trong nh\xF3m anh/ch\u1ECB/em" ${this.dataStore.canMoveSibling(member.id, 1) ? "" : "disabled"}>\u2192</button>
         <button class="node-action-btn action-add-child" title="Th\xEAm con">
           <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
           <span>Con</span>
@@ -966,6 +1010,15 @@ var TreeCanvas = class {
         </button>
       </div>
     `;
+    for (const [selector, step] of [[".action-move-left", -1], [".action-move-right", 1]]) {
+      card.querySelector(selector).onclick = (event) => {
+        event.stopPropagation();
+        if (this.dataStore.moveSibling(member.id, step)) {
+          this.dataStore.selectMember(member.id);
+          window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: member.id }));
+        }
+      };
+    }
     card.onclick = (e) => {
       e.stopPropagation();
       this.dataStore.selectMember(member.id);
@@ -1751,10 +1804,11 @@ var KinshipCalculator = class {
       return `<strong>${escapeHTML(a.full_name)}</strong> l\xE0 <strong>Con ch\xE1u \u0110\u1EDDi ${escapeHTML(a.generation)}</strong> c\u1EE7a <strong>${escapeHTML(b.full_name)}</strong>.`;
     }
     if (distA === 1 && distB === 1) {
-      const genA = parseInt(a.birth_date, 10) || 0;
-      const genB = parseInt(b.birth_date, 10) || 0;
-      if (genA && genB) {
-        if (genA < genB) {
+      const explicitOrder = typeof a.sibling_order === "number" && typeof b.sibling_order === "number" && a.sibling_order !== b.sibling_order;
+      const year = (value) => Number(String(value || "").match(/^(?:\d{1,2}[/. -]\d{1,2}[/. -])?(\d{4})(?:\b|$)/)?.[1]) || 0;
+      const genA = year(a.birth_date), genB = year(b.birth_date);
+      if (explicitOrder || genA && genB && genA !== genB) {
+        if (explicitOrder ? a.sibling_order < b.sibling_order : genA < genB) {
           return `<strong>${escapeHTML(a.full_name)}</strong> l\xE0 <strong>${isMaleA ? "Anh ru\u1ED9t" : "Ch\u1ECB ru\u1ED9t"}</strong> c\u1EE7a <strong>${escapeHTML(b.full_name)}</strong> (C\xF9ng cha/m\u1EB9 l\xE0 ${escapeHTML(lcaMember.full_name)}).`;
         } else {
           return `<strong>${escapeHTML(a.full_name)}</strong> l\xE0 <strong>${isMaleA ? "Em trai ru\u1ED9t" : "Em g\xE1i ru\u1ED9t"}</strong> c\u1EE7a <strong>${escapeHTML(b.full_name)}</strong>.`;
@@ -3493,7 +3547,7 @@ var FamilyPortal = class {
 var $2 = (id) => document.getElementById(id);
 var copy = (value) => JSON.parse(JSON.stringify(value));
 var roles = { admin: "Qu\u1EA3n tr\u1ECB", editor: "Ch\u1EC9nh s\u1EEDa", viewer: "Ch\u1EC9 xem" };
-var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "Ph\u1ED1i ng\u1EABu", generation: "Th\u1EBF h\u1EC7" };
+var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "Ph\u1ED1i ng\u1EABu", generation: "Th\u1EBF h\u1EC7", sibling_order: "Th\u1EE9 t\u1EF1 anh/ch\u1ECB/em" };
 var SupabaseController = class {
   constructor(app) {
     this.app = app;
@@ -4068,7 +4122,7 @@ var SupabaseController = class {
     for (const change of request.changes) {
       const line = document.createElement("p");
       line.className = "sb-detail";
-      line.textContent = change.type === "add_member" ? `Th\xEAm: ${change.new_value.full_name || ""} (${change.new_value.id})` : change.type === "delete_member" ? `X\xF3a: ${change.member_id}` : change.type === "update_info" ? `\u0110\u1ED5i th\xF4ng tin gia ph\u1EA3: ${change.new_value.name}` : `S\u1EEDa ${change.member_id}: ` + Object.entries(change.new_value).map(([key, value]) => `${fieldNames[key] || key} \u2192 ${value ?? ""}`).join("; ");
+      line.textContent = change.type === "add_member" ? `Th\xEAm: ${change.new_value.full_name || ""} (${change.new_value.id})` : change.type === "delete_member" ? `X\xF3a: ${change.member_id}` : change.type === "update_info" ? `\u0110\u1ED5i th\xF4ng tin gia ph\u1EA3: ${change.new_value.name}` : `S\u1EEDa ${change.member_id}: ` + Object.entries(change.new_value).map(([key, value]) => `${fieldNames[key] || key} \u2192 ${key === "sibling_order" && typeof value === "number" ? value + 1 : value ?? ""}`).join("; ");
       details.appendChild(line);
     }
     row.appendChild(details);
@@ -4478,7 +4532,7 @@ var App = class {
     });
   }
   applyRoleRestrictions() {
-    const editControls = document.querySelectorAll("#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected");
+    const editControls = document.querySelectorAll("#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-inspect-move-left, #btn-inspect-move-right, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected");
     const viewerOnly = document.getElementById("btn-request-edit");
     const shareBtn = document.getElementById("btn-open-share");
     this.updateUserDisplay();
@@ -4608,6 +4662,15 @@ var App = class {
     });
   }
   setupLeftInspector() {
+    for (const [id, step] of [["btn-inspect-move-left", -1], ["btn-inspect-move-right", 1]]) {
+      document.getElementById(id).onclick = () => {
+        const selected = this.dataStore.selectedMemberId;
+        if (this.dataStore.moveSibling(selected, step)) {
+          this.populateInspector(selected);
+          this.canvas.focusOnMember(selected);
+        }
+      };
+    }
     const emptyState = document.getElementById("inspector-empty-state");
     const formWrapper = document.getElementById("inspector-form-wrapper");
     const btnDelete = document.getElementById("btn-inspect-delete");
@@ -4722,6 +4785,8 @@ var App = class {
     formWrapper.classList.remove("hidden");
     indicator.classList.remove("hidden");
     document.getElementById("inspect-header-name").textContent = m.full_name;
+    document.getElementById("btn-inspect-move-left").disabled = !this.dataStore.canMoveSibling(m.id, -1);
+    document.getElementById("btn-inspect-move-right").disabled = !this.dataStore.canMoveSibling(m.id, 1);
     document.getElementById("inspect-header-meta").textContent = `M\xE3: ${m.id} \u2022 \u0110\u1EDDi ${m.generation} \u2022 ${m.branch || "Ng\xE0nh II"}`;
     document.getElementById("inspect-avatar").innerHTML = avatarSVG(m.gender);
     document.getElementById("inspect-christian-name").value = m.christian_name || "";
@@ -4733,7 +4798,6 @@ var App = class {
     document.getElementById("inspect-parent-id").value = m.parent_id === "-" ? "" : m.parent_id || "";
     const spouseSelect = document.getElementById("inspect-spouse-select");
     if (spouseSelect) {
-      const currentVal = spouseSelect.value;
       spouseSelect.innerHTML = '<option value="">\u2014 Ch\u01B0a li\xEAn k\u1EBFt \u2014</option>';
       for (const other of this.dataStore.members.values()) {
         if (other.id === m.id) continue;
@@ -4744,8 +4808,6 @@ var App = class {
       }
       if (m.spouse_id && this.dataStore.members.has(m.spouse_id)) {
         spouseSelect.value = m.spouse_id;
-      } else if (currentVal && this.dataStore.members.has(currentVal)) {
-        spouseSelect.value = currentVal;
       } else {
         spouseSelect.value = "";
       }

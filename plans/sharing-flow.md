@@ -12,6 +12,8 @@ Admin tạo link có quyền sửa; người nhận đăng nhập Google hoặc 
 
 Mọi thay đổi thêm, sửa, xóa, quan hệ và thông tin gia phả là bản nháp. Nút **Gửi yêu cầu phê duyệt** tạo yêu cầu `pending`; dữ liệu chính chưa thay đổi. Chỉ admin duyệt/từ chối. RPC lưu trực tiếp chỉ cho admin và chặn editor kể cả khi gọi API ngoài giao diện. Xung đột phiên bản phải tải lại, đối chiếu và gửi lại.
 
+Đổi thứ tự anh/chị/em bằng nút trái/phải cũng là thay đổi cần duyệt đối với editor. Thứ tự được lưu riêng trong dữ liệu thành viên, dùng thống nhất ở cây thư mục, canvas, danh xưng và bản công khai. Việc đổi thứ tự không thay đổi ngày sinh, mã bố/mẹ hay mã vợ/chồng. Nút chỉ hoạt động giữa các người con cùng một bố/mẹ.
+
 ## Thời hạn và thu hồi
 
 - Mặc định 7 ngày; có thể chọn **Không hết hạn — đến khi admin thu hồi** khi tạo link.
