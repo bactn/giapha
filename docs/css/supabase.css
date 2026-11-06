@@ -20,6 +20,6 @@
 .sb-detail { white-space:pre-wrap; max-height:12rem; overflow:auto; background:#f8fafc; padding:.75rem; font-size:.75rem; }
 body[data-access="viewer"] .node-action-btn:not(.action-edit),
 body[data-access="viewer"] .btn-node-delete-quick,
-body[data-access="viewer"] .outline-node-row button:not(.outline-toggle) { display:none !important; }
+body[data-access="viewer"] .outline-node-row button:not(.outline-toggle-btn) { display:none !important; }
 #auth-overlay { overflow:auto; }
 #sb-auth { max-height:75vh; overflow:auto; }

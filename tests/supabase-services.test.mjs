@@ -7,6 +7,9 @@ import { startGoogleOAuth, oauthReturnMessage } from '../public/js/services/auth
 import { slugify, portalRoute } from '../public/js/portal.js';
 import { SupabaseController } from '../public/js/supabase-controller.js';
 import { GenealogyService } from '../public/js/services/genealogy.js';
+import { lifeDates, spouseRole, avatarSVG } from '../public/js/member-presentation.js';
+import { AutoLayout } from '../public/js/auto-layout.js';
+import { Exporter } from '../public/js/export.js';
 
 test('snapshot diff includes new fields and info changes without derived statistics noise', () => {
   const before = { lineageInfo: { name: 'Family', total_members: 1 }, members: [{ id: 'A', full_name: 'Old' }] };
@@ -136,4 +139,42 @@ test('old viewer invitation URLs open as guests, while edit links continue to lo
   finally { if (oldHistory===undefined) delete globalThis.history; else globalThis.history=oldHistory; }
   c.service.shared=async()=>{throw {code:'42501'};}; opened=null;
   assert.equal(await c.openViewerInvite('edit'),false); assert.equal(opened,null);
+});
+
+test('node dates label births and deaths without inferring early death from missing data', () => {
+  assert.equal(lifeDates({birth_date:'12/08/1990',death_date:'11/09/2045'}),'SN 12/08/1990 - Mất 11/09/2045');
+  assert.equal(lifeDates({birth_date:'12/08/1990',status:'Mất sớm'}),'SN 12/08/1990 - Mất sớm');
+  assert.equal(lifeDates({birth_date:'?',death_date:'Không rõ',status:'Đã mất'}),'Mất');
+  assert.equal(lifeDates({status:'Mất sớm'}),'Mất sớm');
+  assert.equal(lifeDates({birth_date:'1990',status:'Còn sống'}),'SN 1990');
+  assert.equal(lifeDates({}),'');
+});
+test('spouse labels use the partner gender and avatars never include initials', () => {
+  assert.equal(spouseRole({gender:'Nam'},{gender:'Nữ'}),'Vợ');
+  assert.equal(spouseRole({gender:'Nữ'},{gender:'Nam'}),'Chồng');
+  assert.equal(spouseRole({gender:'Nữ'}),'Chồng');
+  assert.equal(spouseRole({}), 'Vợ/Chồng');
+  assert.match(avatarSVG('Nữ'),/Avatar nữ/);
+  assert.match(avatarSVG('Nam'),/Avatar nam/);
+  assert(!avatarSVG('Nữ').includes('<text'));
+});
+test('linking a spouse does not hide the family ancestor and its descendants in the outline', () => {
+  const store=new DataStore(); store.loadState({members:[
+    {id:'A',full_name:'Ancestor',spouse_id:'B',parent_id:'-'},
+    {id:'B',full_name:'Partner',spouse_id:'A',parent_id:'-',branch_type:'Ngoại tộc (Phối ngẫu)'},
+    {id:'C',full_name:'Child',parent_id:'A'}]});
+  assert.deepEqual(store.getRootMembers().map(m=>m.id),['A']);
+  assert.equal(store.getChildren('A')[0].id,'C');
+});
+test('SVG export retains avatar and date/spouse labels while escaping member names', async () => {
+  const store=new DataStore(); store.loadState({lineageInfo:{name:'Test'},members:[
+    {id:'A',full_name:'A <script>',gender:'Nam',generation:'1',birth_date:'1990',status:'Mất sớm',spouse_id:'B'},
+    {id:'B',full_name:'B & C',gender:'Nữ',generation:'1',spouse_id:'A'}]});
+  const old=Exporter.downloadBlob; let blob;
+  Exporter.downloadBlob=value=>{blob=value;};
+  try { Exporter.exportSVG({dataStore:store,layout:new AutoLayout()}); } finally { Exporter.downloadBlob=old; }
+  const text=await blob.text();
+  assert.match(text,/Avatar nam/); assert.match(text,/Avatar nữ/);
+  assert.match(text,/SN 1990 - Mất sớm/); assert.match(text,/Vợ: B &amp; C/);
+  assert.match(text,/A &lt;script&gt;/); assert(!text.includes('<script>'));
 });

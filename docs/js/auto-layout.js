@@ -2,7 +2,7 @@
 export class AutoLayout {
   constructor(options = {}) {
     this.nodeWidth = options.nodeWidth || 230;
-    this.nodeHeight = options.nodeHeight || 105;
+    this.nodeHeight = options.nodeHeight || 140;
     this.siblingGap = options.siblingGap || 35;
     this.generationGap = options.generationGap || 130;
     this.orientation = options.orientation || 'VERTICAL'; // 'VERTICAL' (Top->Down) or 'HORIZONTAL' (Left->Right)

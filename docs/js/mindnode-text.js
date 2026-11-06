@@ -1,4 +1,5 @@
 // mindnode-text.js - MindNode-style Text/Outline Tree Editor with Clean SVG Icons
+import { spouseRole } from './member-presentation.js';
 export class MindNodeTextEditor {
   constructor(container, dataStore) {
     this.container = container;
@@ -14,7 +15,7 @@ export class MindNodeTextEditor {
       if (['load', 'add', 'update', 'delete', 'undo', 'redo'].includes(event)) {
         this.render();
       } else if (event === 'select') {
-        this.highlightSelected(data);
+        this.revealSelected(data);
       }
     });
 
@@ -91,6 +92,10 @@ export class MindNodeTextEditor {
     const toggle = document.createElement('button');
     toggle.className = 'outline-toggle-btn';
     if (hasChildren) {
+      toggle.type = 'button';
+      toggle.title = `${isCollapsed ? 'Mở rộng' : 'Thu gọn'} nhánh ${member.full_name}`;
+      toggle.setAttribute('aria-label',toggle.title);
+      toggle.setAttribute('aria-expanded',String(!isCollapsed));
       toggle.innerHTML = isCollapsed
         ? `<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>`
         : `<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>`;
@@ -104,6 +109,7 @@ export class MindNodeTextEditor {
         this.render();
       };
     } else {
+      toggle.disabled = true; toggle.setAttribute('aria-hidden','true');
       toggle.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"></span>`;
     }
     row.appendChild(toggle);
@@ -133,7 +139,7 @@ export class MindNodeTextEditor {
     if (spouseMember) {
       const spouseLabel = document.createElement('span');
       spouseLabel.className = 'outline-spouse-label';
-      spouseLabel.textContent = ` ⚭ ${spouseMember.full_name}`;
+      spouseLabel.textContent = ` ${spouseRole(member,spouseMember)}: ${spouseMember.full_name}`;
       spouseLabel.title = `Phối ngẫu: ${spouseMember.full_name} (${spouseMember.id})`;
       row.appendChild(spouseLabel);
     }
@@ -387,6 +393,18 @@ export class MindNodeTextEditor {
       }
     }
     this.render();
+  }
+
+  revealSelected(selectedId) {
+    // Search must reveal a result even when its ancestors are collapsed.
+    let parent = this.dataStore.getMember(selectedId)?.parent_id;
+    let expanded = false;
+    const visited = new Set();
+    while (parent && !visited.has(parent)) {
+      visited.add(parent); expanded = this.collapsedNodes.delete(parent) || expanded;
+      parent = this.dataStore.getMember(parent)?.parent_id;
+    }
+    if (expanded) this.render(); else this.highlightSelected(selectedId);
   }
 
   highlightSelected(selectedId) {

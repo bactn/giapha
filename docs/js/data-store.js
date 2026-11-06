@@ -113,8 +113,8 @@ export class DataStore {
   getRootMembers() {
     const roots = [];
     for (const m of this.members.values()) {
-      // Exclude members that are linked as spouses (they render under their partner)
-      if (m.spouse_id && this.members.has(m.spouse_id)) continue;
+      // Only explicitly classified partners are inline; a spouse link must not hide an ancestor.
+      if (m.branch_type?.includes('Phối ngẫu') && m.spouse_id && this.members.has(m.spouse_id)) continue;
       if (!m.parent_id || m.parent_id === '-' || !this.members.has(m.parent_id)) {
         roots.push(m);
       }

@@ -1,5 +1,10 @@
 // export.js - High-Resolution Canvas 2D & SVG Engine supporting Tree/Branch Selection, PDF, PNG, Print & JSON
 // Supports A4-optimized vertical export templates for proper printing
+import { lifeDates, spouseRole, avatarSVG, drawAvatar } from './member-presentation.js';
+function spouseCaption(member,store) {
+  const partner=store?.getSpouseMember(member.id); const name=partner?.full_name || member.spouse;
+  return name ? `${spouseRole(member,partner)}: ${name}` : '';
+}
 export class Exporter {
 
   // A4 dimensions in points (72pt = 1 inch): 595 x 842 (portrait), 842 x 595 (landscape)
@@ -340,12 +345,7 @@ export class Exporter {
       ctx.arc(avX, avY, 14, 0, Math.PI * 2);
       ctx.fill();
 
-      // Initials
-      const initials = m.full_name.split(' ').map(w => w[0]).slice(-2).join('');
-      ctx.textAlign = 'center';
-      ctx.fillStyle = isMale ? '#1d4ed8' : '#be123c';
-      ctx.font = 'bold 10px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(initials, avX, avY + 3.5);
+      drawAvatar(ctx,m.gender,avX,avY,14);
 
       // Member text info
       ctx.textAlign = 'left';
@@ -364,15 +364,15 @@ export class Exporter {
       ctx.fillText(m.full_name, x + 44, textY);
 
       // Birth - Death
-      const dates = `${m.birth_date || ''} ${m.death_date ? '• ' + m.death_date : ''}`.trim();
+      const dates = lifeDates(m);
       if (dates) {
         ctx.fillStyle = '#64748b';
-        ctx.font = '10px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(dates, x + 44, textY + 14);
+        ctx.font = '9.5px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(dates, x + 44, textY + 14,nw-52);
       }
 
       // Spouse
-      if (m.spouse) {
+      if (spouseCaption(m,treeCanvas.dataStore)) {
         ctx.fillStyle = '#f8fafc';
         this.fillRoundRect(ctx, x + 1, y + nh - 20, nw - 2, 19, [0, 0, 11, 11]);
         ctx.strokeStyle = '#f1f5f9';
@@ -384,7 +384,7 @@ export class Exporter {
 
         ctx.fillStyle = '#64748b';
         ctx.font = '9.5px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(`⚭ ${m.spouse}`, x + 8, y + nh - 7);
+        ctx.fillText(spouseCaption(m,treeCanvas.dataStore), x + 8, y + nh - 7);
       }
     }
 
@@ -553,10 +553,11 @@ export class Exporter {
       <text x="10" y="16" font-size="10" font-weight="bold" fill="${headerTextFill}">Đời ${m.generation} • ${this.escapeXml(m.branch || 'Ngành II')}</text>
       ${isDichTon ? `<text x="${nw - 10}" y="16" font-size="9" font-weight="bold" fill="#d97706" text-anchor="end">DICH TON</text>` : ''}
       
-      ${m.christian_name ? `<text x="10" y="42" font-size="9.5" font-weight="bold" fill="#d97706">[${this.escapeXml(m.christian_name)}]</text>` : ''}
-      <text x="10" y="${m.christian_name ? 58 : 48}" font-size="12.5" font-weight="bold" fill="#0f172a">${this.escapeXml(m.full_name)}</text>
-      <text x="10" y="${m.christian_name ? 74 : 64}" font-size="10" fill="#64748b">${this.escapeXml(m.birth_date || '')} ${m.death_date ? '• ' + this.escapeXml(m.death_date) : ''}</text>
-      ${m.spouse ? `<text x="10" y="${nh - 10}" font-size="9.5" fill="#78716c">⚭ ${this.escapeXml(m.spouse)}</text>` : ''}
+      ${avatarSVG(m.gender).replace('<svg ','<svg x="10" y="33" width="28" height="28" ')}
+      ${m.christian_name ? `<text x="44" y="42" font-size="9.5" font-weight="bold" fill="#d97706">[${this.escapeXml(m.christian_name)}]</text>` : ''}
+      <text x="44" y="${m.christian_name ? 58 : 48}" font-size="12.5" font-weight="bold" fill="#0f172a">${this.escapeXml(m.full_name)}</text>
+      <text x="44" y="${m.christian_name ? 74 : 64}" font-size="9.5" fill="#64748b">${this.escapeXml(lifeDates(m))}</text>
+      ${spouseCaption(m,treeCanvas.dataStore) ? `<text x="10" y="${nh - 10}" font-size="9.5" fill="#78716c">${this.escapeXml(spouseCaption(m,treeCanvas.dataStore))}</text>` : ''}
     </g>
 `;
     }
@@ -842,7 +843,7 @@ export class Exporter {
       ctx.fillText(m.full_name, nameX, y + 10);
 
       // Dates
-      const dates = `${m.birth_date || ''}${m.death_date ? ' - ' + m.death_date : ''}`.trim();
+      const dates = lifeDates(m);
       if (dates) {
         ctx.fillStyle = '#64748b';
         ctx.font = '6.5px "Plus Jakarta Sans", sans-serif';
@@ -850,10 +851,10 @@ export class Exporter {
       }
 
       // Spouse (if fits)
-      if (m.spouse) {
+      if (spouseCaption(m,treeCanvas.dataStore)) {
         ctx.fillStyle = '#94a3b8';
         ctx.font = '6px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(`⚭ ${m.spouse}`, nameX, y + nh - 3);
+        ctx.fillText(spouseCaption(m,treeCanvas.dataStore), nameX, y + nh - 3);
       }
 
       // Đích Tôn badge
@@ -996,13 +997,13 @@ export class Exporter {
 
       // Dates
       ctx.fillStyle = '#64748b';
-      const dates = `${m.birth_date || ''}${m.death_date ? ' - ' + m.death_date : ''}`.trim();
+      const dates = lifeDates(m);
       ctx.fillText(dates, cx, y + cfg.rowHeight - 4);
       cx += colDates;
 
       // Spouse
       ctx.fillStyle = '#64748b';
-      ctx.fillText(m.spouse || '', cx, y + cfg.rowHeight - 4);
+      ctx.fillText(spouseCaption(m,treeCanvas.dataStore), cx, y + cfg.rowHeight - 4);
       cx += colSpouse;
 
       // Branch

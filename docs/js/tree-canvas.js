@@ -1,5 +1,6 @@
 // tree-canvas.js - Infinite Pan/Zoom Canvas with Mobile Touch Gestures & Standardized SVG Icons
 import { escapeHTML } from './html.js';
+import { avatarSVG, lifeDates, spouseRole } from './member-presentation.js';
 export class TreeCanvas {
   constructor(viewportEl, nodesContainerEl, svgEl, linksGroupEl, dataStore, autoLayout) {
     this.viewport = viewportEl;
@@ -295,7 +296,6 @@ export class TreeCanvas {
     }
 
     const isDeceased = member.status === 'Đã mất' || member.status === 'Mất sớm';
-    const avatarInitials = member.full_name.split(' ').map(n => n[0]).slice(-2).join('');
 
     card.innerHTML = `
       <div class="node-header">
@@ -312,31 +312,29 @@ export class TreeCanvas {
       </div>
       <div class="node-body">
         <div class="node-avatar ${member.gender === 'Nữ' ? 'avatar-female' : 'avatar-male'}">
-          ${escapeHTML(avatarInitials)}
+          ${avatarSVG(member.gender)}
         </div>
         <div class="node-info">
           ${member.christian_name ? `<div class="node-christian-name">[${escapeHTML(member.christian_name)}]</div>` : ''}
           <div class="node-full-name" title="Bấm đúp để sửa tên">${escapeHTML(member.full_name)}</div>
-          <div class="node-meta">${escapeHTML(member.birth_date)} ${member.death_date ? '• ' + escapeHTML(member.death_date) : ''}</div>
+          <div class="node-meta" title="${escapeHTML(lifeDates(member))}">${escapeHTML(lifeDates(member))}</div>
         </div>
       </div>
       ${member.spouse_id && this.dataStore.members.has(member.spouse_id) ? (() => {
         const sp = this.dataStore.members.get(member.spouse_id);
-        const spInitials = sp.full_name.split(' ').map(n => n[0]).slice(-2).join('');
         const spGender = sp.gender === 'Nữ' ? 'avatar-female' : 'avatar-male';
         const spChristian = sp.christian_name ? `[${sp.christian_name}] ` : '';
-        const spBirthYear = sp.birth_date ? sp.birth_date : '';
         return `
         <div class="node-footer node-footer-spouse" data-spouse-id="${escapeHTML(sp.id)}" title="Nhấp để xem chi tiết ${escapeHTML(sp.full_name)}">
-          <div class="spouse-mini-avatar ${spGender}">${escapeHTML(spInitials)}</div>
+          <div class="spouse-mini-avatar ${spGender}">${avatarSVG(sp.gender)}</div>
           <div class="spouse-mini-info">
-            <span class="spouse-mini-name">⚭ ${escapeHTML(spChristian)}${escapeHTML(sp.full_name)}</span>
-            <span class="spouse-mini-meta">${escapeHTML(spBirthYear)}</span>
+            <span class="spouse-mini-name">${spouseRole(member,sp)}: ${escapeHTML(spChristian)}${escapeHTML(sp.full_name)}</span>
+            <span class="spouse-mini-meta">${escapeHTML(lifeDates(sp))}</span>
           </div>
         </div>`;
       })() : (member.spouse ? `
         <div class="node-footer">
-          <span class="truncate">⚭ ${escapeHTML(member.spouse)}</span>
+          <span class="truncate">${spouseRole(member)}: ${escapeHTML(member.spouse)}</span>
         </div>
       ` : '')}
       

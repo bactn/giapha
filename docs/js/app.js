@@ -12,11 +12,12 @@ import { apiFetch, apiUrl, shareUrl } from './api.js';
 import { isSupabaseConfigured } from './supabase-client.js';
 import { SupabaseController } from './supabase-controller.js';
 import { escapeHTML } from './html.js';
+import { avatarSVG } from './member-presentation.js';
 
 class App {
   constructor() {
     this.dataStore = new DataStore();
-    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 105, siblingGap: 35, generationGap: 130 });
+    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 140, siblingGap: 35, generationGap: 130 });
 
     this.viewportEl = document.getElementById('canvas-viewport');
     this.nodesContainerEl = document.getElementById('canvas-nodes-container');
@@ -347,7 +348,7 @@ class App {
 
   applyRoleRestrictions() {
     // Show/hide edit controls based on role
-    const editControls = document.querySelectorAll('#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected, #btn-expand-all, #btn-collapse-all');
+    const editControls = document.querySelectorAll('#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected');
     const viewerOnly = document.getElementById('btn-request-edit');
     const shareBtn = document.getElementById('btn-open-share');
 
@@ -430,6 +431,11 @@ class App {
   }
 
   setupResponsiveDrawer() {
+    if (!this.headerObserver) {
+      const header = document.querySelector('.app-header');
+      this.headerObserver = new ResizeObserver(() => document.documentElement.style.setProperty('--workspace-header-height',`${header.getBoundingClientRect().height}px`));
+      this.headerObserver.observe(header);
+    }
     const leftPane = document.getElementById('left-menu-pane');
     const backdrop = document.getElementById('left-menu-backdrop');
     const btnHamburger = document.getElementById('btn-hamburger');
@@ -638,7 +644,7 @@ class App {
 
     document.getElementById('inspect-header-name').textContent = m.full_name;
     document.getElementById('inspect-header-meta').textContent = `Mã: ${m.id} • Đời ${m.generation} • ${m.branch || 'Ngành II'}`;
-    document.getElementById('inspect-avatar').textContent = m.full_name[0] || 'P';
+    document.getElementById('inspect-avatar').innerHTML = avatarSVG(m.gender);
 
     document.getElementById('inspect-christian-name').value = m.christian_name || '';
     document.getElementById('inspect-full-name').value = m.full_name || '';
@@ -678,6 +684,7 @@ class App {
   }
 
   setupToolbarButtons() {
+    this.setupHeaderMenus();
     // Zoom In, Out, Reset, Fit
     document.getElementById('btn-zoom-in').onclick = () => this.canvas.setZoom(this.canvas.scale * 1.2);
     document.getElementById('btn-zoom-out').onclick = () => this.canvas.setZoom(this.canvas.scale * 0.8);
@@ -2273,20 +2280,36 @@ class App {
   setupSearch() {
     const searchInput = document.getElementById('global-search');
     searchInput.oninput = (e) => {
-      const q = e.target.value.trim().toLowerCase();
-      if (!q) return;
+      const normalize = text => String(text || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').toLowerCase();
+      const q = normalize(e.target.value.trim());
+      if (!q) { document.getElementById('search-status').textContent = ''; return; }
 
       const match = this.dataStore.getAllMembers().find(m => 
-        m.full_name.toLowerCase().includes(q) ||
-        (m.christian_name && m.christian_name.toLowerCase().includes(q)) ||
-        m.id.toLowerCase() === q
+        normalize(m.full_name).includes(q) ||
+        normalize(m.christian_name).includes(q) ||
+        normalize(m.id) === q
       );
 
       if (match) {
         this.dataStore.selectMember(match.id);
         window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: match.id }));
       }
+      document.getElementById('search-status').textContent = match ? `Đã tìm thấy ${match.full_name}` : 'Không tìm thấy thành viên';
     };
+  }
+
+  setupHeaderMenus() {
+    if (this.headerMenusReady) return;
+    this.headerMenusReady = true;
+    const menus = [...document.querySelectorAll('.header-menu')];
+    const close = () => menus.forEach(menu => { menu.classList.remove('is-open'); menu.firstElementChild.setAttribute('aria-expanded','false'); });
+    menus.forEach(menu => {
+      const button = menu.firstElementChild;
+      button.onclick = () => { const open = !menu.classList.contains('is-open'); close(); menu.classList.toggle('is-open',open); button.setAttribute('aria-expanded',String(open)); };
+      menu.querySelector('.dropdown-menu').addEventListener('click',close);
+    });
+    document.addEventListener('click',event => { if (!event.target.closest('.header-menu')) close(); });
+    document.addEventListener('keydown',event => { if(event.key==='Escape') close(); });
   }
 
   setupLineageTitle() {

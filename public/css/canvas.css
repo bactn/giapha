@@ -57,6 +57,9 @@
 .family-node {
   position: absolute;
   width: 230px;
+  height:140px;
+  display:flex;
+  flex-direction:column;
   background-color: #ffffff;
   border-radius: 12px;
   border: 1.5px solid #cbd5e1;
@@ -128,6 +131,7 @@
 
 /* Node Body */
 .node-body {
+  flex:1;
   padding: 6px 8px;
   display: flex;
   align-items: center;
@@ -182,9 +186,9 @@
   font-size: 10px;
   color: #64748b;
   margin-top: 1px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space:normal;
+  line-height:1.4;
+  overflow-wrap:anywhere;
 }
 
 .node-footer {
@@ -248,9 +252,8 @@
 .spouse-mini-meta {
   font-size: 8.5px;
   color: #94a3b8;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space:normal;
+  line-height:1.35;
 }
 
 /* Node Inline Input for Direct Canvas Editing */

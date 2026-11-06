@@ -100,7 +100,7 @@ var DataStore = class {
   getRootMembers() {
     const roots = [];
     for (const m of this.members.values()) {
-      if (m.spouse_id && this.members.has(m.spouse_id)) continue;
+      if (m.branch_type?.includes("Ph\u1ED1i ng\u1EABu") && m.spouse_id && this.members.has(m.spouse_id)) continue;
       if (!m.parent_id || m.parent_id === "-" || !this.members.has(m.parent_id)) {
         roots.push(m);
       }
@@ -395,7 +395,7 @@ var DataStore = class {
 var AutoLayout = class {
   constructor(options = {}) {
     this.nodeWidth = options.nodeWidth || 230;
-    this.nodeHeight = options.nodeHeight || 105;
+    this.nodeHeight = options.nodeHeight || 140;
     this.siblingGap = options.siblingGap || 35;
     this.generationGap = options.generationGap || 130;
     this.orientation = options.orientation || "VERTICAL";
@@ -610,6 +610,65 @@ var AutoLayout = class {
 // dist/js/html.js
 function escapeHTML(value) {
   return String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+// dist/js/member-presentation.js
+var knownDate = (value) => {
+  const text = String(value || "").trim();
+  return /^(?:[-?–—]+|không rõ|chưa rõ|unknown|null)$/i.test(text) ? "" : text;
+};
+function lifeDates(member) {
+  const birth = knownDate(member.birth_date);
+  const death = knownDate(member.death_date);
+  const early = member.status === "M\u1EA5t s\u1EDBm" || /^mất sớm$/i.test(death);
+  const died = early || member.status === "\u0110\xE3 m\u1EA5t" || Boolean(death);
+  const deathLabel = death && !/^(?:mất sớm|đã mất|mất)$/i.test(death) ? `M\u1EA5t ${death}` : early ? "M\u1EA5t s\u1EDBm" : died ? "M\u1EA5t" : "";
+  return [birth ? `SN ${birth}` : "", deathLabel].filter(Boolean).join(" - ");
+}
+function spouseRole(member, spouse = null) {
+  if (spouse?.gender === "N\u1EEF") return "V\u1EE3";
+  if (spouse?.gender === "Nam") return "Ch\u1ED3ng";
+  return member.gender === "Nam" ? "V\u1EE3" : member.gender === "N\u1EEF" ? "Ch\u1ED3ng" : "V\u1EE3/Ch\u1ED3ng";
+}
+function avatarSVG(gender) {
+  const female = gender === "N\u1EEF";
+  const label = female ? "Avatar n\u1EEF" : gender === "Nam" ? "Avatar nam" : "Avatar th\xE0nh vi\xEAn";
+  return `<svg viewBox="0 0 48 48" role="img" aria-label="${label}" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="24" fill="${female ? "#ffe4e6" : "#dbeafe"}"/>
+    ${female ? '<path d="M12 25V19a12 12 0 0 1 24 0v17H12Z" fill="#65453d"/>' : ""}
+    <path d="M6 48v-5a18 14 0 0 1 36 0v5" fill="${female ? "#be4567" : "#426ba3"}"/><path d="M19 29h10v9l-5 4-5-4Z" fill="#e6ad89"/>
+    <ellipse cx="24" cy="21" rx="9" ry="12" fill="#f4c9a8"/>
+    <path d="${female ? "M14 21V18a10 11 0 0 1 20 0v7c-2-7-7-7-10-13-1 5-5 8-10 9Z" : "M14 22V17a10 10 0 0 1 20 0v6l-3-7c-5 2-9 0-12-2l-2 8Z"}" fill="#65453d"/>
+    <circle cx="21" cy="23" r=".8" fill="#65453d"/><circle cx="28" cy="23" r=".8" fill="#65453d"/><path d="M21 28q3 2 6 0" fill="none" stroke="#ba7863" stroke-linecap="round"/></svg>`;
+}
+function drawAvatar(ctx, gender, cx, cy, radius) {
+  const female = gender === "N\u1EEF";
+  ctx.save();
+  ctx.translate(cx - radius, cy - radius);
+  ctx.scale(radius / 24, radius / 24);
+  ctx.beginPath();
+  ctx.arc(24, 24, 24, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.fillStyle = female ? "#ffe4e6" : "#dbeafe";
+  ctx.fillRect(0, 0, 48, 48);
+  ctx.fillStyle = "#65453d";
+  if (female) ctx.fillRect(12, 16, 24, 23);
+  ctx.fillStyle = female ? "#be4567" : "#426ba3";
+  ctx.beginPath();
+  ctx.ellipse(24, 47, 19, 16, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#f4c9a8";
+  ctx.beginPath();
+  ctx.ellipse(24, 22, 9, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#65453d";
+  ctx.beginPath();
+  ctx.ellipse(24, 14, 10, 6, 0, Math.PI, Math.PI * 2);
+  ctx.lineTo(34, 21);
+  ctx.lineTo(29, 15);
+  ctx.lineTo(17, 18);
+  ctx.lineTo(14, 23);
+  ctx.fill();
+  ctx.restore();
 }
 
 // dist/js/tree-canvas.js
@@ -847,7 +906,6 @@ var TreeCanvas = class {
       card.classList.add("is-dich-ton");
     }
     const isDeceased = member.status === "\u0110\xE3 m\u1EA5t" || member.status === "M\u1EA5t s\u1EDBm";
-    const avatarInitials = member.full_name.split(" ").map((n) => n[0]).slice(-2).join("");
     card.innerHTML = `
       <div class="node-header">
         <span class="font-bold text-[10px] text-slate-500">\u0110\u1EDDi ${escapeHTML(member.generation)} \u2022 ${escapeHTML(member.branch || "Ng\xE0nh II")}</span>
@@ -863,31 +921,29 @@ var TreeCanvas = class {
       </div>
       <div class="node-body">
         <div class="node-avatar ${member.gender === "N\u1EEF" ? "avatar-female" : "avatar-male"}">
-          ${escapeHTML(avatarInitials)}
+          ${avatarSVG(member.gender)}
         </div>
         <div class="node-info">
           ${member.christian_name ? `<div class="node-christian-name">[${escapeHTML(member.christian_name)}]</div>` : ""}
           <div class="node-full-name" title="B\u1EA5m \u0111\xFAp \u0111\u1EC3 s\u1EEDa t\xEAn">${escapeHTML(member.full_name)}</div>
-          <div class="node-meta">${escapeHTML(member.birth_date)} ${member.death_date ? "\u2022 " + escapeHTML(member.death_date) : ""}</div>
+          <div class="node-meta" title="${escapeHTML(lifeDates(member))}">${escapeHTML(lifeDates(member))}</div>
         </div>
       </div>
       ${member.spouse_id && this.dataStore.members.has(member.spouse_id) ? (() => {
       const sp = this.dataStore.members.get(member.spouse_id);
-      const spInitials = sp.full_name.split(" ").map((n) => n[0]).slice(-2).join("");
       const spGender = sp.gender === "N\u1EEF" ? "avatar-female" : "avatar-male";
       const spChristian = sp.christian_name ? `[${sp.christian_name}] ` : "";
-      const spBirthYear = sp.birth_date ? sp.birth_date : "";
       return `
         <div class="node-footer node-footer-spouse" data-spouse-id="${escapeHTML(sp.id)}" title="Nh\u1EA5p \u0111\u1EC3 xem chi ti\u1EBFt ${escapeHTML(sp.full_name)}">
-          <div class="spouse-mini-avatar ${spGender}">${escapeHTML(spInitials)}</div>
+          <div class="spouse-mini-avatar ${spGender}">${avatarSVG(sp.gender)}</div>
           <div class="spouse-mini-info">
-            <span class="spouse-mini-name">\u26AD ${escapeHTML(spChristian)}${escapeHTML(sp.full_name)}</span>
-            <span class="spouse-mini-meta">${escapeHTML(spBirthYear)}</span>
+            <span class="spouse-mini-name">${spouseRole(member, sp)}: ${escapeHTML(spChristian)}${escapeHTML(sp.full_name)}</span>
+            <span class="spouse-mini-meta">${escapeHTML(lifeDates(sp))}</span>
           </div>
         </div>`;
     })() : member.spouse ? `
         <div class="node-footer">
-          <span class="truncate">\u26AD ${escapeHTML(member.spouse)}</span>
+          <span class="truncate">${spouseRole(member)}: ${escapeHTML(member.spouse)}</span>
         </div>
       ` : ""}
       
@@ -1120,7 +1176,7 @@ var MindNodeTextEditor = class {
       if (["load", "add", "update", "delete", "undo", "redo"].includes(event)) {
         this.render();
       } else if (event === "select") {
-        this.highlightSelected(data);
+        this.revealSelected(data);
       }
     });
     window.addEventListener("keydown", (e) => {
@@ -1176,6 +1232,10 @@ var MindNodeTextEditor = class {
     const toggle = document.createElement("button");
     toggle.className = "outline-toggle-btn";
     if (hasChildren) {
+      toggle.type = "button";
+      toggle.title = `${isCollapsed ? "M\u1EDF r\u1ED9ng" : "Thu g\u1ECDn"} nh\xE1nh ${member.full_name}`;
+      toggle.setAttribute("aria-label", toggle.title);
+      toggle.setAttribute("aria-expanded", String(!isCollapsed));
       toggle.innerHTML = isCollapsed ? `<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>` : `<svg class="w-3 h-3 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>`;
       toggle.onclick = (e) => {
         e.stopPropagation();
@@ -1187,6 +1247,8 @@ var MindNodeTextEditor = class {
         this.render();
       };
     } else {
+      toggle.disabled = true;
+      toggle.setAttribute("aria-hidden", "true");
       toggle.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-slate-300 inline-block"></span>`;
     }
     row.appendChild(toggle);
@@ -1210,7 +1272,7 @@ var MindNodeTextEditor = class {
     if (spouseMember) {
       const spouseLabel = document.createElement("span");
       spouseLabel.className = "outline-spouse-label";
-      spouseLabel.textContent = ` \u26AD ${spouseMember.full_name}`;
+      spouseLabel.textContent = ` ${spouseRole(member, spouseMember)}: ${spouseMember.full_name}`;
       spouseLabel.title = `Ph\u1ED1i ng\u1EABu: ${spouseMember.full_name} (${spouseMember.id})`;
       row.appendChild(spouseLabel);
     }
@@ -1417,6 +1479,18 @@ var MindNodeTextEditor = class {
       }
     }
     this.render();
+  }
+  revealSelected(selectedId) {
+    let parent = this.dataStore.getMember(selectedId)?.parent_id;
+    let expanded = false;
+    const visited = /* @__PURE__ */ new Set();
+    while (parent && !visited.has(parent)) {
+      visited.add(parent);
+      expanded = this.collapsedNodes.delete(parent) || expanded;
+      parent = this.dataStore.getMember(parent)?.parent_id;
+    }
+    if (expanded) this.render();
+    else this.highlightSelected(selectedId);
   }
   highlightSelected(selectedId) {
     const allRows = this.container.querySelectorAll(".outline-node-row");
@@ -1811,6 +1885,11 @@ var LunarCalendarManager = class {
 };
 
 // dist/js/export.js
+function spouseCaption(member, store) {
+  const partner = store?.getSpouseMember(member.id);
+  const name = partner?.full_name || member.spouse;
+  return name ? `${spouseRole(member, partner)}: ${name}` : "";
+}
 var Exporter = class {
   // A4 dimensions in points (72pt = 1 inch): 595 x 842 (portrait), 842 x 595 (landscape)
   static A4 = {
@@ -2067,11 +2146,7 @@ var Exporter = class {
       ctx.beginPath();
       ctx.arc(avX, avY, 14, 0, Math.PI * 2);
       ctx.fill();
-      const initials = m.full_name.split(" ").map((w) => w[0]).slice(-2).join("");
-      ctx.textAlign = "center";
-      ctx.fillStyle = isMale ? "#1d4ed8" : "#be123c";
-      ctx.font = 'bold 10px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(initials, avX, avY + 3.5);
+      drawAvatar(ctx, m.gender, avX, avY, 14);
       ctx.textAlign = "left";
       let textY = y + 44;
       if (m.christian_name) {
@@ -2083,13 +2158,13 @@ var Exporter = class {
       ctx.fillStyle = "#0f172a";
       ctx.font = 'bold 12.5px "Plus Jakarta Sans", sans-serif';
       ctx.fillText(m.full_name, x + 44, textY);
-      const dates = `${m.birth_date || ""} ${m.death_date ? "\u2022 " + m.death_date : ""}`.trim();
+      const dates = lifeDates(m);
       if (dates) {
         ctx.fillStyle = "#64748b";
-        ctx.font = '10px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(dates, x + 44, textY + 14);
+        ctx.font = '9.5px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(dates, x + 44, textY + 14, nw - 52);
       }
-      if (m.spouse) {
+      if (spouseCaption(m, treeCanvas.dataStore)) {
         ctx.fillStyle = "#f8fafc";
         this.fillRoundRect(ctx, x + 1, y + nh - 20, nw - 2, 19, [0, 0, 11, 11]);
         ctx.strokeStyle = "#f1f5f9";
@@ -2100,7 +2175,7 @@ var Exporter = class {
         ctx.stroke();
         ctx.fillStyle = "#64748b";
         ctx.font = '9.5px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(`\u26AD ${m.spouse}`, x + 8, y + nh - 7);
+        ctx.fillText(spouseCaption(m, treeCanvas.dataStore), x + 8, y + nh - 7);
       }
     }
     ctx.restore();
@@ -2249,10 +2324,11 @@ var Exporter = class {
       <text x="10" y="16" font-size="10" font-weight="bold" fill="${headerTextFill}">\u0110\u1EDDi ${m.generation} \u2022 ${this.escapeXml(m.branch || "Ng\xE0nh II")}</text>
       ${isDichTon ? `<text x="${nw - 10}" y="16" font-size="9" font-weight="bold" fill="#d97706" text-anchor="end">DICH TON</text>` : ""}
       
-      ${m.christian_name ? `<text x="10" y="42" font-size="9.5" font-weight="bold" fill="#d97706">[${this.escapeXml(m.christian_name)}]</text>` : ""}
-      <text x="10" y="${m.christian_name ? 58 : 48}" font-size="12.5" font-weight="bold" fill="#0f172a">${this.escapeXml(m.full_name)}</text>
-      <text x="10" y="${m.christian_name ? 74 : 64}" font-size="10" fill="#64748b">${this.escapeXml(m.birth_date || "")} ${m.death_date ? "\u2022 " + this.escapeXml(m.death_date) : ""}</text>
-      ${m.spouse ? `<text x="10" y="${nh - 10}" font-size="9.5" fill="#78716c">\u26AD ${this.escapeXml(m.spouse)}</text>` : ""}
+      ${avatarSVG(m.gender).replace("<svg ", '<svg x="10" y="33" width="28" height="28" ')}
+      ${m.christian_name ? `<text x="44" y="42" font-size="9.5" font-weight="bold" fill="#d97706">[${this.escapeXml(m.christian_name)}]</text>` : ""}
+      <text x="44" y="${m.christian_name ? 58 : 48}" font-size="12.5" font-weight="bold" fill="#0f172a">${this.escapeXml(m.full_name)}</text>
+      <text x="44" y="${m.christian_name ? 74 : 64}" font-size="9.5" fill="#64748b">${this.escapeXml(lifeDates(m))}</text>
+      ${spouseCaption(m, treeCanvas.dataStore) ? `<text x="10" y="${nh - 10}" font-size="9.5" fill="#78716c">${this.escapeXml(spouseCaption(m, treeCanvas.dataStore))}</text>` : ""}
     </g>
 `;
     }
@@ -2475,16 +2551,16 @@ ${startXref}
       ctx.font = 'bold 8px "Plus Jakarta Sans", sans-serif';
       const nameX = x + 26;
       ctx.fillText(m.full_name, nameX, y + 10);
-      const dates = `${m.birth_date || ""}${m.death_date ? " - " + m.death_date : ""}`.trim();
+      const dates = lifeDates(m);
       if (dates) {
         ctx.fillStyle = "#64748b";
         ctx.font = '6.5px "Plus Jakarta Sans", sans-serif';
         ctx.fillText(dates, nameX, y + 19);
       }
-      if (m.spouse) {
+      if (spouseCaption(m, treeCanvas.dataStore)) {
         ctx.fillStyle = "#94a3b8";
         ctx.font = '6px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(`\u26AD ${m.spouse}`, nameX, y + nh - 3);
+        ctx.fillText(spouseCaption(m, treeCanvas.dataStore), nameX, y + nh - 3);
       }
       if (isDichTon) {
         ctx.fillStyle = "#fef3c7";
@@ -2584,11 +2660,11 @@ ${startXref}
       ctx.font = `${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
       cx += colName;
       ctx.fillStyle = "#64748b";
-      const dates = `${m.birth_date || ""}${m.death_date ? " - " + m.death_date : ""}`.trim();
+      const dates = lifeDates(m);
       ctx.fillText(dates, cx, y + cfg.rowHeight - 4);
       cx += colDates;
       ctx.fillStyle = "#64748b";
-      ctx.fillText(m.spouse || "", cx, y + cfg.rowHeight - 4);
+      ctx.fillText(spouseCaption(m, treeCanvas.dataStore), cx, y + cfg.rowHeight - 4);
       cx += colSpouse;
       ctx.fillStyle = "#475569";
       ctx.fillText(m.branch || "", cx, y + cfg.rowHeight - 4);
@@ -3750,7 +3826,10 @@ var SupabaseController = class {
     $2("btn-inspect-save").onclick = () => this.save();
     for (const id2 of ["btn-save-lineage", "btn-inspect-save"]) {
       const button = $2(id2);
-      button.textContent = role === "editor" ? "G\u1EEDi y\xEAu c\u1EA7u ph\xEA duy\u1EC7t" : "L\u01B0u gia ph\u1EA3";
+      const label = role === "editor" ? "G\u1EEDi y\xEAu c\u1EA7u ph\xEA duy\u1EC7t" : "L\u01B0u gia ph\u1EA3";
+      const displayLabel = id2 === "btn-save-lineage" ? role === "editor" ? "G\u1EEDi duy\u1EC7t" : "L\u01B0u" : label;
+      button.innerHTML = `<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg><span class="workspace-action-label">${displayLabel}</span>`;
+      button.setAttribute("aria-label", label);
       button.title = role === "editor" ? "M\u1ECDi thay \u0111\u1ED5i c\u1EA7n qu\u1EA3n tr\u1ECB vi\xEAn ph\xEA duy\u1EC7t" : "L\u01B0u gia ph\u1EA3";
     }
     if (this.guest) $2("btn-request-edit").style.display = "none";
@@ -3819,18 +3898,23 @@ var SupabaseController = class {
   installNavigation() {
     const host = $2("user-display").parentElement;
     const switcher = document.createElement("button");
-    switcher.className = "sb-button";
+    switcher.className = "workspace-icon-button";
     switcher.id = "sb-switch";
-    switcher.textContent = "Gia ph\u1EA3 c\u1EE7a t\xF4i";
-    switcher.textContent = "Trang ch\u1EE7";
+    switcher.title = "Trang ch\u1EE7";
+    switcher.setAttribute("aria-label", "Trang ch\u1EE7");
+    switcher.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9"/></svg>';
     switcher.onclick = () => this.portal.go("home");
     const reload = document.createElement("button");
-    reload.className = "sb-button";
-    reload.textContent = "T\u1EA3i l\u1EA1i";
+    reload.className = "workspace-icon-button";
+    reload.id = "sb-reload";
+    reload.title = "T\u1EA3i l\u1EA1i";
+    reload.setAttribute("aria-label", "T\u1EA3i l\u1EA1i");
+    reload.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 7v5h-5M4 17v-5h5M19 11a7 7 0 0 0-12-5L4 9m16 6-3 3A7 7 0 0 1 5 13"/></svg>';
     reload.onclick = () => this.action(reload, async () => {
       if (this.canLeave()) await this.load();
     });
-    host.append(switcher, reload);
+    host.insertBefore(switcher, $2("notification-bell-wrapper"));
+    host.insertBefore(reload, $2("notification-bell-wrapper"));
     for (const link of document.querySelectorAll('a[href^="/api/download/"]')) {
       link.href = "data:text/csv;charset=utf-8," + encodeURIComponent("\uFEFFM\xE3 ID,T\xEAn Th\xE1nh,H\u1ECD v\xE0 T\xEAn,Gi\u1EDBi T\xEDnh,Th\u1EBF H\u1EC7,Chi,Nh\xE1nh N\u1ED9i Ngo\u1EA1i,M\xE3 ID Cha/M\u1EB9,V\u1EE3 Ch\u1ED3ng,Ng\xE0y Sinh,Ng\xE0y M\u1EA5t,Tr\u1EA1ng Th\xE1i,Vai Tr\xF2,Ghi Ch\xFA\r\n");
       link.download = "gia-pha-mau.csv";
@@ -4119,7 +4203,7 @@ var SupabaseController = class {
 var App = class {
   constructor() {
     this.dataStore = new DataStore();
-    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 105, siblingGap: 35, generationGap: 130 });
+    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 140, siblingGap: 35, generationGap: 130 });
     this.viewportEl = document.getElementById("canvas-viewport");
     this.nodesContainerEl = document.getElementById("canvas-nodes-container");
     this.svgEl = document.getElementById("canvas-svg");
@@ -4394,7 +4478,7 @@ var App = class {
     });
   }
   applyRoleRestrictions() {
-    const editControls = document.querySelectorAll("#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected, #btn-expand-all, #btn-collapse-all");
+    const editControls = document.querySelectorAll("#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected");
     const viewerOnly = document.getElementById("btn-request-edit");
     const shareBtn = document.getElementById("btn-open-share");
     this.updateUserDisplay();
@@ -4463,6 +4547,11 @@ var App = class {
     if (badge) badge.textContent = String(this.dataStore.members.size);
   }
   setupResponsiveDrawer() {
+    if (!this.headerObserver) {
+      const header = document.querySelector(".app-header");
+      this.headerObserver = new ResizeObserver(() => document.documentElement.style.setProperty("--workspace-header-height", `${header.getBoundingClientRect().height}px`));
+      this.headerObserver.observe(header);
+    }
     const leftPane = document.getElementById("left-menu-pane");
     const backdrop = document.getElementById("left-menu-backdrop");
     const btnHamburger = document.getElementById("btn-hamburger");
@@ -4634,7 +4723,7 @@ var App = class {
     indicator.classList.remove("hidden");
     document.getElementById("inspect-header-name").textContent = m.full_name;
     document.getElementById("inspect-header-meta").textContent = `M\xE3: ${m.id} \u2022 \u0110\u1EDDi ${m.generation} \u2022 ${m.branch || "Ng\xE0nh II"}`;
-    document.getElementById("inspect-avatar").textContent = m.full_name[0] || "P";
+    document.getElementById("inspect-avatar").innerHTML = avatarSVG(m.gender);
     document.getElementById("inspect-christian-name").value = m.christian_name || "";
     document.getElementById("inspect-full-name").value = m.full_name || "";
     document.getElementById("inspect-gender").value = m.gender || "Nam";
@@ -4668,6 +4757,7 @@ var App = class {
     document.getElementById("inspect-notes").value = m.notes || "";
   }
   setupToolbarButtons() {
+    this.setupHeaderMenus();
     document.getElementById("btn-zoom-in").onclick = () => this.canvas.setZoom(this.canvas.scale * 1.2);
     document.getElementById("btn-zoom-out").onclick = () => this.canvas.setZoom(this.canvas.scale * 0.8);
     document.getElementById("btn-zoom-reset").onclick = () => this.canvas.setZoom(1);
@@ -6073,16 +6163,46 @@ var App = class {
   setupSearch() {
     const searchInput = document.getElementById("global-search");
     searchInput.oninput = (e) => {
-      const q = e.target.value.trim().toLowerCase();
-      if (!q) return;
+      const normalize = (text) => String(text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").toLowerCase();
+      const q = normalize(e.target.value.trim());
+      if (!q) {
+        document.getElementById("search-status").textContent = "";
+        return;
+      }
       const match = this.dataStore.getAllMembers().find(
-        (m) => m.full_name.toLowerCase().includes(q) || m.christian_name && m.christian_name.toLowerCase().includes(q) || m.id.toLowerCase() === q
+        (m) => normalize(m.full_name).includes(q) || normalize(m.christian_name).includes(q) || normalize(m.id) === q
       );
       if (match) {
         this.dataStore.selectMember(match.id);
         window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: match.id }));
       }
+      document.getElementById("search-status").textContent = match ? `\u0110\xE3 t\xECm th\u1EA5y ${match.full_name}` : "Kh\xF4ng t\xECm th\u1EA5y th\xE0nh vi\xEAn";
     };
+  }
+  setupHeaderMenus() {
+    if (this.headerMenusReady) return;
+    this.headerMenusReady = true;
+    const menus = [...document.querySelectorAll(".header-menu")];
+    const close = () => menus.forEach((menu) => {
+      menu.classList.remove("is-open");
+      menu.firstElementChild.setAttribute("aria-expanded", "false");
+    });
+    menus.forEach((menu) => {
+      const button = menu.firstElementChild;
+      button.onclick = () => {
+        const open = !menu.classList.contains("is-open");
+        close();
+        menu.classList.toggle("is-open", open);
+        button.setAttribute("aria-expanded", String(open));
+      };
+      menu.querySelector(".dropdown-menu").addEventListener("click", close);
+    });
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest(".header-menu")) close();
+    });
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") close();
+    });
   }
   setupLineageTitle() {
     const titleEl = document.getElementById("lineage-title");

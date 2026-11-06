@@ -255,7 +255,10 @@ export class SupabaseController {
     $('btn-save-lineage').onclick = () => this.save();
     $('btn-inspect-save').onclick = () => this.save();
     for (const id of ['btn-save-lineage','btn-inspect-save']) {
-      const button = $(id); button.textContent = role === 'editor' ? 'Gửi yêu cầu phê duyệt' : 'Lưu gia phả';
+      const button = $(id); const label = role === 'editor' ? 'Gửi yêu cầu phê duyệt' : 'Lưu gia phả';
+      const displayLabel = id === 'btn-save-lineage' ? role === 'editor' ? 'Gửi duyệt' : 'Lưu' : label;
+      button.innerHTML = `<svg aria-hidden="true" width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3v12m-4-4 4 4 4-4M5 16v4h14v-4"/></svg><span class="workspace-action-label">${displayLabel}</span>`;
+      button.setAttribute('aria-label',label);
       button.title = role === 'editor' ? 'Mọi thay đổi cần quản trị viên phê duyệt' : 'Lưu gia phả';
     }
     if (this.guest) $('btn-request-edit').style.display = 'none';
@@ -309,12 +312,14 @@ export class SupabaseController {
 
   installNavigation() {
     const host = $('user-display').parentElement;
-    const switcher = document.createElement('button'); switcher.className = 'sb-button'; switcher.id = 'sb-switch'; switcher.textContent = 'Gia phả của tôi';
-    switcher.textContent = 'Trang chủ';
+    const switcher = document.createElement('button'); switcher.className = 'workspace-icon-button'; switcher.id = 'sb-switch';
+    switcher.title = 'Trang chủ'; switcher.setAttribute('aria-label','Trang chủ');
+    switcher.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="m3 10 9-7 9 7M5 9v12h5v-7h4v7h5V9"/></svg>';
     switcher.onclick = () => this.portal.go('home');
-    const reload = document.createElement('button'); reload.className = 'sb-button'; reload.textContent = 'Tải lại';
+    const reload = document.createElement('button'); reload.className = 'workspace-icon-button'; reload.id = 'sb-reload'; reload.title = 'Tải lại'; reload.setAttribute('aria-label','Tải lại');
+    reload.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M20 7v5h-5M4 17v-5h5M19 11a7 7 0 0 0-12-5L4 9m16 6-3 3A7 7 0 0 1 5 13"/></svg>';
     reload.onclick = () => this.action(reload, async () => { if (this.canLeave()) await this.load(); });
-    host.append(switcher, reload);
+    host.insertBefore(switcher,$('notification-bell-wrapper')); host.insertBefore(reload,$('notification-bell-wrapper'));
     for (const link of document.querySelectorAll('a[href^="/api/download/"]')) {
       link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent('\uFEFFMã ID,Tên Thánh,Họ và Tên,Giới Tính,Thế Hệ,Chi,Nhánh Nội Ngoại,Mã ID Cha/Mẹ,Vợ Chồng,Ngày Sinh,Ngày Mất,Trạng Thái,Vai Trò,Ghi Chú\r\n');
       link.download = 'gia-pha-mau.csv'; link.textContent = '📥 Tải mẫu CSV';

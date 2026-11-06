@@ -23,6 +23,56 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* Keep the header's menus above every canvas control in one stacking context. */
+#workspace-shell { display:flex; flex-direction:column; height:100vh; height:100dvh; }
+#workspace-shell > .app-header { flex-shrink:0; z-index:60; gap:8px; }
+.app-header button { white-space:nowrap; }
+#workspace-shell > main { flex:1; min-height:0; height:auto; z-index:0; isolation:isolate; }
+.header-menu > .dropdown-menu { display:none; z-index:200; top:100%; margin-top:6px; }
+.header-menu.is-open > .dropdown-menu { display:block; }
+.workspace-icon-button { display:inline-flex; align-items:center; justify-content:center; width:32px; height:32px; padding:6px; border:0; border-radius:8px; color:#64748b; background:transparent; flex-shrink:0; }
+.workspace-icon-button svg { width:18px; height:18px; }
+.workspace-icon-button:hover { background:#f1f5f9; color:#92400e; }
+.workspace-icon-button:focus-visible { outline:2px solid #b45309; outline-offset:2px; }
+@media (min-width:640px) and (max-width:1599px) {
+  .workspace-brand { min-width:0; flex:1; }
+  .workspace-brand .app-header-title { max-width:180px; }
+  .workspace-search #global-search-wrapper { width:170px; }
+  .workspace-undo { display:none !important; }
+  #btn-toggle-left-menu span { display:none; }
+  #btn-toggle-left-menu { padding:8px; }
+  #btn-open-kinship > span,#btn-open-lunar > span,#btn-open-export > span,#btn-open-share > span { display:none; }
+}
+@media (min-width:640px) and (max-width:1199px) { .workspace-actions .portal-user-name { display:none; } }
+.node-avatar svg,.spouse-mini-avatar svg,#inspect-avatar svg { width:100%; height:100%; border-radius:inherit; }
+.modal-overlay { z-index:200 !important; }
+#share-panel-overlay,#edit-request-overlay { z-index:210; }
+#auth-overlay { z-index:300; }
+#toast-container { z-index:400; }
+
+@media (max-width:1023px) {
+  #workspace-shell > .app-header { height:auto; min-height:52px; flex-wrap:wrap; }
+}
+@media (max-width:639px) {
+  :root { --header-height:140px; }
+  #workspace-shell > .app-header { display:grid; grid-template-columns:minmax(0,1fr); padding:6px 8px; gap:5px; }
+  .workspace-brand { min-width:0; grid-row:1; }
+  .workspace-brand > .min-w-0 { flex:1; }
+  .workspace-brand .app-header-title { max-width:calc(100vw - 110px); }
+  .workspace-search { grid-row:2; width:100%; }
+  .workspace-search #global-search-wrapper { flex:1; width:100%; }
+  #global-search { min-height:36px; font-size:16px; }
+  .workspace-actions { grid-row:3; width:100%; justify-content:flex-end; gap:3px; flex-wrap:wrap; }
+  .workspace-actions > * { margin-left:0 !important; }
+  .workspace-actions > button,.workspace-actions > .header-menu > button { min-width:32px; min-height:36px; padding:6px; }
+  .workspace-actions .workspace-action-label { display:none; }
+  .workspace-actions .portal-user-name { display:none; }
+  .workspace-actions .portal-user-trigger { padding:0; gap:3px; }
+  #user-display { padding:0; border:0; background:none; }
+  .header-menu > .dropdown-menu { position:fixed; top:var(--workspace-header-height,140px); left:8px; right:auto; width:min(280px,calc(100vw - 16px)); }
+  .outline-toggle-btn { width:32px; height:32px; }
+}
+
 .font-serif {
   font-family: 'Playfair Display', Georgia, serif;
 }
@@ -177,8 +227,8 @@ body {
 }
 
 .outline-toggle-btn {
-  width: 20px;
-  height: 20px;
+  width: 26px;
+  height: 26px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -191,6 +241,9 @@ body {
   background-color: #e2e8f0;
   color: #0f172a;
 }
+.outline-toggle-btn svg { width:15px; height:15px; }
+.outline-toggle-btn:disabled { pointer-events:none; opacity:.55; }
+.outline-toggle-btn:focus-visible { outline:2px solid #b45309; outline-offset:1px; }
 .outline-node-title {
   flex: 1;
   font-size: 12px;
@@ -245,10 +298,10 @@ body {
   /* Left Menu becomes an off-canvas drawer */
   #left-menu-pane {
     position: fixed;
-    top: 0;
+    top: var(--workspace-header-height,52px);
     left: 0;
     bottom: 0;
-    height: 100%;
+    height: calc(100dvh - var(--workspace-header-height,52px));
     width: 340px;
     max-width: 85vw;
     z-index: 40;
@@ -284,7 +337,7 @@ body {
 /* Small mobile devices (< 640px) */
 @media (max-width: 639px) {
   #global-search-wrapper {
-    display: none; /* Hide wide search bar, open on button if needed */
+    display:block;
   }
   .hide-on-mobile {
     display: none !important;
