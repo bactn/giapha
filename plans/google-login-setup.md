@@ -41,6 +41,21 @@ Người đăng ký mới cần được mời hoặc admin cấp quyền để 
 
 ## Kiểm tra thực tế
 
+Đã kiểm chứng trên website công khai ngày 06/11/2026:
+
+- Google provider bật; `/auth/v1/authorize` trả 302 tới `accounts.google.com`
+  với callback Supabase đúng cấu hình.
+- Bấm nút Google khi form email/mật khẩu trống vẫn mở được Google.
+- Chọn tài khoản quản trị đã có và hoàn tất Google consent: quay về đúng
+  `/giapha/index.html`, thấy các gia phả và quyền quản trị hiện có.
+- Database xác nhận danh tính `email` và `google` gắn cùng UUID người dùng cũ;
+  không tạo tài khoản thứ hai hoặc tự cấp lại quyền.
+- Mở được cây hiện có; tải lại trang vẫn khôi phục phiên và mở lại được cây.
+- 16 kiểm tra tự động đã qua. Không kiểm thử đăng ký Google bằng một email mới
+  chưa có tài khoản; khi mời người mới cần kiểm tra Audience/Test users bên Google.
+
+Các bước nghiệm thu để kiểm tra lại khi đổi cấu hình:
+
 1. Mở website qua HTTPS (không dùng `file://`), bấm **Tiếp tục với Google** khi
    email/mật khẩu còn trống: vẫn phải mở Google.
 2. Chọn tài khoản thử được cho phép trong Audience và hoàn tất consent cần thiết.
