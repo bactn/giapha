@@ -183,12 +183,13 @@ test('SVG export retains avatar and date/spouse labels while escaping member nam
 test('adding children and spouses after deletions never overwrites an existing ID or changes parent/spouse links', () => {
   const store=new DataStore(); store.loadState({members:[
     {id:'P001',full_name:'Father',spouse_id:'P004'},
-    {id:'P003',full_name:'Existing child',parent_id:'P001'},
+    {id:'P003',full_name:'Existing child',parent_id:'P001',gender:'Nam',birth_date:'1992'},
     {id:'P004',full_name:'Mother',spouse_id:'P001',branch_type:'Ngoại tộc (Phối ngẫu)'}]});
-  const child=store.addMember({parent_id:'P001',full_name:'New child'});
+  const child=store.addMember({parent_id:'P001',full_name:'New child',birth_date:'1990'});
   assert.equal(child.id,'P005'); assert.equal(store.members.size,4);
   assert.equal(child.parent_id,'P001'); assert.equal(child.spouse_id,'');
   assert.equal(store.getSpouseMember('P001').full_name,'Mother');
+  assert.match(KinshipCalculator.calculateRelationship(store,'P003',child.id),/Em trai ruột/);
   assert.throws(()=>store.addMember({id:'P004',full_name:'Overwrite'}),/đã tồn tại/);
   const newPartner=store.addSpouseAsMember('P003'); assert.equal(newPartner.id,'P006');
   assert.equal(store.getMember('P005').parent_id,'P001');

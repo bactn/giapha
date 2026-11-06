@@ -151,6 +151,7 @@ var DataStore = class {
   appendSiblingOrder(parentId, excludeId = null) {
     if (!this.members.has(parentId)) return void 0;
     const siblings = this.getChildren(parentId).filter((m) => m.id !== excludeId);
+    if (!siblings.some((m) => typeof m.sibling_order === "number" && Number.isFinite(m.sibling_order))) return void 0;
     siblings.forEach((member, order) => this.members.set(member.id, { ...member, sibling_order: order }));
     return siblings.length;
   }
