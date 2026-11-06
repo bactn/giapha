@@ -8,7 +8,7 @@
   <title>Gia phả dòng họ Trần Ngọc — Gìn giữ cội nguồn</title>
   <!-- Tailwind CSS CDN for instant JIT responsive styling -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="./css/style.css?v=ad6bd83c07e4c10f">
+  <link rel="stylesheet" href="./css/style.css?v=dae19caaa5560cf2">
   <link rel="stylesheet" href="./css/canvas.css?v=dc165ec7f77f1107">
   <link rel="stylesheet" href="./css/supabase.css?v=b1ad7fc76035536c">
   <link rel="stylesheet" href="./css/portal.css?v=f7ed0d67abb38b45">
@@ -549,15 +549,16 @@
   </div>
 
   <!-- MODAL: EXPORT / PRINT -->
-  <div id="modal-export" class="modal-overlay hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 sm:p-6 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-sm sm:text-base font-bold text-slate-900 font-serif">🖨️ Xuất Bản Đồ Gia Phả</h3>
-        <button class="modal-close p-1 rounded-lg hover:bg-slate-100 text-slate-400">
+  <div id="modal-export" role="dialog" aria-modal="true" aria-labelledby="export-dialog-title" class="modal-overlay hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4">
+    <div class="export-dialog bg-white rounded-2xl shadow-2xl max-w-md w-full">
+      <div class="export-dialog-header flex items-center justify-between border-b border-slate-100">
+        <h3 id="export-dialog-title" class="text-sm sm:text-base font-bold text-slate-900 font-serif">Xuất Bản Đồ Gia Phả</h3>
+        <button type="button" aria-label="Đóng hộp thoại xuất ảnh" class="modal-close export-dialog-close">
+          <span>Đóng</span>
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-
+      <div class="export-dialog-body space-y-4" tabindex="0" role="region" aria-label="Tùy chọn xuất gia phả">
       <!-- Scope Selector -->
       <div class="space-y-1.5">
         <label class="text-xs font-bold text-slate-700">🌳 Phạm Vi Xuất</label>
@@ -665,6 +666,7 @@
           </div>
         </button>
       </div>
+      </div><!-- export-dialog-body -->
     </div>
   </div>
 
@@ -942,6 +944,6 @@
   </div>
 
   <!-- SCRIPTS -->
-  <script type="module" src="./js/app.bundle.js?v=a9276ff27e8d3d20"></script>
+  <script type="module" src="./js/app.bundle.js?v=86d53d7a9be4c38b"></script>
 </body>
 </html>

@@ -829,7 +829,8 @@ class App {
   setupModals() {
     document.querySelectorAll('.modal-close').forEach(btn => {
       btn.onclick = () => {
-        btn.closest('.modal-overlay').classList.add('hidden');
+        const dialog=btn.closest('.modal-overlay'); dialog.classList.add('hidden');
+        if(dialog.id==='modal-export') document.getElementById('btn-open-export').focus();
       };
     });
 
@@ -950,8 +951,7 @@ class App {
       modalLunar.classList.remove('hidden');
       LunarCalendarManager.renderGiỗList(lunarListContainer, this.dataStore, (memberId) => {
         modalLunar.classList.add('hidden');
-        this.dataStore.selectMember(memberId);
-        window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: memberId }));
+        this.revealMemberOnTree(memberId);
       });
     };
 
@@ -989,6 +989,7 @@ class App {
     document.getElementById('btn-open-export').onclick = () => {
       refreshExportScopeSelector();
       modalExport.classList.remove('hidden');
+      modalExport.querySelector('.modal-close').focus();
     };
 
     // Helper: get current export scope from selector
@@ -2301,6 +2302,20 @@ class App {
       }
       document.getElementById('search-status').textContent = match ? `Đã tìm thấy ${match.full_name}` : 'Không tìm thấy thành viên';
     };
+  }
+
+  revealMemberOnTree(memberId) {
+    if (!this.dataStore.getMember(memberId)) return;
+    if (!this.canvas.layoutData?.positions.has(memberId)) {
+      this.canvas.activeFilter='ALL';
+      document.getElementById('select-branch-filter').value='ALL';
+      this.canvas.render();
+    }
+    document.getElementById('left-menu-pane').classList.remove('drawer-open');
+    document.getElementById('left-menu-backdrop').classList.remove('drawer-open');
+    this.dataStore.selectMember(memberId);
+    this.populateInspector(memberId);
+    requestAnimationFrame(()=>this.canvas.focusOnMember(memberId));
   }
 
   setupHeaderMenus() {

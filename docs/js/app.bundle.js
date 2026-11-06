@@ -3240,7 +3240,7 @@ var FamilyPortal = class {
     document.querySelectorAll('[data-portal="menu"]').forEach((el) => el.setAttribute("aria-expanded", "false"));
   }
   menu(workspace = false) {
-    if (!this.c.user) return `<button class="portal-btn ${workspace ? "portal-small" : ""}" data-portal="login">\u0110\u0103ng nh\u1EADp</button>`;
+    if (!this.c.user) return workspace ? '<button class="workspace-icon-button" data-portal="login" aria-label="\u0110\u0103ng nh\u1EADp" title="\u0110\u0103ng nh\u1EADp"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M15 3h5v18h-5M3 12h12m-4-4 4 4-4 4"/></svg></button>' : '<button class="portal-btn" data-portal="login">\u0110\u0103ng nh\u1EADp</button>';
     return `<div class="portal-user"><button type="button" class="portal-user-trigger" data-portal="menu" aria-expanded="false" aria-label="Th\xF4ng tin t\xE0i kho\u1EA3n"><span class="portal-avatar">${escapeHTML(this.name().charAt(0).toUpperCase())}</span><span class="portal-user-name">${escapeHTML(this.name())}${workspace ? `<small>${roleNames[this.c.app.userRole] || "Ch\u1EC9 xem"}</small>` : ""}</span><span aria-hidden="true">\u2304</span></button>
       <div class="portal-menu" hidden><span class="portal-menu-email">${escapeHTML(this.c.user.email)}</span><button data-portal="account">Th\xF4ng tin t\xE0i kho\u1EA3n</button><button data-portal="mine">Gia ph\u1EA3 c\u1EE7a t\xF4i</button><button data-portal="requests">Y\xEAu c\u1EA7u ph\xEA duy\u1EC7t</button><button data-portal="home">Trang ch\u1EE7</button><hr><button id="${workspace ? "btn-logout" : "portal-logout"}" data-portal="logout" class="portal-danger">\u0110\u0103ng xu\u1EA5t</button></div></div>`;
   }
@@ -4936,7 +4936,9 @@ var App = class {
   setupModals() {
     document.querySelectorAll(".modal-close").forEach((btn) => {
       btn.onclick = () => {
-        btn.closest(".modal-overlay").classList.add("hidden");
+        const dialog = btn.closest(".modal-overlay");
+        dialog.classList.add("hidden");
+        if (dialog.id === "modal-export") document.getElementById("btn-open-export").focus();
       };
     });
     const modalImport = document.getElementById("modal-import");
@@ -5041,8 +5043,7 @@ var App = class {
       modalLunar.classList.remove("hidden");
       LunarCalendarManager.renderGi\u1ED7List(lunarListContainer, this.dataStore, (memberId) => {
         modalLunar.classList.add("hidden");
-        this.dataStore.selectMember(memberId);
-        window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: memberId }));
+        this.revealMemberOnTree(memberId);
       });
     };
     const modalExport = document.getElementById("modal-export");
@@ -5070,6 +5071,7 @@ var App = class {
     document.getElementById("btn-open-export").onclick = () => {
       refreshExportScopeSelector();
       modalExport.classList.remove("hidden");
+      modalExport.querySelector(".modal-close").focus();
     };
     const getExportScope = () => selectExportScope.value || "ALL";
     const getExportDepth = () => {
@@ -6241,6 +6243,19 @@ var App = class {
       }
       document.getElementById("search-status").textContent = match ? `\u0110\xE3 t\xECm th\u1EA5y ${match.full_name}` : "Kh\xF4ng t\xECm th\u1EA5y th\xE0nh vi\xEAn";
     };
+  }
+  revealMemberOnTree(memberId) {
+    if (!this.dataStore.getMember(memberId)) return;
+    if (!this.canvas.layoutData?.positions.has(memberId)) {
+      this.canvas.activeFilter = "ALL";
+      document.getElementById("select-branch-filter").value = "ALL";
+      this.canvas.render();
+    }
+    document.getElementById("left-menu-pane").classList.remove("drawer-open");
+    document.getElementById("left-menu-backdrop").classList.remove("drawer-open");
+    this.dataStore.selectMember(memberId);
+    this.populateInspector(memberId);
+    requestAnimationFrame(() => this.canvas.focusOnMember(memberId));
   }
   setupHeaderMenus() {
     if (this.headerMenusReady) return;
