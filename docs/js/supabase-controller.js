@@ -116,13 +116,14 @@ export class SupabaseController {
   showLogin(message = '') {
     this.overlay();
     this.emailMode = 'login';
-    this.authBox.innerHTML = `<p class="portal-eyebrow">KẾT NỐI VỚI GIA ĐÌNH</p><h2>Chào mừng bạn trở về.</h2><p class="portal-auth-description">Đăng nhập để cùng lưu giữ câu chuyện dòng họ.</p><p class="portal-auth-section">1. Đăng nhập bằng mạng xã hội</p>
+    this.authBox.innerHTML = `<p class="portal-eyebrow">KẾT NỐI VỚI GIA ĐÌNH</p><h2>Chào mừng bạn trở về.</h2><p class="portal-auth-description">Đăng nhập để cùng lưu giữ câu chuyện dòng họ.</p>
       <button id="sb-google" class="sb-google" type="button">
         <svg aria-hidden="true" width="20" height="20" viewBox="0 0 48 48"><path fill="#4285F4" d="M43.61 24.46c0-1.36-.12-2.66-.35-3.92H24v7.42h11a9.4 9.4 0 0 1-4.08 6.18v5.14h6.61c3.87-3.56 6.08-8.81 6.08-14.82Z"/><path fill="#34A853" d="M24 44c5.5 0 10.1-1.82 13.53-4.95l-6.61-5.14c-1.83 1.23-4.17 1.96-6.92 1.96-5.32 0-9.83-3.59-11.44-8.42H5.73v5.3A20 20 0 0 0 24 44Z"/><path fill="#FBBC05" d="M12.56 27.45a12 12 0 0 1 0-6.9v-5.3H5.73a20 20 0 0 0 0 17.5l6.83-5.3Z"/><path fill="#EA4335" d="M24 12.13c3 0 5.69 1.03 7.8 3.05l5.86-5.86A19.6 19.6 0 0 0 24 4 20 20 0 0 0 5.73 15.25l6.83 5.3C14.17 15.72 18.68 12.13 24 12.13Z"/></svg>
         <span>Tiếp tục với Google</span>
       </button>
-      <button class="portal-facebook" type="button" disabled><span>f</span> Tiếp tục với Facebook <small>Sắp có</small></button>
       <p class="sb-auth-hint">Dùng tài khoản Google để đăng nhập hoặc đăng ký nhanh.</p>
+      <p id="sb-message" role="status" class="sb-message"></p>
+      <div id="sb-email-auth" hidden>
       <div class="sb-auth-divider"><span>hoặc dùng email và mật khẩu</span></div>
       <p class="portal-auth-section">2. Sử dụng email và mật khẩu</p>
       <div class="portal-auth-tabs"><button type="button" id="sb-mode-login" aria-pressed="true">Đăng nhập</button><button type="button" id="sb-mode-signup" aria-pressed="false">Tạo tài khoản</button></div>
@@ -130,9 +131,8 @@ export class SupabaseController {
       <label for="sb-email">Email</label><input id="sb-email" type="email" autocomplete="username" required>
       <label for="sb-password">Mật khẩu</label><input id="sb-password" type="password" autocomplete="current-password" minlength="8" required>
       <div id="sb-name-wrapper" hidden><label for="sb-name">Tên hiển thị</label><input id="sb-name" autocomplete="nickname" maxlength="200"></div>
-      <p id="sb-message" role="status" class="sb-message"></p>
       <div class="sb-actions"><button id="sb-signin" class="sb-primary" type="submit">Đăng nhập</button>
-      <button id="sb-signup" class="sb-primary" type="button" hidden>Tạo tài khoản</button><button id="sb-forgot" type="button">Quên mật khẩu</button></div></form>`;
+      <button id="sb-signup" class="sb-primary" type="button" hidden>Tạo tài khoản</button><button id="sb-forgot" type="button">Quên mật khẩu</button></div></form></div>`;
     this.message(message);
     if (!sessionStorage.getItem('giapha_return')) sessionStorage.setItem('giapha_return','mine');
     const mode = value => {
