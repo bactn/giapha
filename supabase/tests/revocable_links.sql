@@ -11,6 +11,15 @@ begin
   rev:=public.save_lineage_state(family,0,'{"name":"Disposable link lifecycle"}',
     '[{"id":"A","full_name":"Before","notes":"private"}]');
   token:=public.create_access_link(family,'share','viewer');
+  -- Old clients used #invite URLs for viewer links. They now become guest links.
+  edit_token:=public.create_access_link(family,'invite','viewer','forever');
+  perform set_config('request.jwt.claim.sub','',true);
+  set local role anon;
+  perform public.read_shared_lineage(edit_token);
+  if not public.can_read_lineage(family,edit_token) then raise exception 'FAIL: legacy viewer probe'; end if;
+  set local role authenticated;
+  perform set_config('request.jwt.claim.sub',owner_id::text,true);
+  perform public.revoke_access_link((select id from public.list_access_links(family) where expires_at is null));
   if not exists(select 1 from public.list_access_links(family) where expires_at between now()+interval '6 days' and now()+interval '8 days') then
     raise exception 'FAIL: default duration'; end if;
   begin

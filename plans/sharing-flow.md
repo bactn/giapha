@@ -4,6 +4,8 @@
 
 Admin tạo link chỉ xem. Người nhận mở trực tiếp, không cần đăng nhập, không có nút chỉnh sửa. Ghi chú không được trả về từ endpoint khách. Link không đồng nghĩa với bật công khai gia phả trên trang chủ.
 
+Các link mời người xem cũ cũng được chuyển sang link khách; URL `#invite=…` cũ vẫn được nhận diện và mở chế độ chỉ xem, không cần đăng nhập. Thời hạn và trạng thái thu hồi cũ được giữ nguyên.
+
 ## Có quyền sửa
 
 Admin tạo link có quyền sửa; người nhận đăng nhập Google hoặc email trước khi được mở vùng chỉnh sửa. Link dùng lại được cho nhiều người trong thời gian còn hiệu lực. Mỗi tài khoản nhận quyền qua link được ghi nhận riêng, không chuyển thành quyền thành viên vĩnh viễn.

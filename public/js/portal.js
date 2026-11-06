@@ -83,7 +83,8 @@ export class FamilyPortal {
       return;
     }
     if (route.page === 'invite') {
-      if (!this.c.canLeave()) return;
+      if (!this.c.canLeave() || !this.service) return;
+      if (await this.c.openViewerInvite(route.value)) return;
       sessionStorage.setItem('giapha_invite',route.value); sessionStorage.setItem('giapha_return','mine');
       if (!this.c.user) this.c.showLogin('Đăng nhập để chỉnh sửa gia phả. Mọi thay đổi sẽ gửi quản trị viên phê duyệt.'); else await this.c.restore();
       return;

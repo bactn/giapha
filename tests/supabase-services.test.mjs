@@ -125,3 +125,15 @@ test('link duration defaults to seven days and explicit unlimited duration reach
   await service.canRead('family','token');
   assert.deepEqual(calls[3],{name:'can_read_lineage',args:{p_lineage_id:'family',p_share_token:'token',p_public_slug:null}});
 });
+
+test('old viewer invitation URLs open as guests, while edit links continue to login', async () => {
+  const c=new SupabaseController({}); let opened;
+  c.client={auth:{getUser:async()=>({data:{user:null}})}};
+  c.service={shared:async()=>({lineage_id:'family'})};
+  c.open=async(id,role)=>{opened={id,role};}; c.callbackUrl=()=> 'https://bactn.github.io/giapha/index.html';
+  const oldHistory=globalThis.history; globalThis.history={replaceState(){}};
+  try { assert.equal(await c.openViewerInvite('legacy'),true); assert.deepEqual(opened,{id:'family',role:'viewer'}); assert.equal(c.user,null); }
+  finally { if (oldHistory===undefined) delete globalThis.history; else globalThis.history=oldHistory; }
+  c.service.shared=async()=>{throw {code:'42501'};}; opened=null;
+  assert.equal(await c.openViewerInvite('edit'),false); assert.equal(opened,null);
+});

@@ -3197,7 +3197,8 @@ var FamilyPortal = class {
       return;
     }
     if (route.page === "invite") {
-      if (!this.c.canLeave()) return;
+      if (!this.c.canLeave() || !this.service) return;
+      if (await this.c.openViewerInvite(route.value)) return;
       sessionStorage.setItem("giapha_invite", route.value);
       sessionStorage.setItem("giapha_return", "mine");
       if (!this.c.user) this.c.showLogin("\u0110\u0103ng nh\u1EADp \u0111\u1EC3 ch\u1EC9nh s\u1EEDa gia ph\u1EA3. M\u1ECDi thay \u0111\u1ED5i s\u1EBD g\u1EEDi qu\u1EA3n tr\u1ECB vi\xEAn ph\xEA duy\u1EC7t.");
@@ -3481,6 +3482,7 @@ var SupabaseController = class {
       const query = new URLSearchParams(location.search);
       const invite = params.get("invite") || query.get("invite");
       if (invite) {
+        if (await this.openViewerInvite(invite)) return;
         sessionStorage.setItem("giapha_invite", invite);
         history.replaceState(null, "", this.callbackUrl() + "#mine");
       }
@@ -3674,6 +3676,22 @@ var SupabaseController = class {
   }
   async showPicker() {
     return this.portal.showMine();
+  }
+  async openViewerInvite(token) {
+    let state;
+    try {
+      state = await this.service.shared(token);
+    } catch (error) {
+      if (error.code === "42501") return false;
+      throw error;
+    }
+    const { data } = await this.client.auth.getUser();
+    this.user = data.user;
+    this.publicSlug = null;
+    this.shareToken = token;
+    await this.open(state.lineage_id, "viewer", state);
+    history.replaceState(null, "", this.callbackUrl() + "#share=" + encodeURIComponent(token));
+    return true;
   }
   async openShared(token) {
     this.publicSlug = null;

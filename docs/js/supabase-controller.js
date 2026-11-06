@@ -61,7 +61,10 @@ export class SupabaseController {
       const params = new URLSearchParams(location.hash.slice(1));
       const query = new URLSearchParams(location.search);
       const invite = params.get('invite') || query.get('invite');
-      if (invite) { sessionStorage.setItem('giapha_invite', invite); history.replaceState(null,'',this.callbackUrl()+'#mine'); }
+      if (invite) {
+        if (await this.openViewerInvite(invite)) return;
+        sessionStorage.setItem('giapha_invite', invite); history.replaceState(null,'',this.callbackUrl()+'#mine');
+      }
       this.shareToken = params.get('share') || query.get('share');
       if (this.shareToken) {
         const { data } = await this.client.auth.getUser();
@@ -200,6 +203,17 @@ export class SupabaseController {
   canLeave() { return !this.saving && (!this.hasDraft() || confirm('Có bản nháp chưa lưu. Bạn có muốn rời gia phả này? Hãy xuất JSON trước nếu cần sao lưu.')); }
 
   async showPicker() { return this.portal.showMine(); }
+
+  async openViewerInvite(token) {
+    let state;
+    try { state = await this.service.shared(token); }
+    catch(error) { if (error.code === '42501') return false; throw error; }
+    const { data } = await this.client.auth.getUser(); this.user = data.user;
+    this.publicSlug = null; this.shareToken = token;
+    await this.open(state.lineage_id,'viewer',state);
+    history.replaceState(null,'',this.callbackUrl()+'#share='+encodeURIComponent(token));
+    return true;
+  }
 
   async openShared(token) {
     this.publicSlug = null; this.shareToken = token;
