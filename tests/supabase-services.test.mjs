@@ -5,6 +5,8 @@ import { DataStore } from '../public/js/data-store.js';
 import { escapeHTML } from '../public/js/html.js';
 import { startGoogleOAuth, oauthReturnMessage } from '../public/js/services/auth.js';
 import { slugify, portalRoute } from '../public/js/portal.js';
+import { SupabaseController } from '../public/js/supabase-controller.js';
+import { GenealogyService } from '../public/js/services/genealogy.js';
 
 test('snapshot diff includes new fields and info changes without derived statistics noise', () => {
   const before = { lineageInfo: { name: 'Family', total_members: 1 }, members: [{ id: 'A', full_name: 'Old' }] };
@@ -86,4 +88,38 @@ test('portal links remain compatible with Pages, including Vietnamese slugs and 
   assert.equal(portalRoute('#requests').page, 'requests');
   assert.deepEqual(portalRoute('#share=legacy-token'), { page: 'share', value: 'legacy-token' });
   assert.deepEqual(portalRoute('#invite=invitation'), { page: 'invite', value: 'invitation' });
+});
+
+test('editor save submits the entire draft for approval and never writes canonical data', async () => {
+  const app = { userRole:'editor', lineageId:'family', showToast() {} };
+  const c = new SupabaseController(app);
+  c.base = { lineageInfo:{name:'Before'},members:[{id:'A',full_name:'Old'},{id:'B'}] };
+  c.capture = () => ({lineageInfo:{name:'After'},members:[{id:'A',full_name:'New'},{id:'C'}]});
+  c.revision = 5;
+  c.client = {auth:{getUser:async()=>({data:{user:{id:'editor'}}})}};
+  let submitted = 0;
+  c.service = { save() { assert.fail('Editor wrote canonical data'); }, submit:async(id,revision,changes)=>{
+    submitted++; assert.equal(id,'family'); assert.equal(revision,5);
+    assert.deepEqual(new Set(changes.map(c=>c.type)),new Set(['update_member','delete_member','add_member','update_info']));
+  }};
+  await c.save(); await c.save();
+  assert.equal(submitted,1); assert.equal(c.base.lineageInfo.name,'Before');
+});
+
+test('expired login prevents sending a draft and freezes editing', async () => {
+  const app={userRole:'editor',lineageId:'family',dataStore:{readOnly:false},showToast(){}};
+  const c=new SupabaseController(app); c.base={lineageInfo:{name:'A'},members:[]};
+  c.capture=()=>({lineageInfo:{name:'B'},members:[]});
+  c.client={auth:{getUser:async()=>({data:{user:null}})}};
+  c.service={submit(){assert.fail('Unauthenticated proposal');}};
+  let prompted=false; c.showLogin=()=>{prompted=true;};
+  await c.save(); assert.equal(prompted,true); assert.equal(app.dataStore.readOnly,true);
+});
+
+test('link duration defaults to seven days and explicit unlimited duration reaches the RPC', async () => {
+  const calls=[]; const service=new GenealogyService({rpc:async(name,args)=>{calls.push({name,args}); return {data:'token'};}});
+  await service.link('family','share','viewer');
+  await service.link('family','invite','editor','forever');
+  assert.equal(calls[0].args.p_duration,'7days'); assert.equal(calls[1].args.p_duration,'forever');
+  await service.list(); assert.equal(calls[2].name,'list_my_lineages');
 });

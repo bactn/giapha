@@ -34,6 +34,7 @@ export class SupabaseController {
     window.addEventListener('beforeunload', event => {
       if (this.hasDraft()) { event.preventDefault(); event.returnValue = ''; }
     });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && this.poll) this.checkAccess(); });
     const oauthMessage = oauthReturnMessage(location.href);
     try {
       this.client = await getSupabaseClient();
@@ -44,7 +45,8 @@ export class SupabaseController {
           queueMicrotask(() => this.showRecovery());
         }
         if (event === 'SIGNED_OUT' && !this.signingOut) {
-          this.user = null; this.stopPoll(); this.showLogin('Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại.');
+          this.user = null; this.app.dataStore.readOnly = true;
+          this.stopPoll(); this.showLogin('Phiên đăng nhập đã kết thúc. Vui lòng đăng nhập lại.');
         }
         // Do not await another Supabase request inside an Auth callback.
         if (event === 'SIGNED_IN' && !this.initializing && !this.user && !this.authenticating && session) {
@@ -64,9 +66,7 @@ export class SupabaseController {
       if (this.shareToken) {
         const { data } = await this.client.auth.getUser();
         this.user = data.user;
-        const state = await this.service.shared(this.shareToken);
-        this.guest = true;
-        await this.open(state.lineage_id, 'viewer', state);
+        await this.openShared(this.shareToken);
       } else await this.restore();
     } catch (error) { this.showLogin(describeError(error)); }
     finally { this.initializing = false; }
@@ -82,10 +82,15 @@ export class SupabaseController {
     const invite = sessionStorage.getItem('giapha_invite');
     if (invite) {
       try {
-        await this.service.redeem(invite);
-        sessionStorage.setItem('giapha_return','mine');
+        const id = await this.service.redeem(invite);
         sessionStorage.removeItem('giapha_invite');
-        history.replaceState(null, '', new URL('index.html', location.href));
+        sessionStorage.removeItem('giapha_return');
+        this.shareToken = null; this.publicSlug = null;
+        const rows = await this.service.list();
+        const row = rows.find(row => row.lineage_id === id);
+        if (!row) throw new Error('Liên kết đã hết hạn hoặc được thu hồi.');
+        await this.open(id,row.role);
+        return;
       } catch (error) {
         sessionStorage.removeItem('giapha_invite');
         this.app.showToast(describeError(error), 'error');
@@ -196,6 +201,22 @@ export class SupabaseController {
 
   async showPicker() { return this.portal.showMine(); }
 
+  async openShared(token) {
+    this.publicSlug = null; this.shareToken = token;
+    try { const state = await this.service.shared(token); await this.open(state.lineage_id,'viewer',state); }
+    catch (error) {
+      if (error.code === '42501') this.invalidateAccess('Liên kết chia sẻ không hợp lệ, đã hết hạn hoặc đã được thu hồi.');
+      else throw error;
+    }
+  }
+
+  invalidateAccess(message) {
+    this.stopPoll(); this.base = null; this.guest = false; this.shareToken = null; this.publicSlug = null;
+    this.app.dataStore.readOnly = true; this.app.lineageId = null; this.app.userRole = 'viewer';
+    this.app.dataStore.loadState({ lineageInfo:{name:'',total_members:0,generations:0}, members:[] });
+    this.portal.unavailable(message);
+  }
+
   async open(id, role, state = null) {
     const snapshot = state || await this.service.load(id);
     this.guest = Boolean(this.publicSlug || (state && this.shareToken));
@@ -219,6 +240,11 @@ export class SupabaseController {
     $('btn-reset-data').style.display = 'none';
     $('btn-save-lineage').onclick = () => this.save();
     $('btn-inspect-save').onclick = () => this.save();
+    for (const id of ['btn-save-lineage','btn-inspect-save']) {
+      const button = $(id); button.textContent = role === 'editor' ? 'Gửi yêu cầu phê duyệt' : 'Lưu gia phả';
+      button.title = role === 'editor' ? 'Mọi thay đổi cần quản trị viên phê duyệt' : 'Lưu gia phả';
+    }
+    if (this.guest) $('btn-request-edit').style.display = 'none';
     $('auth-overlay').style.display = 'none';
     this.portal.screen('workspace');
     if (state?.slug) history.replaceState(null,'',this.callbackUrl()+'#family='+encodeURIComponent(state.slug));
@@ -236,8 +262,10 @@ export class SupabaseController {
     setTimeout(() => this.app.canvas.zoomFit(), 100);
   }
   async load() {
-    const state = this.publicSlug ? await this.service.openPage(this.publicSlug) : this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
-    this.applySnapshot(state);
+    try {
+      const state = this.publicSlug ? await this.service.openPage(this.publicSlug) : this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
+      this.applySnapshot(state);
+    } catch (error) { if (error.code === '42501') this.invalidateAccess('Quyền truy cập đã hết hạn hoặc đã được thu hồi.'); else throw error; }
   }
 
   async save() {
@@ -247,6 +275,8 @@ export class SupabaseController {
     if (!changes.length) { this.app.showToast('Không có thay đổi cần lưu.'); return; }
     this.saving = true;
     try {
+      const { data, error } = await this.client.auth.getUser();
+      if (error || !data.user || (this.user && data.user.id !== this.user.id)) { this.app.dataStore.readOnly = true; this.showLogin('Đăng nhập trước khi gửi thay đổi.'); return; }
       if (this.app.userRole === 'editor') {
         const signature = JSON.stringify(changes);
         if (signature === this.lastSubmitted) { this.app.showToast('Bản nháp này đã được gửi và đang chờ duyệt.'); return; }
@@ -300,25 +330,27 @@ export class SupabaseController {
   setupSharing() {
     const overlay = $('share-panel-overlay');
     overlay.innerHTML = `<div class="sb-card" style="width:min(95vw,640px);max-height:85vh;overflow:auto">
-      <h2>Chia sẻ và phê duyệt</h2><p class="sb-message">Link chỉ xem có hạn 7 ngày và không hiển thị ghi chú. Link mời dùng một lần, cần đăng nhập.</p>
-      <div class="sb-actions"><button id="sb-share-view">Tạo link chỉ xem</button><select id="sb-invite-role" style="width:auto"><option value="viewer">Mời người xem</option><option value="editor">Mời người chỉnh sửa</option></select><button id="sb-invite">Tạo link mời</button><button id="sb-share-close">Đóng</button></div>
+      <h2>Chia sẻ gia phả</h2><p class="sb-message">Chỉ xem: mở được không cần đăng nhập. Quyền sửa: cần đăng nhập, mọi thay đổi gửi quản trị phê duyệt. Thu hồi link sẽ ngừng quyền truy cập được cấp qua link đó.</p>
+      <label for="sb-link-duration">Thời hạn liên kết</label><select id="sb-link-duration"><option value="7days">7 ngày (mặc định)</option><option value="forever">Không hết hạn — đến khi admin thu hồi</option></select>
+      <div class="sb-actions"><button id="sb-share-view">Tạo link chỉ xem</button><button id="sb-invite">Tạo link có quyền sửa</button><button id="sb-share-close">Đóng</button></div>
       <label for="sb-link-result">Liên kết mới (chỉ hiển thị một lần)</label><input id="sb-link-result" readonly><button id="sb-copy-link">Sao chép</button>
-      <h2 style="margin-top:1rem">Liên kết đã tạo</h2><div id="sb-links"></div><h2>Danh sách quyền</h2><div id="sb-access"></div>
-      <h2>Đề xuất (100 mục gần nhất)</h2><div id="sb-requests"></div></div>`;
+      <h2 style="margin-top:1rem">Liên kết còn hiệu lực</h2><div id="sb-links"></div><details><summary>Quyền cấp trực tiếp cho tài khoản</summary><p class="sb-message">Quyền cấp trực tiếp độc lập với link. Thu hồi link không xóa quyền được admin cấp riêng.</p><div id="sb-access"></div></details>
+      <button id="sb-open-requests" style="margin-top:1rem">Quản lý yêu cầu phê duyệt</button></div>`;
     const close = () => { overlay.classList.add('hidden'); overlay.classList.remove('flex'); };
     $('sb-share-close').onclick = close;
+    $('sb-open-requests').onclick = () => { close(); this.portal.go('requests'); };
     overlay.onclick = event => { if (event.target === overlay) close(); };
     $('btn-open-share').onclick = async () => {
       overlay.classList.remove('hidden'); overlay.classList.add('flex');
       try { await this.refreshSharing(); } catch (error) { this.app.showToast(describeError(error), 'error'); }
     };
     const create = (button, kind, role) => this.action(button, async () => {
-      const token = await this.service.link(this.app.lineageId, kind, role);
+      const token = await this.service.link(this.app.lineageId, kind, role, $('sb-link-duration').value);
       const url = new URL(this.callbackUrl()); url.hash = new URLSearchParams({ [kind === 'share' ? 'share' : 'invite']: token });
       $('sb-link-result').value = url.href; await this.refreshSharing();
     });
     $('sb-share-view').onclick = () => create($('sb-share-view'), 'share', 'viewer');
-    $('sb-invite').onclick = () => create($('sb-invite'), 'invite', $('sb-invite-role').value);
+    $('sb-invite').onclick = () => create($('sb-invite'), 'invite', 'editor');
     $('sb-copy-link').onclick = () => this.action($('sb-copy-link'), async () => {
       if ($('sb-link-result').value) { await navigator.clipboard.writeText($('sb-link-result').value); this.app.showToast('Đã sao chép.'); }
     });
@@ -328,12 +360,14 @@ export class SupabaseController {
   button(row, text, fn) { const button = document.createElement('button'); button.textContent = text; row.appendChild(button); button.onclick = () => this.action(button, fn); return button; }
   async refreshSharing() {
     const id = this.app.lineageId;
-    const [links, access, requests] = await Promise.all([this.service.links(id), this.service.accessList(id), this.service.requests(id)]);
-    $('sb-links').replaceChildren(); $('sb-access').replaceChildren(); $('sb-requests').replaceChildren();
+    const [links, access] = await Promise.all([this.service.links(id), this.service.accessList(id)]);
+    $('sb-links').replaceChildren(); $('sb-access').replaceChildren();
     for (const link of links) {
-      const row = this.row($('sb-links'), `${link.kind === 'share' ? 'Chỉ xem' : 'Lời mời'} · ${roles[link.role]} · hết hạn ${new Date(link.expires_at).toLocaleString('vi-VN')} · ${link.revoked ? 'Đã thu hồi' : link.used_at ? 'Đã dùng' : 'Chưa thu hồi'}`);
-      if (!link.revoked) this.button(row, 'Thu hồi', async () => { await this.service.revoke(link.id); await this.refreshSharing(); });
+      const row = this.row($('sb-links'), `${link.kind === 'share' ? 'Chỉ xem · Không cần đăng nhập' : roles[link.role]+' · Cần đăng nhập'} · ${link.expires_at ? 'Hết hạn '+new Date(link.expires_at).toLocaleString('vi-VN') : 'Không hết hạn'}`);
+      row.classList.add('sb-link-row');
+      this.button(row, 'Thu hồi', async () => { await this.service.revoke(link.id); $('sb-link-result').value = ''; await this.refreshSharing(); });
     }
+    if (!links.length) this.row($('sb-links'), 'Chưa có liên kết còn hiệu lực.');
     for (const item of access) {
       const row = this.row($('sb-access'), `${item.user_id === this.user.id ? 'Bạn' : 'Thành viên ' + item.user_id} · ${roles[item.role]}`);
       const select = document.createElement('select'); select.style.width = 'auto';
@@ -346,8 +380,6 @@ export class SupabaseController {
         else await this.refreshSharing();
       } });
     }
-    for (const request of requests) this.renderRequest($('sb-requests'), request, true);
-    if (!requests.length) this.row($('sb-requests'), 'Chưa có đề xuất.');
   }
 
   renderRequest(container, request, admin, onReviewed = null) {
@@ -420,10 +452,22 @@ export class SupabaseController {
     this.stopPoll();
     const host = $('notification-bell-wrapper');
     host.classList.toggle('hidden', Boolean(this.guest)); host.classList.toggle('flex', !this.guest);
-    if (this.guest || !this.app.lineageId) return;
+    if (!this.app.lineageId) return;
+    this.poll = setInterval(() => { if (!document.hidden) this.checkAccess(); },30000);
+    if (this.guest) return;
     $('btn-notification-bell').onclick = () => this.portal.go('requests');
     this.refreshNotifications();
-    this.poll = setInterval(() => { if (!document.hidden && this.user) this.refreshNotifications(); }, 60000);
+  }
+  async checkAccess() {
+    const id = this.app.lineageId;
+    const screen = this.portal.sequence;
+    if (!id || document.body.dataset.screen !== 'workspace') return;
+    try {
+      if (this.publicSlug) await this.service.openPage(this.publicSlug);
+      else if (this.guest) await this.service.shared(this.shareToken);
+      else await this.service.load(id);
+      if (id === this.app.lineageId && screen === this.portal.sequence && !this.guest) await this.refreshNotifications();
+    } catch(error) { if (error.code === '42501' && id === this.app.lineageId && screen === this.portal.sequence) this.invalidateAccess('Liên kết hoặc quyền truy cập đã hết hạn hoặc đã được thu hồi.'); }
   }
   async refreshNotifications() {
     try {

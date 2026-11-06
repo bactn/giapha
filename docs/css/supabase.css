@@ -14,6 +14,9 @@
 .sb-actions { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:.75rem; }
 .sb-message { margin:.75rem 0; font-size:.8rem; color:#92400e; white-space:pre-wrap; }
 .sb-row { padding:.75rem 0; border-bottom:1px solid #e2e8f0; overflow-wrap:anywhere; font-size:.8rem; }
+.sb-link-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.sb-link-row p { flex:1; }
+.sb-link-row button { flex-shrink:0; min-height:44px; }
 .sb-detail { white-space:pre-wrap; max-height:12rem; overflow:auto; background:#f8fafc; padding:.75rem; font-size:.75rem; }
 body[data-access="viewer"] .node-action-btn:not(.action-edit),
 body[data-access="viewer"] .btn-node-delete-quick,

@@ -77,7 +77,7 @@ async function rpc(name, args, user, errorCode) {
   await rpc('read_shared_lineage', { p_token: '0'.repeat(64) }, undefined, '42501');
   const invitation = await rpc('create_access_link', { p_lineage_id: id, p_kind: 'invite', p_role: 'editor' }, users.admin);
   assert.equal(await rpc('redeem_invite', { p_token: invitation }, users.viewer), id);
-  await rpc('redeem_invite', { p_token: invitation }, users.outsider, '42501');
+  assert.equal(await rpc('redeem_invite', { p_token: invitation }, users.outsider), id);
   const links = await rpc('list_access_links', { p_lineage_id: id }, users.admin);
   await rpc('revoke_access_link', { p_link_id: links.find(l => l.kind === 'share').id }, users.admin);
   await rpc('read_shared_lineage', { p_token: shared }, undefined, '42501');

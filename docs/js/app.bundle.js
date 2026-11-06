@@ -2988,10 +2988,8 @@ var GenealogyService = class {
     if (error) throw error;
     return data;
   }
-  async list(userId) {
-    const { data, error } = await this.client.from("lineage_access").select("lineage_id,role,lineages(id,info,revision)").eq("user_id", userId);
-    if (error) throw error;
-    return data;
+  list() {
+    return this.rpc("list_my_lineages");
   }
   create(name) {
     return this.rpc("create_lineage", { p_info: { name, origin: "" } });
@@ -3008,8 +3006,8 @@ var GenealogyService = class {
   review(id, approve, reason = "") {
     return this.rpc("review_changes", { p_request_id: id, p_approve: approve, p_reason: reason });
   }
-  link(id, kind, role) {
-    return this.rpc("create_access_link", { p_lineage_id: id, p_kind: kind, p_role: role });
+  link(id, kind, role, duration = "7days") {
+    return this.rpc("create_access_link", { p_lineage_id: id, p_kind: kind, p_role: role, p_duration: duration });
   }
   redeem(token) {
     return this.rpc("redeem_invite", { p_token: token });
@@ -3142,6 +3140,9 @@ var FamilyPortal = class {
     if (el) el.textContent = message;
     this.c.app.showToast(message, "error");
   }
+  unavailable(message) {
+    this.render(`<main class="portal-dashboard"><h1>Kh\xF4ng th\u1EC3 m\u1EDF gia ph\u1EA3</h1><p class="portal-page-intro">${escapeHTML(message)}</p><a class="portal-btn" href="#home">V\u1EC1 trang ch\u1EE7</a></main>`);
+  }
   async busy(button, fn) {
     button.disabled = true;
     try {
@@ -3189,21 +3190,14 @@ var FamilyPortal = class {
     }
     if (route.page === "share") {
       if (!this.c.canLeave() || !this.service) return;
-      try {
-        this.c.publicSlug = null;
-        this.c.shareToken = route.value;
-        const state = await this.service.shared(route.value);
-        await this.c.open(state.lineage_id, "viewer", state);
-      } catch {
-        this.c.showLogin("Li\xEAn k\u1EBFt chia s\u1EBB kh\xF4ng h\u1EE3p l\u1EC7, \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\xE3 \u0111\u01B0\u1EE3c thu h\u1ED3i.");
-      }
+      await this.c.openShared(route.value);
       return;
     }
     if (route.page === "invite") {
       if (!this.c.canLeave()) return;
       sessionStorage.setItem("giapha_invite", route.value);
       sessionStorage.setItem("giapha_return", "mine");
-      if (!this.c.user) this.c.showLogin("\u0110\u0103ng nh\u1EADp \u0111\u1EC3 nh\u1EADn l\u1EDDi m\u1EDDi tham gia gia ph\u1EA3.");
+      if (!this.c.user) this.c.showLogin("\u0110\u0103ng nh\u1EADp \u0111\u1EC3 ch\u1EC9nh s\u1EEDa gia ph\u1EA3. M\u1ECDi thay \u0111\u1ED5i s\u1EBD g\u1EEDi qu\u1EA3n tr\u1ECB vi\xEAn ph\xEA duy\u1EC7t.");
       else await this.c.restore();
       return;
     }
@@ -3453,6 +3447,9 @@ var SupabaseController = class {
         event.returnValue = "";
       }
     });
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden && this.poll) this.checkAccess();
+    });
     const oauthMessage = oauthReturnMessage(location.href);
     try {
       this.client = await getSupabaseClient();
@@ -3464,6 +3461,7 @@ var SupabaseController = class {
         }
         if (event === "SIGNED_OUT" && !this.signingOut) {
           this.user = null;
+          this.app.dataStore.readOnly = true;
           this.stopPoll();
           this.showLogin("Phi\xEAn \u0111\u0103ng nh\u1EADp \u0111\xE3 k\u1EBFt th\xFAc. Vui l\xF2ng \u0111\u0103ng nh\u1EADp l\u1EA1i.");
         }
@@ -3487,9 +3485,7 @@ var SupabaseController = class {
       if (this.shareToken) {
         const { data } = await this.client.auth.getUser();
         this.user = data.user;
-        const state = await this.service.shared(this.shareToken);
-        this.guest = true;
-        await this.open(state.lineage_id, "viewer", state);
+        await this.openShared(this.shareToken);
       } else await this.restore();
     } catch (error) {
       this.showLogin(describeError(error));
@@ -3518,10 +3514,16 @@ var SupabaseController = class {
     const invite = sessionStorage.getItem("giapha_invite");
     if (invite) {
       try {
-        await this.service.redeem(invite);
-        sessionStorage.setItem("giapha_return", "mine");
+        const id = await this.service.redeem(invite);
         sessionStorage.removeItem("giapha_invite");
-        history.replaceState(null, "", new URL("index.html", location.href));
+        sessionStorage.removeItem("giapha_return");
+        this.shareToken = null;
+        this.publicSlug = null;
+        const rows = await this.service.list();
+        const row = rows.find((row2) => row2.lineage_id === id);
+        if (!row) throw new Error("Li\xEAn k\u1EBFt \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\u01B0\u1EE3c thu h\u1ED3i.");
+        await this.open(id, row.role);
+        return;
       } catch (error2) {
         sessionStorage.removeItem("giapha_invite");
         this.app.showToast(describeError(error2), "error");
@@ -3670,6 +3672,29 @@ var SupabaseController = class {
   async showPicker() {
     return this.portal.showMine();
   }
+  async openShared(token) {
+    this.publicSlug = null;
+    this.shareToken = token;
+    try {
+      const state = await this.service.shared(token);
+      await this.open(state.lineage_id, "viewer", state);
+    } catch (error) {
+      if (error.code === "42501") this.invalidateAccess("Li\xEAn k\u1EBFt chia s\u1EBB kh\xF4ng h\u1EE3p l\u1EC7, \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\xE3 \u0111\u01B0\u1EE3c thu h\u1ED3i.");
+      else throw error;
+    }
+  }
+  invalidateAccess(message) {
+    this.stopPoll();
+    this.base = null;
+    this.guest = false;
+    this.shareToken = null;
+    this.publicSlug = null;
+    this.app.dataStore.readOnly = true;
+    this.app.lineageId = null;
+    this.app.userRole = "viewer";
+    this.app.dataStore.loadState({ lineageInfo: { name: "", total_members: 0, generations: 0 }, members: [] });
+    this.portal.unavailable(message);
+  }
   async open(id, role, state = null) {
     const snapshot = state || await this.service.load(id);
     this.guest = Boolean(this.publicSlug || state && this.shareToken);
@@ -3702,6 +3727,12 @@ var SupabaseController = class {
     $2("btn-reset-data").style.display = "none";
     $2("btn-save-lineage").onclick = () => this.save();
     $2("btn-inspect-save").onclick = () => this.save();
+    for (const id2 of ["btn-save-lineage", "btn-inspect-save"]) {
+      const button = $2(id2);
+      button.textContent = role === "editor" ? "G\u1EEDi y\xEAu c\u1EA7u ph\xEA duy\u1EC7t" : "L\u01B0u gia ph\u1EA3";
+      button.title = role === "editor" ? "M\u1ECDi thay \u0111\u1ED5i c\u1EA7n qu\u1EA3n tr\u1ECB vi\xEAn ph\xEA duy\u1EC7t" : "L\u01B0u gia ph\u1EA3";
+    }
+    if (this.guest) $2("btn-request-edit").style.display = "none";
     $2("auth-overlay").style.display = "none";
     this.portal.screen("workspace");
     if (state?.slug) history.replaceState(null, "", this.callbackUrl() + "#family=" + encodeURIComponent(state.slug));
@@ -3719,8 +3750,13 @@ var SupabaseController = class {
     setTimeout(() => this.app.canvas.zoomFit(), 100);
   }
   async load() {
-    const state = this.publicSlug ? await this.service.openPage(this.publicSlug) : this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
-    this.applySnapshot(state);
+    try {
+      const state = this.publicSlug ? await this.service.openPage(this.publicSlug) : this.guest ? await this.service.shared(this.shareToken) : await this.service.load(this.app.lineageId);
+      this.applySnapshot(state);
+    } catch (error) {
+      if (error.code === "42501") this.invalidateAccess("Quy\u1EC1n truy c\u1EADp \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\xE3 \u0111\u01B0\u1EE3c thu h\u1ED3i.");
+      else throw error;
+    }
   }
   async save() {
     if (this.saving || this.guest || this.app.userRole === "viewer") return;
@@ -3732,6 +3768,12 @@ var SupabaseController = class {
     }
     this.saving = true;
     try {
+      const { data, error } = await this.client.auth.getUser();
+      if (error || !data.user || this.user && data.user.id !== this.user.id) {
+        this.app.dataStore.readOnly = true;
+        this.showLogin("\u0110\u0103ng nh\u1EADp tr\u01B0\u1EDBc khi g\u1EEDi thay \u0111\u1ED5i.");
+        return;
+      }
       if (this.app.userRole === "editor") {
         const signature = JSON.stringify(changes);
         if (signature === this.lastSubmitted) {
@@ -3807,16 +3849,21 @@ var SupabaseController = class {
   setupSharing() {
     const overlay = $2("share-panel-overlay");
     overlay.innerHTML = `<div class="sb-card" style="width:min(95vw,640px);max-height:85vh;overflow:auto">
-      <h2>Chia s\u1EBB v\xE0 ph\xEA duy\u1EC7t</h2><p class="sb-message">Link ch\u1EC9 xem c\xF3 h\u1EA1n 7 ng\xE0y v\xE0 kh\xF4ng hi\u1EC3n th\u1ECB ghi ch\xFA. Link m\u1EDDi d\xF9ng m\u1ED9t l\u1EA7n, c\u1EA7n \u0111\u0103ng nh\u1EADp.</p>
-      <div class="sb-actions"><button id="sb-share-view">T\u1EA1o link ch\u1EC9 xem</button><select id="sb-invite-role" style="width:auto"><option value="viewer">M\u1EDDi ng\u01B0\u1EDDi xem</option><option value="editor">M\u1EDDi ng\u01B0\u1EDDi ch\u1EC9nh s\u1EEDa</option></select><button id="sb-invite">T\u1EA1o link m\u1EDDi</button><button id="sb-share-close">\u0110\xF3ng</button></div>
+      <h2>Chia s\u1EBB gia ph\u1EA3</h2><p class="sb-message">Ch\u1EC9 xem: m\u1EDF \u0111\u01B0\u1EE3c kh\xF4ng c\u1EA7n \u0111\u0103ng nh\u1EADp. Quy\u1EC1n s\u1EEDa: c\u1EA7n \u0111\u0103ng nh\u1EADp, m\u1ECDi thay \u0111\u1ED5i g\u1EEDi qu\u1EA3n tr\u1ECB ph\xEA duy\u1EC7t. Thu h\u1ED3i link s\u1EBD ng\u1EEBng quy\u1EC1n truy c\u1EADp \u0111\u01B0\u1EE3c c\u1EA5p qua link \u0111\xF3.</p>
+      <label for="sb-link-duration">Th\u1EDDi h\u1EA1n li\xEAn k\u1EBFt</label><select id="sb-link-duration"><option value="7days">7 ng\xE0y (m\u1EB7c \u0111\u1ECBnh)</option><option value="forever">Kh\xF4ng h\u1EBFt h\u1EA1n \u2014 \u0111\u1EBFn khi admin thu h\u1ED3i</option></select>
+      <div class="sb-actions"><button id="sb-share-view">T\u1EA1o link ch\u1EC9 xem</button><button id="sb-invite">T\u1EA1o link c\xF3 quy\u1EC1n s\u1EEDa</button><button id="sb-share-close">\u0110\xF3ng</button></div>
       <label for="sb-link-result">Li\xEAn k\u1EBFt m\u1EDBi (ch\u1EC9 hi\u1EC3n th\u1ECB m\u1ED9t l\u1EA7n)</label><input id="sb-link-result" readonly><button id="sb-copy-link">Sao ch\xE9p</button>
-      <h2 style="margin-top:1rem">Li\xEAn k\u1EBFt \u0111\xE3 t\u1EA1o</h2><div id="sb-links"></div><h2>Danh s\xE1ch quy\u1EC1n</h2><div id="sb-access"></div>
-      <h2>\u0110\u1EC1 xu\u1EA5t (100 m\u1EE5c g\u1EA7n nh\u1EA5t)</h2><div id="sb-requests"></div></div>`;
+      <h2 style="margin-top:1rem">Li\xEAn k\u1EBFt c\xF2n hi\u1EC7u l\u1EF1c</h2><div id="sb-links"></div><details><summary>Quy\u1EC1n c\u1EA5p tr\u1EF1c ti\u1EBFp cho t\xE0i kho\u1EA3n</summary><p class="sb-message">Quy\u1EC1n c\u1EA5p tr\u1EF1c ti\u1EBFp \u0111\u1ED9c l\u1EADp v\u1EDBi link. Thu h\u1ED3i link kh\xF4ng x\xF3a quy\u1EC1n \u0111\u01B0\u1EE3c admin c\u1EA5p ri\xEAng.</p><div id="sb-access"></div></details>
+      <button id="sb-open-requests" style="margin-top:1rem">Qu\u1EA3n l\xFD y\xEAu c\u1EA7u ph\xEA duy\u1EC7t</button></div>`;
     const close = () => {
       overlay.classList.add("hidden");
       overlay.classList.remove("flex");
     };
     $2("sb-share-close").onclick = close;
+    $2("sb-open-requests").onclick = () => {
+      close();
+      this.portal.go("requests");
+    };
     overlay.onclick = (event) => {
       if (event.target === overlay) close();
     };
@@ -3830,14 +3877,14 @@ var SupabaseController = class {
       }
     };
     const create = (button, kind, role) => this.action(button, async () => {
-      const token = await this.service.link(this.app.lineageId, kind, role);
+      const token = await this.service.link(this.app.lineageId, kind, role, $2("sb-link-duration").value);
       const url = new URL(this.callbackUrl());
       url.hash = new URLSearchParams({ [kind === "share" ? "share" : "invite"]: token });
       $2("sb-link-result").value = url.href;
       await this.refreshSharing();
     });
     $2("sb-share-view").onclick = () => create($2("sb-share-view"), "share", "viewer");
-    $2("sb-invite").onclick = () => create($2("sb-invite"), "invite", $2("sb-invite-role").value);
+    $2("sb-invite").onclick = () => create($2("sb-invite"), "invite", "editor");
     $2("sb-copy-link").onclick = () => this.action($2("sb-copy-link"), async () => {
       if ($2("sb-link-result").value) {
         await navigator.clipboard.writeText($2("sb-link-result").value);
@@ -3863,17 +3910,19 @@ var SupabaseController = class {
   }
   async refreshSharing() {
     const id = this.app.lineageId;
-    const [links, access, requests] = await Promise.all([this.service.links(id), this.service.accessList(id), this.service.requests(id)]);
+    const [links, access] = await Promise.all([this.service.links(id), this.service.accessList(id)]);
     $2("sb-links").replaceChildren();
     $2("sb-access").replaceChildren();
-    $2("sb-requests").replaceChildren();
     for (const link of links) {
-      const row = this.row($2("sb-links"), `${link.kind === "share" ? "Ch\u1EC9 xem" : "L\u1EDDi m\u1EDDi"} \xB7 ${roles[link.role]} \xB7 h\u1EBFt h\u1EA1n ${new Date(link.expires_at).toLocaleString("vi-VN")} \xB7 ${link.revoked ? "\u0110\xE3 thu h\u1ED3i" : link.used_at ? "\u0110\xE3 d\xF9ng" : "Ch\u01B0a thu h\u1ED3i"}`);
-      if (!link.revoked) this.button(row, "Thu h\u1ED3i", async () => {
+      const row = this.row($2("sb-links"), `${link.kind === "share" ? "Ch\u1EC9 xem \xB7 Kh\xF4ng c\u1EA7n \u0111\u0103ng nh\u1EADp" : roles[link.role] + " \xB7 C\u1EA7n \u0111\u0103ng nh\u1EADp"} \xB7 ${link.expires_at ? "H\u1EBFt h\u1EA1n " + new Date(link.expires_at).toLocaleString("vi-VN") : "Kh\xF4ng h\u1EBFt h\u1EA1n"}`);
+      row.classList.add("sb-link-row");
+      this.button(row, "Thu h\u1ED3i", async () => {
         await this.service.revoke(link.id);
+        $2("sb-link-result").value = "";
         await this.refreshSharing();
       });
     }
+    if (!links.length) this.row($2("sb-links"), "Ch\u01B0a c\xF3 li\xEAn k\u1EBFt c\xF2n hi\u1EC7u l\u1EF1c.");
     for (const item of access) {
       const row = this.row($2("sb-access"), `${item.user_id === this.user.id ? "B\u1EA1n" : "Th\xE0nh vi\xEAn " + item.user_id} \xB7 ${roles[item.role]}`);
       const select = document.createElement("select");
@@ -3903,8 +3952,6 @@ var SupabaseController = class {
         }
       });
     }
-    for (const request of requests) this.renderRequest($2("sb-requests"), request, true);
-    if (!requests.length) this.row($2("sb-requests"), "Ch\u01B0a c\xF3 \u0111\u1EC1 xu\u1EA5t.");
   }
   renderRequest(container, request, admin, onReviewed = null) {
     const status = { pending: "Ch\u1EDD duy\u1EC7t", approved: "\u0110\xE3 duy\u1EC7t", rejected: "\u0110\xE3 t\u1EEB ch\u1ED1i" };
@@ -4010,12 +4057,26 @@ var SupabaseController = class {
     const host = $2("notification-bell-wrapper");
     host.classList.toggle("hidden", Boolean(this.guest));
     host.classList.toggle("flex", !this.guest);
-    if (this.guest || !this.app.lineageId) return;
+    if (!this.app.lineageId) return;
+    this.poll = setInterval(() => {
+      if (!document.hidden) this.checkAccess();
+    }, 3e4);
+    if (this.guest) return;
     $2("btn-notification-bell").onclick = () => this.portal.go("requests");
     this.refreshNotifications();
-    this.poll = setInterval(() => {
-      if (!document.hidden && this.user) this.refreshNotifications();
-    }, 6e4);
+  }
+  async checkAccess() {
+    const id = this.app.lineageId;
+    const screen = this.portal.sequence;
+    if (!id || document.body.dataset.screen !== "workspace") return;
+    try {
+      if (this.publicSlug) await this.service.openPage(this.publicSlug);
+      else if (this.guest) await this.service.shared(this.shareToken);
+      else await this.service.load(id);
+      if (id === this.app.lineageId && screen === this.portal.sequence && !this.guest) await this.refreshNotifications();
+    } catch (error) {
+      if (error.code === "42501" && id === this.app.lineageId && screen === this.portal.sequence) this.invalidateAccess("Li\xEAn k\u1EBFt ho\u1EB7c quy\u1EC1n truy c\u1EADp \u0111\xE3 h\u1EBFt h\u1EA1n ho\u1EB7c \u0111\xE3 \u0111\u01B0\u1EE3c thu h\u1ED3i.");
+    }
   }
   async refreshNotifications() {
     try {

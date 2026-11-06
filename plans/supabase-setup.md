@@ -11,7 +11,7 @@ Dashboard: https://supabase.com/dashboard/project/nwbozmxgdhouhzlpiskd
   không lấy revision mới rồi tự ghi đè dữ liệu.
 - Admin lưu chính thức; editor gửi thay đổi chờ duyệt; viewer có biểu mẫu đề xuất.
 - Duyệt/từ chối nguyên tử, chống duyệt hai lần, kiểm tra quan hệ và vòng lặp.
-- Mời viewer/editor một lần; liên kết khách chỉ xem có hạn 7 ngày, bỏ ghi chú.
+- Link chỉ xem mở không cần đăng nhập; link có quyền sửa cần đăng nhập và gửi admin duyệt. Cả hai chọn 7 ngày hoặc không hết hạn, có thể thu hồi. Quyền qua link hết hiệu lực cùng link; xem [luồng chia sẻ](sharing-flow.md).
   Có danh sách/thu hồi liên kết; liên kết bị từ chối nếu người tạo mất quyền admin.
 - Quản lý quyền và thông báo đề xuất (poll 60 giây khi tab đang hiển thị).
 - RLS và RPC kiểm tra quyền trên database, không tin role trong user metadata.
@@ -109,7 +109,7 @@ gộp tài khoản hoặc cấp quyền gia phả theo email/tên Google.
 
 - 16 kiểm tra cấu hình, validation, diff, giữ bản nháp, viewer, escape HTML và OAuth.
 - 36 kiểm tra trực tiếp Auth/Data API/RPC trên tài khoản thử: lưu/duyệt/quyền,
-  stale revision HTTP 409, rollback, mời một lần, chia sẻ và thu hồi.
+  stale revision HTTP 409, rollback, link tái sử dụng, thời hạn, chia sẻ và thu hồi.
 - SQL `supabase/tests/genealogy_rls.sql`: cô lập gia phả, chống tự nâng quyền,
   admin cuối cùng, reference/cycle, rollback; fixture trong transaction rollback.
 - SQL `supabase/tests/access_links.sql`: hết hạn và người tạo mất quyền admin.

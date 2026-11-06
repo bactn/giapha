@@ -41,12 +41,7 @@ export class GenealogyService {
     return data;
   }
 
-  async list(userId) {
-    const { data, error } = await this.client.from('lineage_access')
-      .select('lineage_id,role,lineages(id,info,revision)').eq('user_id', userId);
-    if (error) throw error;
-    return data;
-  }
+  list() { return this.rpc('list_my_lineages'); }
 
   create(name) { return this.rpc('create_lineage', { p_info: { name, origin: '' } }); }
   load(id) { return this.rpc('get_lineage_state', { p_lineage_id: id }); }
@@ -57,7 +52,7 @@ export class GenealogyService {
     return this.rpc('submit_changes', { p_lineage_id: id, p_base_revision: revision, p_changes: changes, p_title: title });
   }
   review(id, approve, reason = '') { return this.rpc('review_changes', { p_request_id: id, p_approve: approve, p_reason: reason }); }
-  link(id, kind, role) { return this.rpc('create_access_link', { p_lineage_id: id, p_kind: kind, p_role: role }); }
+  link(id, kind, role, duration = '7days') { return this.rpc('create_access_link', { p_lineage_id: id, p_kind: kind, p_role: role, p_duration: duration }); }
   redeem(token) { return this.rpc('redeem_invite', { p_token: token }); }
   shared(token) { return this.rpc('read_shared_lineage', { p_token: token }); }
   links(id) { return this.rpc('list_access_links', { p_lineage_id: id }); }

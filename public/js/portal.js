@@ -52,6 +52,7 @@ export class FamilyPortal {
   }
   render(content, name = 'portal') { this.screen(name); this.root.innerHTML = this.header() + content + this.footer(); return this.sequence; }
   error(error) { const message = describeError(error); const el = $('portal-message'); if (el) el.textContent = message; this.c.app.showToast(message, 'error'); }
+  unavailable(message) { this.render(`<main class="portal-dashboard"><h1>Không thể mở gia phả</h1><p class="portal-page-intro">${esc(message)}</p><a class="portal-btn" href="#home">Về trang chủ</a></main>`); }
   async busy(button, fn) { button.disabled = true; try { await fn(); } catch(error) { this.error(error); } finally { button.disabled = false; } }
   async go(page) {
     history.pushState(null,'',`${this.c.callbackUrl()}#${page}`);
@@ -78,14 +79,13 @@ export class FamilyPortal {
     if (route.page === 'home') { sessionStorage.removeItem('giapha_return'); return this.home(); }
     if (route.page === 'share') {
       if (!this.c.canLeave() || !this.service) return;
-      try { this.c.publicSlug = null; this.c.shareToken = route.value; const state = await this.service.shared(route.value); await this.c.open(state.lineage_id,'viewer',state); }
-      catch { this.c.showLogin('Liên kết chia sẻ không hợp lệ, đã hết hạn hoặc đã được thu hồi.'); }
+      await this.c.openShared(route.value);
       return;
     }
     if (route.page === 'invite') {
       if (!this.c.canLeave()) return;
       sessionStorage.setItem('giapha_invite',route.value); sessionStorage.setItem('giapha_return','mine');
-      if (!this.c.user) this.c.showLogin('Đăng nhập để nhận lời mời tham gia gia phả.'); else await this.c.restore();
+      if (!this.c.user) this.c.showLogin('Đăng nhập để chỉnh sửa gia phả. Mọi thay đổi sẽ gửi quản trị viên phê duyệt.'); else await this.c.restore();
       return;
     }
     if (route.page === 'login') { sessionStorage.setItem('giapha_return','mine'); this.c.showLogin(); return; }
