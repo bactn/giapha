@@ -42,7 +42,7 @@ http://localhost:8080/. Không chạy API JSON cũ. Dùng `npm run be` chỉ khi
 
 ```sh
 npm run build:pages       # dist/
-npm run build:pages:docs  # cập nhật docs/ cho Pages release + /docs
+npm run build:pages:docs  # cập nhật docs/ cho Pages từ /docs
 ```
 
 SDK được bundle tại chỗ, phiên bản khóa trong package-lock.json. Chỉ public assets
@@ -51,7 +51,9 @@ frontend; quyền dữ liệu do Auth/RLS quyết định.
 Ứng dụng được bundle cùng public config và gắn phiên bản theo SHA-256 trên URL,
 tránh trình duyệt giữ module cấu hình cũ sau khi GitHub Pages triển khai bản mới.
 
-GitHub Pages dùng branch `release`, folder `/docs`. Workflow `pages.yml` kiểm tra
+GitHub Pages hiện dùng branch `codex/supabase-integration`, folder `/docs`
+(đã kiểm tra Settings → Pages ngày 06/11/2026). `release` nhận cùng commit
+và chạy kiểm tra build; để đổi website phải cập nhật nhánh Pages đang chọn. Workflow `pages.yml` kiểm tra
 build và xuất artifact, không tự commit docs và không tự deploy artifact.
 Nếu dùng workflow để build, khai báo repository variables `SUPABASE_URL` và
 `SUPABASE_PUBLISHABLE_KEY`; không khai báo service-role key.
@@ -117,3 +119,9 @@ gộp tài khoản hoặc cấp quyền gia phả theo email/tên Google.
 
 Không xóa schema để rollback khi có dữ liệu thật. Nếu cần quay lui, xuất và đối
 chiếu dữ liệu Supabase mới nhất trước khi chuyển lại hệ thống JSON cũ.
+
+## Homepage giai đoạn 1
+
+Xem [kế hoạch hai giai đoạn](homepage-roadmap.md) cho landing page, hồ sơ tài khoản,
+menu người dùng, quản lý phê duyệt và cơ chế công khai do admin bật. Các gia phả
+hiện có không được tự động bật công khai khi cập nhật giao diện.

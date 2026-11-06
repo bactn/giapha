@@ -74,7 +74,9 @@ Chỉ bắt đầu sau khi trải nghiệm một dòng họ được nghiệm th
 
 Làm trên nhánh codex/phase1-family-portal. Áp dụng migration bổ sung, kiểm thử quyền
 bằng fixture rollback, build dist, kiểm tra desktop/mobile và người dùng hiện có,
-sau đó build docs và cập nhật release. Không đưa data/, backup hoặc thông tin
+sau đó build docs, cập nhật release và nhánh Pages đang dùng. Cấu hình được kiểm
+tra ngày 06/11/2026 là codex/supabase-integration + /docs; cả hai nhánh nhận cùng
+bản phát hành. Không đưa data/, backup hoặc thông tin
 liên hệ vào tài nguyên tĩnh. Giữ nguyên hiện trạng công khai của tất cả gia phả.
 
 ## Tài sản minh hoạ

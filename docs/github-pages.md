@@ -1,14 +1,19 @@
-# Triển khai GitHub Pages từ release/docs
+# Triển khai GitHub Pages từ /docs
 
-Website được xuất bản bằng **Deploy from a branch**, nhánh **release**,
+Website được xuất bản bằng **Deploy from a branch**, nhánh **codex/supabase-integration**,
 thư mục **/docs**. `docs/index.html`, `docs/css/`, `docs/js/` và
 `docs/.nojekyll` là các file được sinh từ `public/`.
+
+Đã kiểm tra trực tiếp ngày 06/11/2026: Pages dùng `codex/supabase-integration`
+và `/docs`. Nhánh `release` cũng nhận cùng bản phát hành, nhưng workflow trên
+release chỉ kiểm tra build. Chỉ push release sẽ không đổi website khi Pages
+vẫn chọn nhánh Supabase.
 
 ## Cấu hình GitHub
 
 1. Mở https://github.com/bactn/giapha/settings/pages.
 2. Chọn **Source → Deploy from a branch**.
-3. Chọn nhánh **release**, thư mục **/docs**, rồi **Save**.
+3. Chọn nhánh **codex/supabase-integration**, thư mục **/docs**, rồi **Save**.
 4. Chờ workflow **pages build and deployment** thành công.
 5. Mở https://bactn.github.io/giapha/.
 
@@ -24,7 +29,7 @@ npm run build:pages:docs
 ```
 
 Commit các thay đổi nguồn và file được sinh trong `docs/`, rồi push lên
-`release`. GitHub Pages tự cập nhật từ các file đã commit trong `docs/`.
+nhánh Pages đang dùng. GitHub Pages tự cập nhật từ các file đã commit trong `docs/`.
 Không sửa trực tiếp HTML/CSS/JS được sinh trong `docs/`.
 
 Các tài liệu Markdown hiện có trong `docs/` được giữ lại và cũng có thể được
