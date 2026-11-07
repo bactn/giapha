@@ -297,6 +297,8 @@ export class DataStore {
       spouse_id: memberData.spouse_id || '',
       birth_date: memberData.birth_date || '',
       death_date: memberData.death_date || '',
+      death_date_solar: memberData.death_date_solar || '',
+      lifespan_override: memberData.lifespan_override ?? '',
       status: memberData.status || 'Còn sống',
       role: memberData.role || 'Thành viên',
       notes: memberData.notes || ''

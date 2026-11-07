@@ -12,7 +12,7 @@ import { apiFetch, apiUrl, shareUrl } from './api.js';
 import { isSupabaseConfigured } from './supabase-client.js';
 import { SupabaseController } from './supabase-controller.js';
 import { escapeHTML } from './html.js';
-import { avatarSVG } from './member-presentation.js';
+import { avatarSVG, lifespanAge } from './member-presentation.js';
 
 class App {
   constructor() {
@@ -348,7 +348,7 @@ class App {
 
   applyRoleRestrictions() {
     // Show/hide edit controls based on role
-    const editControls = document.querySelectorAll('#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-inspect-move-left, #btn-inspect-move-right, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected');
+    const editControls = document.querySelectorAll('#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-inspect-move-left, #btn-inspect-move-right, #btn-lifespan-auto, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected');
     const viewerOnly = document.getElementById('btn-request-edit');
     const shareBtn = document.getElementById('btn-open-share');
 
@@ -507,6 +507,7 @@ class App {
   }
 
   setupLeftInspector() {
+    document.getElementById('btn-lifespan-auto').onclick=()=>{const id=this.dataStore.selectedMemberId;if(id){this.dataStore.updateMember(id,{lifespan_override:''});this.populateInspector(id);}};
     for (const [id,step] of [['btn-inspect-move-left',-1],['btn-inspect-move-right',1]]) {
       document.getElementById(id).onclick=()=>{
         const selected=this.dataStore.selectedMemberId;
@@ -529,6 +530,8 @@ class App {
       { id: 'inspect-parent-id', key: 'parent_id' },
       { id: 'inspect-birth-date', key: 'birth_date' },
       { id: 'inspect-death-date', key: 'death_date' },
+      { id: 'inspect-death-date-solar', key: 'death_date_solar' },
+      { id: 'inspect-lifespan', key: 'lifespan_override' },
       { id: 'inspect-status', key: 'status' },
       { id: 'inspect-role', key: 'role' },
       { id: 'inspect-notes', key: 'notes' }
@@ -543,8 +546,14 @@ class App {
         if (!selId) return;
 
         const val = el.value.trim();
+        if(key==='lifespan_override' && val!=='' && (!Number.isInteger(Number(val)) || Number(val)<0 || Number(val)>200)) return;
         try {
           this.dataStore.updateMember(selId, { [key]: val });
+          if(key==='lifespan_override') document.getElementById('inspect-lifespan-hint').textContent=val==='' ? 'Tự tính theo ngày sinh và ngày mất dương lịch; tính theo năm nếu thiếu ngày/tháng.' : 'Hưởng thọ đang nhập riêng. Bấm Tự tính lại để dùng ngày sinh và ngày mất dương lịch.';
+          if(['birth_date','death_date_solar'].includes(key)) {
+            const member=this.dataStore.getMember(selId);
+            document.getElementById('inspect-lifespan').value=lifespanAge(member) ?? '';
+          }
           if (key === 'full_name') {
             document.getElementById('inspect-header-name').textContent = val || 'Người Mới';
           }
@@ -683,6 +692,9 @@ class App {
 
     document.getElementById('inspect-birth-date').value = m.birth_date || '';
     document.getElementById('inspect-death-date').value = m.death_date || '';
+    document.getElementById('inspect-death-date-solar').value=m.death_date_solar || '';
+    document.getElementById('inspect-lifespan').value=lifespanAge(m) ?? '';
+    document.getElementById('inspect-lifespan-hint').textContent=m.lifespan_override !== undefined && m.lifespan_override !== null && m.lifespan_override !== '' ? 'Hưởng thọ đang nhập riêng. Bấm Tự tính lại để dùng ngày sinh và ngày mất dương lịch.' : 'Tự tính theo ngày sinh và ngày mất dương lịch; tính theo năm nếu thiếu ngày/tháng.';
     document.getElementById('inspect-status').value = m.status || 'Còn sống';
     document.getElementById('inspect-role').value = m.role || 'Thành viên';
     document.getElementById('inspect-notes').value = m.notes || '';
@@ -947,12 +959,16 @@ class App {
     // 3. Lunar Calendar Modal
     const modalLunar = document.getElementById('modal-lunar');
     const lunarListContainer = document.getElementById('lunar-giỗ-list');
+    let anniversaryCalendar='lunar';
+    const renderAnniversaries=()=>{
+      for(const calendar of ['lunar','solar']) document.getElementById('tab-anniversary-'+calendar).setAttribute('aria-selected',String(calendar===anniversaryCalendar));
+      lunarListContainer.setAttribute('aria-labelledby','tab-anniversary-'+anniversaryCalendar);
+      LunarCalendarManager.renderGiỗList(lunarListContainer,this.dataStore,id=>{modalLunar.classList.add('hidden');this.revealMemberOnTree(id);},anniversaryCalendar);
+    };
+    for(const calendar of ['lunar','solar']) document.getElementById('tab-anniversary-'+calendar).onclick=()=>{anniversaryCalendar=calendar;renderAnniversaries();};
     document.getElementById('btn-open-lunar').onclick = () => {
       modalLunar.classList.remove('hidden');
-      LunarCalendarManager.renderGiỗList(lunarListContainer, this.dataStore, (memberId) => {
-        modalLunar.classList.add('hidden');
-        this.revealMemberOnTree(memberId);
-      });
+      renderAnniversaries();
     };
 
     // 4. Export Modal

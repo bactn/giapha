@@ -6,7 +6,7 @@ import { FamilyPortal } from './portal.js';
 const $ = id => document.getElementById(id);
 const copy = value => JSON.parse(JSON.stringify(value));
 const roles = { admin: 'Quản trị', editor: 'Chỉnh sửa', viewer: 'Chỉ xem' };
-const fieldNames = { full_name: 'Họ tên', christian_name: 'Tên thánh', birth_date: 'Ngày sinh', death_date: 'Ngày mất', notes: 'Ghi chú', parent_id: 'Cha/mẹ', spouse_id: 'Phối ngẫu', generation: 'Thế hệ', sibling_order:'Thứ tự anh/chị/em' };
+const fieldNames = { full_name: 'Họ tên', christian_name: 'Tên thánh', birth_date: 'Ngày sinh', death_date: 'Ngày mất', notes: 'Ghi chú', parent_id: 'Cha/mẹ', spouse_id: 'Phối ngẫu', generation: 'Thế hệ', sibling_order:'Thứ tự anh/chị/em', death_date_solar:'Ngày mất dương lịch', lifespan_override:'Hưởng thọ nhập riêng' };
 
 export class SupabaseController {
   constructor(app) { this.app = app; this.user = null; this.base = null; }

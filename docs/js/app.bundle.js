@@ -265,6 +265,8 @@ var DataStore = class {
       spouse_id: memberData.spouse_id || "",
       birth_date: memberData.birth_date || "",
       death_date: memberData.death_date || "",
+      death_date_solar: memberData.death_date_solar || "",
+      lifespan_override: memberData.lifespan_override ?? "",
       status: memberData.status || "C\xF2n s\u1ED1ng",
       role: memberData.role || "Th\xE0nh vi\xEAn",
       notes: memberData.notes || ""
@@ -662,11 +664,35 @@ var knownDate = (value) => {
 };
 function lifeDates(member) {
   const birth = knownDate(member.birth_date);
-  const death = knownDate(member.death_date);
+  const death = knownDate(member.death_date_solar) || knownDate(member.death_date);
   const early = member.status === "M\u1EA5t s\u1EDBm" || /^mất sớm$/i.test(death);
   const died = early || member.status === "\u0110\xE3 m\u1EA5t" || Boolean(death);
   const deathLabel = death && !/^(?:mất sớm|đã mất|mất)$/i.test(death) ? `M\u1EA5t ${death}` : early ? "M\u1EA5t s\u1EDBm" : died ? "M\u1EA5t" : "";
   return [birth ? `SN ${birth}` : "", deathLabel].filter(Boolean).join(" - ");
+}
+function calendarDate(value) {
+  const text = String(value || "").trim().replace(/^SN\s*/i, "");
+  const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const local = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
+  let year, month, day;
+  if (iso) [, year, month, day] = iso.map(Number);
+  else if (local) {
+    day = Number(local[1]);
+    month = Number(local[2]);
+    year = Number(local[3]);
+  } else if (/^\d{4}$/.test(text)) return { year: Number(text), month: null, day: null };
+  else return null;
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day ? { year, month, day } : null;
+}
+function lifespanAge(member) {
+  const manual = member.lifespan_override;
+  if (manual !== "" && manual !== null && manual !== void 0 && Number.isInteger(Number(manual)) && Number(manual) >= 0 && Number(manual) <= 200) return Number(manual);
+  const born = calendarDate(member.birth_date), died = calendarDate(member.death_date_solar);
+  if (!born || !died) return null;
+  let age = died.year - born.year;
+  if (born.month && died.month && (died.month < born.month || died.month === born.month && died.day < born.day)) age--;
+  return age >= 0 ? age : null;
 }
 function spouseRole(member, spouse = null) {
   if (spouse?.gender === "N\u1EEF") return "V\u1EE3";
@@ -1647,6 +1673,8 @@ var ExcelParser = class {
       else if (norm.includes("machame") || norm.includes("idcha") || norm.includes("cha") || norm.includes("parent")) colMap.parent_id = idx;
       else if (norm.includes("tenchame") || norm.includes("tencha") || norm.includes("parentname")) colMap.parent_name = idx;
       else if (norm.includes("vochong") || norm.includes("phoingau") || norm.includes("spouse")) colMap.spouse = idx;
+      else if (norm.includes("matduonglich") || norm.includes("matdl") || norm === "deathdatesolar") colMap.death_date_solar = idx;
+      else if (norm.includes("huongtho") || norm === "lifespanoverride") colMap.lifespan_override = idx;
       else if (norm.includes("ngaysinh") || norm.includes("namsinh") || norm.includes("sinh")) colMap.birth_date = idx;
       else if (norm.includes("ngaymat") || norm.includes("nammat") || norm.includes("gioal") || norm.includes("mat")) colMap.death_date = idx;
       else if (norm.includes("trangthai") || norm.includes("tinhtrang")) colMap.status = idx;
@@ -1723,6 +1751,8 @@ var ExcelParser = class {
         spouse,
         birth_date: getVal("birth_date"),
         death_date: deathDate,
+        death_date_solar: getVal("death_date_solar"),
+        lifespan_override: getVal("lifespan_override"),
         status,
         role,
         notes
@@ -1858,23 +1888,24 @@ var LunarCalendarManager = class {
     }
     return null;
   }
-  static getAnniversariesByMonth(dataStore) {
+  static getAnniversariesByMonth(dataStore, calendar = "lunar") {
     const months = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       items: []
     }));
     const unknownItems = [];
     for (const m of dataStore.getAllMembers()) {
-      if (m.status === "\u0110\xE3 m\u1EA5t" || m.status === "M\u1EA5t s\u1EDBm" || m.death_date) {
-        const parsed = this.extractLunarDate(m.death_date);
-        if (parsed) {
+      if (m.status === "\u0110\xE3 m\u1EA5t" || m.status === "M\u1EA5t s\u1EDBm" || m.death_date || m.death_date_solar) {
+        const rawDate = calendar === "solar" ? m.death_date_solar : m.death_date;
+        const parsed = calendar === "solar" ? calendarDate(rawDate) : this.extractLunarDate(rawDate);
+        if (parsed?.day && parsed?.month) {
           months[parsed.month - 1].items.push({
             member: m,
             day: parsed.day,
             month: parsed.month,
-            rawText: m.death_date
+            rawText: rawDate
           });
-        } else if (m.status === "\u0110\xE3 m\u1EA5t" || m.status === "M\u1EA5t s\u1EDBm") {
+        } else {
           unknownItems.push(m);
         }
       }
@@ -1884,8 +1915,8 @@ var LunarCalendarManager = class {
     }
     return { months, unknownItems };
   }
-  static renderGi\u1ED7List(container, dataStore, onSelectMember) {
-    const { months, unknownItems } = this.getAnniversariesByMonth(dataStore);
+  static renderGi\u1ED7List(container, dataStore, onSelectMember, calendar = "lunar") {
+    const { months, unknownItems } = this.getAnniversariesByMonth(dataStore, calendar);
     container.innerHTML = "";
     let totalAnniversaries = 0;
     months.forEach((m) => totalAnniversaries += m.items.length);
@@ -1900,8 +1931,8 @@ var LunarCalendarManager = class {
       const header = document.createElement("div");
       header.className = "px-3 py-2 bg-amber-50/80 border-b border-amber-200/60 font-bold text-xs text-amber-900 flex items-center justify-between";
       header.innerHTML = `
-        <span>Th\xE1ng ${group.month} \xC2m L\u1ECBch</span>
-        <span class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded-full">${group.items.length} \u0111\xE1m gi\u1ED7</span>
+        <span>Th\xE1ng ${group.month} ${calendar === "solar" ? "D\u01B0\u01A1ng l\u1ECBch" : "\xC2m l\u1ECBch"}</span>
+        <span class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded-full">${group.items.length} ng\xE0y gi\u1ED7</span>
       `;
       monthCard.appendChild(header);
       const list = document.createElement("div");
@@ -1913,7 +1944,7 @@ var LunarCalendarManager = class {
           <div class="flex items-center space-x-2.5">
             <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex flex-col items-center justify-center font-bold text-xs leading-none">
               <span>${item.day}</span>
-              <span class="text-[8px] font-normal uppercase">\xC2L</span>
+              <span class="text-[8px] font-normal uppercase">${calendar === "solar" ? "DL" : "\xC2L"}</span>
             </span>
             <div>
               <div class="font-bold text-slate-800 flex items-center space-x-1">
@@ -1935,6 +1966,22 @@ var LunarCalendarManager = class {
       }
       monthCard.appendChild(list);
       container.appendChild(monthCard);
+    }
+    if (unknownItems.length) {
+      const section = document.createElement("section");
+      section.className = "border rounded-xl p-3";
+      const title = document.createElement("h4");
+      title.textContent = "Ch\u01B0a r\xF5 ng\xE0y/th\xE1ng " + (calendar === "solar" ? "d\u01B0\u01A1ng l\u1ECBch" : "\xE2m l\u1ECBch");
+      section.append(title);
+      for (const member of unknownItems) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "block py-2 text-amber-700";
+        button.textContent = member.full_name + " \u2014 Xem c\xE2y";
+        button.onclick = () => onSelectMember?.(member.id);
+        section.append(button);
+      }
+      container.append(section);
     }
   }
 };
@@ -3548,7 +3595,7 @@ var FamilyPortal = class {
 var $2 = (id) => document.getElementById(id);
 var copy = (value) => JSON.parse(JSON.stringify(value));
 var roles = { admin: "Qu\u1EA3n tr\u1ECB", editor: "Ch\u1EC9nh s\u1EEDa", viewer: "Ch\u1EC9 xem" };
-var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "Ph\u1ED1i ng\u1EABu", generation: "Th\u1EBF h\u1EC7", sibling_order: "Th\u1EE9 t\u1EF1 anh/ch\u1ECB/em" };
+var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "Ph\u1ED1i ng\u1EABu", generation: "Th\u1EBF h\u1EC7", sibling_order: "Th\u1EE9 t\u1EF1 anh/ch\u1ECB/em", death_date_solar: "Ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch", lifespan_override: "H\u01B0\u1EDFng th\u1ECD nh\u1EADp ri\xEAng" };
 var SupabaseController = class {
   constructor(app) {
     this.app = app;
@@ -4533,7 +4580,7 @@ var App = class {
     });
   }
   applyRoleRestrictions() {
-    const editControls = document.querySelectorAll("#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-inspect-move-left, #btn-inspect-move-right, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected");
+    const editControls = document.querySelectorAll("#btn-add-member, #btn-delete-member, #btn-inspect-delete, #btn-inspect-save, #btn-inspect-add-child, #btn-inspect-move-left, #btn-inspect-move-right, #btn-lifespan-auto, #btn-save-lineage, #btn-reset-data, #btn-quick-add-root, #btn-add-child-selected");
     const viewerOnly = document.getElementById("btn-request-edit");
     const shareBtn = document.getElementById("btn-open-share");
     this.updateUserDisplay();
@@ -4663,6 +4710,13 @@ var App = class {
     });
   }
   setupLeftInspector() {
+    document.getElementById("btn-lifespan-auto").onclick = () => {
+      const id = this.dataStore.selectedMemberId;
+      if (id) {
+        this.dataStore.updateMember(id, { lifespan_override: "" });
+        this.populateInspector(id);
+      }
+    };
     for (const [id, step] of [["btn-inspect-move-left", -1], ["btn-inspect-move-right", 1]]) {
       document.getElementById(id).onclick = () => {
         const selected = this.dataStore.selectedMemberId;
@@ -4687,6 +4741,8 @@ var App = class {
       { id: "inspect-parent-id", key: "parent_id" },
       { id: "inspect-birth-date", key: "birth_date" },
       { id: "inspect-death-date", key: "death_date" },
+      { id: "inspect-death-date-solar", key: "death_date_solar" },
+      { id: "inspect-lifespan", key: "lifespan_override" },
       { id: "inspect-status", key: "status" },
       { id: "inspect-role", key: "role" },
       { id: "inspect-notes", key: "notes" }
@@ -4698,8 +4754,14 @@ var App = class {
         const selId = this.dataStore.selectedMemberId;
         if (!selId) return;
         const val = el.value.trim();
+        if (key === "lifespan_override" && val !== "" && (!Number.isInteger(Number(val)) || Number(val) < 0 || Number(val) > 200)) return;
         try {
           this.dataStore.updateMember(selId, { [key]: val });
+          if (key === "lifespan_override") document.getElementById("inspect-lifespan-hint").textContent = val === "" ? "T\u1EF1 t\xEDnh theo ng\xE0y sinh v\xE0 ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch; t\xEDnh theo n\u0103m n\u1EBFu thi\u1EBFu ng\xE0y/th\xE1ng." : "H\u01B0\u1EDFng th\u1ECD \u0111ang nh\u1EADp ri\xEAng. B\u1EA5m T\u1EF1 t\xEDnh l\u1EA1i \u0111\u1EC3 d\xF9ng ng\xE0y sinh v\xE0 ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch.";
+          if (["birth_date", "death_date_solar"].includes(key)) {
+            const member = this.dataStore.getMember(selId);
+            document.getElementById("inspect-lifespan").value = lifespanAge(member) ?? "";
+          }
           if (key === "full_name") {
             document.getElementById("inspect-header-name").textContent = val || "Ng\u01B0\u1EDDi M\u1EDBi";
           }
@@ -4815,6 +4877,9 @@ var App = class {
     }
     document.getElementById("inspect-birth-date").value = m.birth_date || "";
     document.getElementById("inspect-death-date").value = m.death_date || "";
+    document.getElementById("inspect-death-date-solar").value = m.death_date_solar || "";
+    document.getElementById("inspect-lifespan").value = lifespanAge(m) ?? "";
+    document.getElementById("inspect-lifespan-hint").textContent = m.lifespan_override !== void 0 && m.lifespan_override !== null && m.lifespan_override !== "" ? "H\u01B0\u1EDFng th\u1ECD \u0111ang nh\u1EADp ri\xEAng. B\u1EA5m T\u1EF1 t\xEDnh l\u1EA1i \u0111\u1EC3 d\xF9ng ng\xE0y sinh v\xE0 ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch." : "T\u1EF1 t\xEDnh theo ng\xE0y sinh v\xE0 ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch; t\xEDnh theo n\u0103m n\u1EBFu thi\u1EBFu ng\xE0y/th\xE1ng.";
     document.getElementById("inspect-status").value = m.status || "C\xF2n s\u1ED1ng";
     document.getElementById("inspect-role").value = m.role || "Th\xE0nh vi\xEAn";
     document.getElementById("inspect-notes").value = m.notes || "";
@@ -5039,12 +5104,22 @@ var App = class {
     selectB.onchange = calculateKinship;
     const modalLunar = document.getElementById("modal-lunar");
     const lunarListContainer = document.getElementById("lunar-gi\u1ED7-list");
+    let anniversaryCalendar = "lunar";
+    const renderAnniversaries = () => {
+      for (const calendar of ["lunar", "solar"]) document.getElementById("tab-anniversary-" + calendar).setAttribute("aria-selected", String(calendar === anniversaryCalendar));
+      lunarListContainer.setAttribute("aria-labelledby", "tab-anniversary-" + anniversaryCalendar);
+      LunarCalendarManager.renderGi\u1ED7List(lunarListContainer, this.dataStore, (id) => {
+        modalLunar.classList.add("hidden");
+        this.revealMemberOnTree(id);
+      }, anniversaryCalendar);
+    };
+    for (const calendar of ["lunar", "solar"]) document.getElementById("tab-anniversary-" + calendar).onclick = () => {
+      anniversaryCalendar = calendar;
+      renderAnniversaries();
+    };
     document.getElementById("btn-open-lunar").onclick = () => {
       modalLunar.classList.remove("hidden");
-      LunarCalendarManager.renderGi\u1ED7List(lunarListContainer, this.dataStore, (memberId) => {
-        modalLunar.classList.add("hidden");
-        this.revealMemberOnTree(memberId);
-      });
+      renderAnniversaries();
     };
     const modalExport = document.getElementById("modal-export");
     const selectExportScope = document.getElementById("select-export-scope");

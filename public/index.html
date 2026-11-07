@@ -116,7 +116,7 @@
       </button>
 
       <!-- Lunar Giỗ Calendar -->
-      <button id="btn-open-lunar" class="text-xs flex items-center space-x-1 py-1.5 px-2 md:px-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-700 font-medium" title="Lịch Cúng Giỗ Âm Lịch">
+      <button id="btn-open-lunar" class="text-xs flex items-center space-x-1 py-1.5 px-2 md:px-2.5 bg-white border border-slate-200 hover:bg-slate-50 rounded-lg text-slate-700 font-medium" title="Lịch giỗ">
         <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
         <span class="hidden sm:inline">Giỗ ÂL</span>
       </button>
@@ -327,10 +327,16 @@
               <input type="text" id="inspect-birth-date" placeholder="SN 1928, 23/04/1954..." class="form-input">
             </div>
             <div>
-              <label class="block font-semibold text-slate-600 mb-0.5">Ngày Mất / Giỗ ÂL</label>
+              <label class="block font-semibold text-slate-600 mb-0.5">Ngày mất / Giỗ âm lịch</label>
               <input type="text" id="inspect-death-date" placeholder="15/08 Âm, Mất 21/3..." class="form-input">
             </div>
           </div>
+
+          <div class="grid grid-cols-2 gap-2">
+            <div><label for="inspect-death-date-solar" class="block font-semibold text-slate-600 mb-0.5">Ngày mất dương lịch</label><input type="text" id="inspect-death-date-solar" placeholder="23/04/2020 hoặc 2020" maxlength="40" class="form-input"></div>
+            <div><label for="inspect-lifespan" class="block font-semibold text-slate-600 mb-0.5">Hưởng thọ (tuổi)</label><input type="number" id="inspect-lifespan" min="0" max="200" step="1" class="form-input"><button type="button" id="btn-lifespan-auto" class="text-amber-700 mt-1">Tự tính lại</button></div>
+          </div>
+          <p id="inspect-lifespan-hint" class="text-[11px] text-slate-500">Tự tính theo ngày sinh và ngày mất dương lịch; tính theo năm nếu thiếu ngày/tháng.</p>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -532,15 +538,16 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-5 sm:p-6 space-y-4 max-h-[85vh] flex flex-col">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div>
-          <h3 class="text-sm sm:text-base font-bold text-slate-900 font-serif">📅 Lịch Cúng Giỗ Âm Lịch</h3>
-          <p class="text-[11px] sm:text-xs text-slate-500">Tự động tổng hợp các ngày giỗ theo 12 tháng âm lịch trong dòng họ</p>
+          <h3 class="text-sm sm:text-base font-bold text-slate-900 font-serif">Lịch giỗ</h3>
+          <p class="text-[11px] sm:text-xs text-slate-500">Các ngày giỗ trong dòng họ theo lịch đã nhập</p>
         </div>
         <button class="modal-close p-1 rounded-lg hover:bg-slate-100 text-slate-400">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
 
-      <div id="lunar-giỗ-list" class="flex-1 overflow-y-auto space-y-3 text-xs pr-1"></div>
+      <div role="tablist" aria-label="Loại lịch giỗ" class="flex gap-2"><button type="button" id="tab-anniversary-lunar" role="tab" aria-selected="true" class="anniversary-tab">Âm lịch</button><button type="button" id="tab-anniversary-solar" role="tab" aria-selected="false" class="anniversary-tab">Dương lịch</button></div>
+      <div id="lunar-giỗ-list" role="tabpanel" aria-labelledby="tab-anniversary-lunar" class="flex-1 min-h-0 overflow-y-auto space-y-3 text-xs pr-1"></div>
 
       <div class="flex justify-end pt-2 border-t border-slate-100">
         <button class="modal-close px-4 py-1.5 text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg font-semibold">Đóng</button>

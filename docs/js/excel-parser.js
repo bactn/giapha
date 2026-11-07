@@ -87,6 +87,8 @@ export class ExcelParser {
       else if (norm.includes('machame') || norm.includes('idcha') || norm.includes('cha') || norm.includes('parent')) colMap.parent_id = idx;
       else if (norm.includes('tenchame') || norm.includes('tencha') || norm.includes('parentname')) colMap.parent_name = idx;
       else if (norm.includes('vochong') || norm.includes('phoingau') || norm.includes('spouse')) colMap.spouse = idx;
+      else if (norm.includes('matduonglich') || norm.includes('matdl') || norm==='deathdatesolar') colMap.death_date_solar = idx;
+      else if (norm.includes('huongtho') || norm==='lifespanoverride') colMap.lifespan_override = idx;
       else if (norm.includes('ngaysinh') || norm.includes('namsinh') || norm.includes('sinh')) colMap.birth_date = idx;
       else if (norm.includes('ngaymat') || norm.includes('nammat') || norm.includes('gioal') || norm.includes('mat')) colMap.death_date = idx;
       else if (norm.includes('trangthai') || norm.includes('tinhtrang')) colMap.status = idx;
@@ -179,6 +181,8 @@ export class ExcelParser {
         spouse,
         birth_date: getVal('birth_date'),
         death_date: deathDate,
+        death_date_solar: getVal('death_date_solar'),
+        lifespan_override: getVal('lifespan_override'),
         status,
         role,
         notes

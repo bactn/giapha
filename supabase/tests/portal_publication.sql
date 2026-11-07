@@ -11,7 +11,7 @@ begin
   family:=public.create_lineage('{"name":"Portal fixture family","private_info":"hidden"}');
   perform public.set_lineage_access(family,viewer_id,'viewer');
   perform public.save_lineage_state(family,0,'{"name":"Portal fixture family","private_info":"hidden"}',
-    '[{"id":"ROOT","full_name":"Public Name","birth_date":"1900","sibling_order":2,"notes":"secret note","email":"private@example.invalid","phone":"private","address":"private","custom_private_field":"private"}]');
+    '[{"id":"ROOT","full_name":"Public Name","birth_date":"1900","sibling_order":2,"death_date_solar":"1980-04-23","lifespan_override":"80","notes":"secret note","email":"private@example.invalid","phone":"private","address":"private","custom_private_field":"private"}]');
   perform public.set_lineage_publication(family,v_slug,'Public introduction','Public region',false);
   begin
     insert into public.lineage_publications(lineage_id,slug,title,is_public) values(gen_random_uuid(),'forbidden','forbidden',true);
@@ -58,7 +58,7 @@ begin
   if (page->>'public_read')::boolean is not true or page->>'access_role'<>'viewer'
     or page->'members'->0->>'full_name'<>'Public Name'
     or (page->'members'->0->>'sibling_order')::integer is distinct from 2
-    or page->'members'->0 ?| array['notes','email','phone','address','custom_private_field']
+    or page->'members'->0 ?| array['notes','email','phone','address','custom_private_field','death_date_solar','lifespan_override']
     or page->'lineageInfo' ? 'private_info' then raise exception 'FAIL: public field allowlist'; end if;
   if not exists(select 1 from public.list_public_lineages('Portal fixture family') where slug=v_slug and member_count=1) then
     raise exception 'FAIL: opted-in family not discoverable'; end if;

@@ -1,5 +1,6 @@
 // lunar-calendar.js - Lunar Calendar Death Anniversary (Giỗ Âm Lịch) Manager
 import { escapeHTML } from './html.js';
+import { calendarDate } from './member-presentation.js';
 export class LunarCalendarManager {
   static extractLunarDate(dateStr) {
     if (!dateStr) return null;
@@ -17,7 +18,7 @@ export class LunarCalendarManager {
     return null;
   }
 
-  static getAnniversariesByMonth(dataStore) {
+  static getAnniversariesByMonth(dataStore, calendar = 'lunar') {
     const months = Array.from({ length: 12 }, (_, i) => ({
       month: i + 1,
       items: []
@@ -26,16 +27,17 @@ export class LunarCalendarManager {
     const unknownItems = [];
 
     for (const m of dataStore.getAllMembers()) {
-      if (m.status === 'Đã mất' || m.status === 'Mất sớm' || m.death_date) {
-        const parsed = this.extractLunarDate(m.death_date);
-        if (parsed) {
+      if (m.status === 'Đã mất' || m.status === 'Mất sớm' || m.death_date || m.death_date_solar) {
+        const rawDate=calendar==='solar' ? m.death_date_solar : m.death_date;
+        const parsed = calendar==='solar' ? calendarDate(rawDate) : this.extractLunarDate(rawDate);
+        if (parsed?.day && parsed?.month) {
           months[parsed.month - 1].items.push({
             member: m,
             day: parsed.day,
             month: parsed.month,
-            rawText: m.death_date
+            rawText: rawDate
           });
-        } else if (m.status === 'Đã mất' || m.status === 'Mất sớm') {
+        } else {
           unknownItems.push(m);
         }
       }
@@ -49,8 +51,8 @@ export class LunarCalendarManager {
     return { months, unknownItems };
   }
 
-  static renderGiỗList(container, dataStore, onSelectMember) {
-    const { months, unknownItems } = this.getAnniversariesByMonth(dataStore);
+  static renderGiỗList(container, dataStore, onSelectMember, calendar = 'lunar') {
+    const { months, unknownItems } = this.getAnniversariesByMonth(dataStore,calendar);
     container.innerHTML = '';
 
     let totalAnniversaries = 0;
@@ -71,8 +73,8 @@ export class LunarCalendarManager {
       const header = document.createElement('div');
       header.className = 'px-3 py-2 bg-amber-50/80 border-b border-amber-200/60 font-bold text-xs text-amber-900 flex items-center justify-between';
       header.innerHTML = `
-        <span>Tháng ${group.month} Âm Lịch</span>
-        <span class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded-full">${group.items.length} đám giỗ</span>
+        <span>Tháng ${group.month} ${calendar==='solar'?'Dương lịch':'Âm lịch'}</span>
+        <span class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.2 rounded-full">${group.items.length} ngày giỗ</span>
       `;
       monthCard.appendChild(header);
 
@@ -86,7 +88,7 @@ export class LunarCalendarManager {
           <div class="flex items-center space-x-2.5">
             <span class="w-8 h-8 rounded-lg bg-amber-100 text-amber-800 flex flex-col items-center justify-center font-bold text-xs leading-none">
               <span>${item.day}</span>
-              <span class="text-[8px] font-normal uppercase">ÂL</span>
+              <span class="text-[8px] font-normal uppercase">${calendar==='solar'?'DL':'ÂL'}</span>
             </span>
             <div>
               <div class="font-bold text-slate-800 flex items-center space-x-1">
@@ -109,6 +111,12 @@ export class LunarCalendarManager {
 
       monthCard.appendChild(list);
       container.appendChild(monthCard);
+    }
+    if(unknownItems.length) {
+      const section=document.createElement('section'); section.className='border rounded-xl p-3';
+      const title=document.createElement('h4'); title.textContent='Chưa rõ ngày/tháng '+(calendar==='solar'?'dương lịch':'âm lịch'); section.append(title);
+      for(const member of unknownItems) {const button=document.createElement('button'); button.type='button';button.className='block py-2 text-amber-700';button.textContent=member.full_name+' — Xem cây';button.onclick=()=>onSelectMember?.(member.id);section.append(button);}
+      container.append(section);
     }
   }
 }

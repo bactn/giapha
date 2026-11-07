@@ -5,11 +5,32 @@ const knownDate = value => {
 };
 export function lifeDates(member) {
   const birth = knownDate(member.birth_date);
-  const death = knownDate(member.death_date);
+  const death = knownDate(member.death_date_solar) || knownDate(member.death_date);
   const early = member.status === 'Mất sớm' || /^mất sớm$/i.test(death);
   const died = early || member.status === 'Đã mất' || Boolean(death);
   const deathLabel = death && !/^(?:mất sớm|đã mất|mất)$/i.test(death) ? `Mất ${death}` : early ? 'Mất sớm' : died ? 'Mất' : '';
   return [birth ? `SN ${birth}` : '', deathLabel].filter(Boolean).join(' - ');
+}
+export function calendarDate(value) {
+  const text=String(value || '').trim().replace(/^SN\s*/i,'');
+  const iso=/^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  const local=/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(text);
+  let year,month,day;
+  if(iso) [,year,month,day]=iso.map(Number);
+  else if(local) { day=Number(local[1]);month=Number(local[2]);year=Number(local[3]); }
+  else if(/^\d{4}$/.test(text)) return {year:Number(text),month:null,day:null};
+  else return null;
+  const date=new Date(Date.UTC(year,month-1,day));
+  return date.getUTCFullYear()===year && date.getUTCMonth()===month-1 && date.getUTCDate()===day ? {year,month,day} : null;
+}
+export function lifespanAge(member) {
+  const manual=member.lifespan_override;
+  if(manual !== '' && manual !== null && manual !== undefined && Number.isInteger(Number(manual)) && Number(manual)>=0 && Number(manual)<=200) return Number(manual);
+  const born=calendarDate(member.birth_date), died=calendarDate(member.death_date_solar);
+  if(!born || !died) return null;
+  let age=died.year-born.year;
+  if(born.month && died.month && (died.month<born.month || (died.month===born.month && died.day<born.day))) age--;
+  return age>=0 ? age : null;
 }
 export function spouseRole(member, spouse = null) {
   if (spouse?.gender === 'Nữ') return 'Vợ';

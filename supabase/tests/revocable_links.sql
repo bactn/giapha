@@ -9,7 +9,7 @@ begin
   set local role authenticated;
   family:=public.create_lineage('{"name":"Disposable link lifecycle"}');
   rev:=public.save_lineage_state(family,0,'{"name":"Disposable link lifecycle"}',
-    '[{"id":"A","full_name":"Before","notes":"private"}]');
+    '[{"id":"A","full_name":"Before","notes":"private","death_date_solar":"1980-04-23","lifespan_override":"80"}]');
   token:=public.create_access_link(family,'share','viewer');
   -- Old clients used #invite URLs for viewer links. They now become guest links.
   edit_token:=public.create_access_link(family,'invite','viewer','forever');
@@ -33,7 +33,7 @@ begin
   set local role anon;
   if not public.can_read_lineage(family,token) or public.can_read_lineage(family) then raise exception 'FAIL: guest access probe'; end if;
   if public.read_shared_lineage(token)->'members'->0->>'full_name'<>'Before'
-    or public.read_shared_lineage(token)->'members'->0 ? 'notes' then raise exception 'FAIL: anonymous limited view'; end if;
+    or public.read_shared_lineage(token)->'members'->0 ?| array['notes','death_date_solar','lifespan_override'] then raise exception 'FAIL: anonymous limited view'; end if;
   begin perform public.redeem_invite(token); raise exception 'FAIL: anonymous redemption'; exception when insufficient_privilege then null; end;
   set local role authenticated;
   perform set_config('request.jwt.claim.sub',owner_id::text,true);

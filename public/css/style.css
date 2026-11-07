@@ -55,6 +55,8 @@ body {
 .export-dialog-body { overflow-y:auto; min-height:0; padding:16px; overscroll-behavior:contain; -webkit-overflow-scrolling:touch; }
 .export-dialog-body > div > button { min-width:0; }
 .export-dialog-body button > div:last-child { min-width:0; overflow-wrap:anywhere; }
+.anniversary-tab { padding:8px 16px; border:1px solid #d6dde5; border-radius:8px; color:#64748b; font-size:12px; }
+.anniversary-tab[aria-selected="true"] { color:#92400e; background:#fef3c7; border-color:#d97706; }
 
 @media (max-width:1023px) {
   #workspace-shell > .app-header { height:auto; min-height:52px; flex-wrap:wrap; }

@@ -7,7 +7,8 @@ import { startGoogleOAuth, oauthReturnMessage } from '../public/js/services/auth
 import { slugify, portalRoute } from '../public/js/portal.js';
 import { SupabaseController } from '../public/js/supabase-controller.js';
 import { GenealogyService } from '../public/js/services/genealogy.js';
-import { lifeDates, spouseRole, avatarSVG } from '../public/js/member-presentation.js';
+import { lifeDates, spouseRole, avatarSVG, calendarDate, lifespanAge } from '../public/js/member-presentation.js';
+import { LunarCalendarManager } from '../public/js/lunar-calendar.js';
 import { AutoLayout } from '../public/js/auto-layout.js';
 import { Exporter } from '../public/js/export.js';
 import { KinshipCalculator } from '../public/js/kinship.js';
@@ -220,4 +221,22 @@ test('sibling movement changes the whole branch order, persists in snapshots and
   assert(store.getTrackedChanges().every(c=>c.type==='update_member' && 'sibling_order' in c.new_value));
   assert(store.undo()); assert.deepEqual(order(),['A','B']); assert(store.redo()); assert.deepEqual(order(),['B','A']);
   store.readOnly=true; assert.equal(store.moveSibling('A',-1),false); assert.deepEqual(order(),['B','A']);
+});
+
+test('lifespan uses solar dates, completed birthdays and optional manual override', () => {
+  assert.equal(lifespanAge({birth_date:'12/08/1990',death_date_solar:'11/08/2045'}),54);
+  assert.equal(lifespanAge({birth_date:'1990-08-12',death_date_solar:'2045-08-12'}),55);
+  assert.equal(lifespanAge({birth_date:'SN 1990',death_date_solar:'2045'}),55);
+  assert.equal(lifespanAge({birth_date:'1990',death_date:'15/08/2045 Âm'}),null);
+  assert.equal(lifespanAge({birth_date:'1990',death_date_solar:'1980'}),null);
+  assert.equal(lifespanAge({birth_date:'1990',death_date_solar:'2045',lifespan_override:'72'}),72);
+  assert.equal(lifespanAge({lifespan_override:0}),0);
+  assert.equal(calendarDate('31/02/2020'),null);
+  assert.equal(calendarDate('29/02/2020').day,29);
+});
+test('anniversary calendars use independent lunar and solar fields with unknown-date groups', () => {
+  const store=new DataStore();store.loadState({members:[{id:'A',status:'Đã mất',death_date:'15/08 Âm',death_date_solar:'2020-09-03'},{id:'B',status:'Mất sớm'}]});
+  const lunar=LunarCalendarManager.getAnniversariesByMonth(store,'lunar'),solar=LunarCalendarManager.getAnniversariesByMonth(store,'solar');
+  assert.equal(lunar.months[7].items[0].day,15);assert.equal(solar.months[8].items[0].day,3);
+  assert.equal(lunar.unknownItems[0].id,'B');assert.equal(solar.unknownItems[0].id,'B');
 });
