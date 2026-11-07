@@ -1024,9 +1024,9 @@ class App {
         const scope = getExportScope();
         const template = document.getElementById('select-a4-template')?.value || 'card';
         const maxDepth = getExportDepth();
-        const templateLabel = template === 'table' ? 'Bảng Dữ Liệu' : 'Cây Dọc';
+        const templateLabel = template === 'table' ? 'Bảng Dữ Liệu' : 'Cây 2 thế hệ';
         this.showToast(`Đang tạo file PDF A4 (${templateLabel})...`, 'info');
-        Exporter.exportA4PDF(this.canvas, scope, template, maxDepth);
+        return Exporter.exportA4PDF(this.canvas, scope, template, maxDepth);
       };
     }
 
@@ -1038,7 +1038,7 @@ class App {
         const scope = getExportScope();
         const template = document.getElementById('select-a4-template')?.value || 'card';
         const maxDepth = getExportDepth();
-        Exporter.printA4(this.canvas, scope, template, maxDepth);
+        return Exporter.printA4(this.canvas, scope, template, maxDepth);
       };
     }
 
@@ -1050,7 +1050,7 @@ class App {
         const scope = getExportScope();
         const maxDepth = getExportDepth();
         this.showToast('Đang tạo và tải file PDF chất lượng cao...', 'info');
-        Exporter.exportPDF(this.canvas, scope, 'AUTO', maxDepth);
+        return Exporter.exportPDF(this.canvas, scope, 'AUTO', maxDepth);
       };
     }
 
@@ -1061,7 +1061,7 @@ class App {
         modalExport.classList.add('hidden');
         const scope = getExportScope();
         const maxDepth = getExportDepth();
-        Exporter.printTree(this.canvas, scope, maxDepth);
+        return Exporter.printTree(this.canvas, scope, maxDepth);
       };
     }
 
@@ -1070,10 +1070,11 @@ class App {
       const scope = getExportScope();
       const maxDepth = getExportDepth();
       this.showToast('Đang tạo và tải ảnh PNG độ nét cao...', 'info');
-      Exporter.exportPNG(this.canvas, scope, maxDepth);
+      return Exporter.exportPNG(this.canvas, scope, maxDepth);
     };
 
-    document.getElementById('btn-export-svg').onclick = () => {
+    document.getElementById('btn-export-svg').onclick = async () => {
+      await Exporter.ready();
       const scope = getExportScope();
       const maxDepth = getExportDepth();
       Exporter.exportSVG(this.canvas, scope, maxDepth);
@@ -1081,11 +1082,25 @@ class App {
       this.showToast('Đang tải file Vector SVG...', 'success');
     };
 
+    document.getElementById('btn-export-csv').onclick = () => { modalExport.classList.add('hidden'); Exporter.exportCSV(this.canvas,getExportScope(),getExportDepth()); };
+
     document.getElementById('btn-export-json').onclick = () => {
       Exporter.exportJSON(this.dataStore);
       modalExport.classList.add('hidden');
       this.showToast('Đã tải bản sao lưu JSON.', 'success');
     };
+    let exporting = false;
+    for (const button of modalExport.querySelectorAll('button[id^="btn-export-"], #btn-print-a4, #btn-print-tree')) {
+      const action = button.onclick;
+      button.onclick = async () => {
+        if (exporting) return;
+        exporting = true; button.disabled = true;
+        try { await action(); }
+        catch (error) { this.showToast(error.message || 'Không thể xuất gia phả. Vui lòng thử lại.', 'error'); }
+        finally { exporting = false; button.disabled = false; }
+      };
+    }
+
   }
 
   // ─── Share Panel ───────────────────────────────────────────────────────────

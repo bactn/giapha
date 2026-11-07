@@ -12,7 +12,8 @@
     "start": "node scripts/serve.cjs",
     "dev": "node scripts/serve.cjs",
     "be": "node server.js",
-    "generate-excel": "python3 generate_excel.py"
+    "generate-excel": "python3 generate_excel.py",
+    "test:export": "node --experimental-default-type=module --test tests/export-layout.test.mjs"
   },
   "keywords": [
     "genealogy",

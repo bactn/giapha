@@ -21,6 +21,8 @@ jobs:
         run: npm ci
       - name: Test public Supabase configuration
         run: npm run test:supabase
+      - name: Test export pagination
+        run: npm run test:export
       - name: Build Pages assets
         run: npm run build:pages
         env:

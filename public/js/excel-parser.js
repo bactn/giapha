@@ -86,11 +86,14 @@ export class ExcelParser {
       else if (norm.includes('nhanh') || norm.includes('noingoai') || norm.includes('chau')) colMap.branch_type = idx;
       else if (norm.includes('machame') || norm.includes('idcha') || norm.includes('cha') || norm.includes('parent')) colMap.parent_id = idx;
       else if (norm.includes('tenchame') || norm.includes('tencha') || norm.includes('parentname')) colMap.parent_name = idx;
+      else if (norm==='maphoingau') colMap.spouse_id = idx;
+      else if (norm==='thutuanhem') colMap.sibling_order = idx;
+      else if (norm==='huongthotutinh') { /* Derived column; never turn it into an override. */ }
       else if (norm.includes('vochong') || norm.includes('phoingau') || norm.includes('spouse')) colMap.spouse = idx;
       else if (norm.includes('matduonglich') || norm.includes('matdl') || norm==='deathdatesolar') colMap.death_date_solar = idx;
       else if (norm.includes('huongtho') || norm==='lifespanoverride') colMap.lifespan_override = idx;
       else if (norm.includes('ngaysinh') || norm.includes('namsinh') || norm.includes('sinh')) colMap.birth_date = idx;
-      else if (norm.includes('ngaymat') || norm.includes('nammat') || norm.includes('gioal') || norm.includes('mat')) colMap.death_date = idx;
+      else if (norm.includes('ngaymat') || norm.includes('nammat') || norm.includes('gioal') || norm.includes('gioamlich') || norm.includes('mat')) colMap.death_date = idx;
       else if (norm.includes('trangthai') || norm.includes('tinhtrang')) colMap.status = idx;
       else if (norm.includes('vaitro') || norm.includes('danhhieu') || norm.includes('vịtri')) colMap.role = idx;
       else if (norm.includes('ghichu') || norm.includes('thongtin')) colMap.notes = idx;
@@ -151,7 +154,7 @@ export class ExcelParser {
       let status = getVal('status');
       let deathDate = getVal('death_date');
       if (!status) {
-        if (deathDate || notes.toLowerCase().includes('đã chết') || notes.toLowerCase().includes('mất')) {
+        if (deathDate || getVal('death_date_solar') || notes.toLowerCase().includes('đã chết') || notes.toLowerCase().includes('mất')) {
           status = (notes.toLowerCase().includes('sớm') || notes.toLowerCase().includes('nhỏ')) ? 'Mất sớm' : 'Đã mất';
         } else {
           status = 'Còn sống';
@@ -179,6 +182,8 @@ export class ExcelParser {
         parent_id: getVal('parent_id') || '-',
         parent_name: getVal('parent_name') || '',
         spouse,
+        spouse_id: getVal('spouse_id'),
+        ...(getVal('sibling_order') !== '' && Number.isFinite(Number(getVal('sibling_order'))) ? { sibling_order: Number(getVal('sibling_order')) } : {}),
         birth_date: getVal('birth_date'),
         death_date: deathDate,
         death_date_solar: getVal('death_date_solar'),

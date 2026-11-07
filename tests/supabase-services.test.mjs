@@ -177,7 +177,7 @@ test('SVG export retains avatar and date/spouse labels while escaping member nam
   try { Exporter.exportSVG({dataStore:store,layout:new AutoLayout()}); } finally { Exporter.downloadBlob=old; }
   const text=await blob.text();
   assert.match(text,/Avatar nam/); assert.match(text,/Avatar nữ/);
-  assert.match(text,/SN 1990 - Mất sớm/); assert.match(text,/Vợ: B &amp; C/);
+  assert.match(text,/SN 1990/); assert.match(text,/Mất sớm/); assert.match(text,/Hưởng thọ chưa rõ/); assert.match(text,/Vợ: B &amp; C/);
   assert.match(text,/A &lt;script&gt;/); assert(!text.includes('<script>'));
 });
 

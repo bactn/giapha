@@ -245,17 +245,17 @@ var DataStore = class {
     if (this.members.has(id)) throw new Error("M\xE3 th\xE0nh vi\xEAn \u0111\xE3 t\u1ED3n t\u1EA1i. Kh\xF4ng th\u1EC3 ghi \u0111\xE8 th\xE0nh vi\xEAn c\u0169.");
     if (memberData.parent_id && memberData.parent_id !== "-" && !this.members.has(memberData.parent_id)) throw new Error("Kh\xF4ng t\xECm th\u1EA5y b\u1ED1/m\u1EB9 \u0111\xE3 ch\u1ECDn.");
     this.recordSnapshot();
-    let generation = memberData.generation;
-    if (!generation && memberData.parent_id && this.members.has(memberData.parent_id)) {
+    let generation2 = memberData.generation;
+    if (!generation2 && memberData.parent_id && this.members.has(memberData.parent_id)) {
       const parent = this.members.get(memberData.parent_id);
-      generation = (parseInt(parent.generation, 10) || 1) + 1;
+      generation2 = (parseInt(parent.generation, 10) || 1) + 1;
     }
     const newMember = {
       id,
       christian_name: memberData.christian_name || "",
       full_name: memberData.full_name || "Ng\u01B0\u1EDDi M\u1EDBi",
       gender: memberData.gender || "Nam",
-      generation: String(generation || 1),
+      generation: String(generation2 || 1),
       branch: memberData.branch || "Chi 1",
       branch_type: memberData.branch_type || "N\u1ED9i t\u1ED9c (Tr\u1EF1c h\u1EC7)",
       parent_id: memberData.parent_id || "-",
@@ -708,36 +708,6 @@ function avatarSVG(gender) {
     <ellipse cx="24" cy="21" rx="9" ry="12" fill="#f4c9a8"/>
     <path d="${female ? "M14 21V18a10 11 0 0 1 20 0v7c-2-7-7-7-10-13-1 5-5 8-10 9Z" : "M14 22V17a10 10 0 0 1 20 0v6l-3-7c-5 2-9 0-12-2l-2 8Z"}" fill="#65453d"/>
     <circle cx="21" cy="23" r=".8" fill="#65453d"/><circle cx="28" cy="23" r=".8" fill="#65453d"/><path d="M21 28q3 2 6 0" fill="none" stroke="#ba7863" stroke-linecap="round"/></svg>`;
-}
-function drawAvatar(ctx, gender, cx, cy, radius) {
-  const female = gender === "N\u1EEF";
-  ctx.save();
-  ctx.translate(cx - radius, cy - radius);
-  ctx.scale(radius / 24, radius / 24);
-  ctx.beginPath();
-  ctx.arc(24, 24, 24, 0, Math.PI * 2);
-  ctx.clip();
-  ctx.fillStyle = female ? "#ffe4e6" : "#dbeafe";
-  ctx.fillRect(0, 0, 48, 48);
-  ctx.fillStyle = "#65453d";
-  if (female) ctx.fillRect(12, 16, 24, 23);
-  ctx.fillStyle = female ? "#be4567" : "#426ba3";
-  ctx.beginPath();
-  ctx.ellipse(24, 47, 19, 16, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#f4c9a8";
-  ctx.beginPath();
-  ctx.ellipse(24, 22, 9, 12, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.fillStyle = "#65453d";
-  ctx.beginPath();
-  ctx.ellipse(24, 14, 10, 6, 0, Math.PI, Math.PI * 2);
-  ctx.lineTo(34, 21);
-  ctx.lineTo(29, 15);
-  ctx.lineTo(17, 18);
-  ctx.lineTo(14, 23);
-  ctx.fill();
-  ctx.restore();
 }
 
 // dist/js/tree-canvas.js
@@ -1672,11 +1642,14 @@ var ExcelParser = class {
       else if (norm.includes("nhanh") || norm.includes("noingoai") || norm.includes("chau")) colMap.branch_type = idx;
       else if (norm.includes("machame") || norm.includes("idcha") || norm.includes("cha") || norm.includes("parent")) colMap.parent_id = idx;
       else if (norm.includes("tenchame") || norm.includes("tencha") || norm.includes("parentname")) colMap.parent_name = idx;
-      else if (norm.includes("vochong") || norm.includes("phoingau") || norm.includes("spouse")) colMap.spouse = idx;
+      else if (norm === "maphoingau") colMap.spouse_id = idx;
+      else if (norm === "thutuanhem") colMap.sibling_order = idx;
+      else if (norm === "huongthotutinh") {
+      } else if (norm.includes("vochong") || norm.includes("phoingau") || norm.includes("spouse")) colMap.spouse = idx;
       else if (norm.includes("matduonglich") || norm.includes("matdl") || norm === "deathdatesolar") colMap.death_date_solar = idx;
       else if (norm.includes("huongtho") || norm === "lifespanoverride") colMap.lifespan_override = idx;
       else if (norm.includes("ngaysinh") || norm.includes("namsinh") || norm.includes("sinh")) colMap.birth_date = idx;
-      else if (norm.includes("ngaymat") || norm.includes("nammat") || norm.includes("gioal") || norm.includes("mat")) colMap.death_date = idx;
+      else if (norm.includes("ngaymat") || norm.includes("nammat") || norm.includes("gioal") || norm.includes("gioamlich") || norm.includes("mat")) colMap.death_date = idx;
       else if (norm.includes("trangthai") || norm.includes("tinhtrang")) colMap.status = idx;
       else if (norm.includes("vaitro") || norm.includes("danhhieu") || norm.includes("v\u1ECBtri")) colMap.role = idx;
       else if (norm.includes("ghichu") || norm.includes("thongtin")) colMap.notes = idx;
@@ -1724,7 +1697,7 @@ var ExcelParser = class {
       let status = getVal("status");
       let deathDate = getVal("death_date");
       if (!status) {
-        if (deathDate || notes.toLowerCase().includes("\u0111\xE3 ch\u1EBFt") || notes.toLowerCase().includes("m\u1EA5t")) {
+        if (deathDate || getVal("death_date_solar") || notes.toLowerCase().includes("\u0111\xE3 ch\u1EBFt") || notes.toLowerCase().includes("m\u1EA5t")) {
           status = notes.toLowerCase().includes("s\u1EDBm") || notes.toLowerCase().includes("nh\u1ECF") ? "M\u1EA5t s\u1EDBm" : "\u0110\xE3 m\u1EA5t";
         } else {
           status = "C\xF2n s\u1ED1ng";
@@ -1749,6 +1722,8 @@ var ExcelParser = class {
         parent_id: getVal("parent_id") || "-",
         parent_name: getVal("parent_name") || "",
         spouse,
+        spouse_id: getVal("spouse_id"),
+        ...getVal("sibling_order") !== "" && Number.isFinite(Number(getVal("sibling_order"))) ? { sibling_order: Number(getVal("sibling_order")) } : {},
         birth_date: getVal("birth_date"),
         death_date: deathDate,
         death_date_solar: getVal("death_date_solar"),
@@ -1986,1076 +1961,486 @@ var LunarCalendarManager = class {
   }
 };
 
-// dist/js/export.js
-function spouseCaption(member, store) {
+// dist/js/export-layout.js
+var A4 = Object.freeze({ w: 297 * 72 / 25.4, h: 210 * 72 / 25.4 });
+var PAGE = Object.freeze({ left: 34, right: 34, top: 88, bottom: 38, gap: 18, cardWidth: 240, connectorGap: 28, blockGap: 20 });
+var known = (value) => {
+  const text = String(value ?? "").trim();
+  return /^(?:[-?–—]+|không rõ|chưa rõ|unknown|null)$/i.test(text) ? "" : text;
+};
+var generation = (m) => Number.parseInt(m.generation, 10) || 1;
+function exportFields(member, store) {
+  const birth = known(member.birth_date).replace(/^SN\s*/i, "");
+  const solar = known(member.death_date_solar);
+  const lunar = known(member.death_date);
+  const died = solar || lunar || ["\u0110\xE3 m\u1EA5t", "M\u1EA5t s\u1EDBm"].includes(member.status);
+  const age = lifespanAge(member);
   const partner = store?.getSpouseMember(member.id);
-  const name = partner?.full_name || member.spouse;
-  return name ? `${spouseRole(member, partner)}: ${name}` : "";
+  const spouse = partner?.full_name || member.spouse;
+  return [
+    { kind: "badge", text: `\u0110\u1EDDi ${generation(member)} \xB7 ${member.id}${member.branch ? " \xB7 " + member.branch : ""}` },
+    ...known(member.christian_name) ? [{ kind: "saint", text: member.christian_name }] : [],
+    { kind: "name", text: member.full_name || "Ch\u01B0a r\xF5 t\xEAn" },
+    ...birth ? [{ kind: "detail", text: `SN ${birth}` }] : [],
+    ...solar ? [{ kind: "detail", text: `M\u1EA5t ${solar} (DL)` }] : [],
+    ...lunar && !/^(?:mất sớm|đã mất|mất)$/i.test(lunar) ? [{ kind: "detail", text: `Gi\u1ED7 ${lunar.replace(/\s*(?:âm lịch|âm|ÂL)$/i, "")} (\xC2L)` }] : [],
+    ...!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: "detail", text: member.status === "M\u1EA5t s\u1EDBm" || /^mất sớm$/i.test(lunar) ? "M\u1EA5t s\u1EDBm" : "M\u1EA5t: ch\u01B0a r\xF5 ng\xE0y" }] : [],
+    ...died ? [{ kind: "detail", text: `H\u01B0\u1EDFng th\u1ECD ${age === null ? "ch\u01B0a r\xF5" : age + " tu\u1ED5i"}` }] : [],
+    ...spouse ? [{ kind: "detail", text: `${spouseRole(member, partner)}: ${spouse}` }] : [],
+    ...member.role && member.role !== "Th\xE0nh vi\xEAn" ? [{ kind: "detail", text: member.role }] : []
+  ];
 }
+function scopedMembers(tree, scope = "ALL", maxDepth = 0) {
+  const store = tree.dataStore;
+  let members = store.getAllMembers();
+  if (scope === "CURRENT_VIEW") {
+    const ids = new Set(tree.layoutData?.positions.keys() || []);
+    members = members.filter((m) => ids.has(m.id));
+  } else if (scope.startsWith("SUBTREE:")) {
+    const root = scope.slice(8);
+    if (!store.getMember(root)) return [];
+    const ids = store.getDescendants(root);
+    ids.add(root);
+    for (const id of [...ids]) {
+      const spouse = store.getSpouseMember(id);
+      if (spouse) ids.add(spouse.id);
+    }
+    members = members.filter((m) => ids.has(m.id));
+  } else if (scope === "Chi 1" || scope === "Chi 2") {
+    members = members.filter((m) => m.branch === scope || m.branch === "Ng\xE0nh II");
+  } else if (scope === "PATERNAL_ONLY") members = members.filter((m) => m.branch_type?.includes("N\u1ED9i t\u1ED9c"));
+  else if (scope === "MATERNAL_ONLY") members = members.filter((m) => m.branch_type?.includes("Ngo\u1EA1i t\u1ED9c"));
+  if (maxDepth > 0 && members.length) {
+    const first = Math.min(...members.map(generation));
+    members = members.filter((m) => generation(m) - first < maxDepth);
+  }
+  return [...members].sort((a, b) => generation(a) - generation(b) || compareSiblings(a, b));
+}
+function wrapText(text, width, measure) {
+  const lines = [];
+  let line = "";
+  for (const word of String(text).split(/\s+/).filter(Boolean)) {
+    const candidate = line ? line + " " + word : word;
+    if (measure(candidate) <= width) {
+      line = candidate;
+      continue;
+    }
+    if (line) {
+      lines.push(line);
+      line = "";
+    }
+    for (const char of word) {
+      if (line && measure(line + char) > width) {
+        lines.push(line);
+        line = "";
+      }
+      line += char;
+    }
+  }
+  if (line) lines.push(line);
+  return lines;
+}
+var fontFor = (kind) => kind === "name" ? { size: 12, weight: "bold", line: 15 } : kind === "badge" ? { size: 8, weight: "bold", line: 11 } : { size: 9, weight: kind === "saint" ? "bold" : "normal", line: 12 };
+function measureCard(member, store, width, measure) {
+  const textWidth = width - 68;
+  const lines = exportFields(member, store).flatMap((field) => {
+    const style = fontFor(field.kind);
+    return wrapText(field.text, textWidth, (text) => measure(text, style)).map((text) => ({ text, kind: field.kind, ...style }));
+  });
+  return { member, width, height: Math.max(88, 22 + lines.reduce((h, l) => h + l.line, 0)), lines };
+}
+function planA4(members, store, measure) {
+  if (!members.length) return [];
+  const usableW = A4.w - PAGE.left - PAGE.right;
+  const columns = Math.floor((usableW + PAGE.gap) / (PAGE.cardWidth + PAGE.gap));
+  const cardW = (usableW - (columns - 1) * PAGE.gap) / columns;
+  const cards = new Map(members.map((m) => [m.id, measureCard(m, store, cardW, measure)]));
+  const groups = /* @__PURE__ */ new Map();
+  const covered = /* @__PURE__ */ new Set();
+  const firstGen = Math.min(...members.map(generation));
+  const add = (pair, block) => {
+    const key = pair.join(":");
+    if (!groups.has(key)) groups.set(key, { pair, blocks: [] });
+    groups.get(key).blocks.push(block);
+  };
+  for (const parent of members) {
+    const children = members.filter((m) => m.parent_id === parent.id).sort(compareSiblings);
+    const childGens = [...new Set(children.map(generation))].sort((a, b) => a - b);
+    for (const childGen of childGens) {
+      const rowChildren = children.filter((m) => generation(m) === childGen);
+      for (let i = 0; i < rowChildren.length; i += columns) {
+        const row = rowChildren.slice(i, i + columns).map((m) => cards.get(m.id));
+        add([generation(parent), childGen], { parent: cards.get(parent.id), children: row, continued: i > 0, repeated: members.some((m) => m.id === parent.parent_id), branch: parent.branch || "" });
+        covered.add(parent.id);
+        row.forEach((c) => covered.add(c.member.id));
+      }
+    }
+  }
+  const solos = /* @__PURE__ */ new Map();
+  for (const member of members) if (!covered.has(member.id)) {
+    const gen = generation(member);
+    const key = Math.max(firstGen, gen - 1);
+    if (!solos.has(key)) solos.set(key, []);
+    solos.get(key).push(cards.get(member.id));
+  }
+  for (const [gen, list] of solos) for (let i = 0; i < list.length; i += columns) {
+    add([gen, gen === firstGen && members.every((m) => generation(m) === gen) ? gen : gen + 1], { parent: null, children: list.slice(i, i + columns), continued: false, branch: "" });
+  }
+  const pages = [];
+  for (const group of [...groups.values()].sort((a, b) => a.pair[0] - b.pair[0] || a.pair[1] - b.pair[1])) {
+    let page;
+    let cursor;
+    for (const block of group.blocks) {
+      const rowH = Math.max(...block.children.map((c) => c.height));
+      const height = (block.parent ? block.parent.height + PAGE.connectorGap : 0) + rowH;
+      if (height > A4.h - PAGE.bottom - PAGE.top) throw new Error(`Th\xF4ng tin c\u1EE7a ${block.parent?.member.full_name || block.children[0].member.full_name} qu\xE1 d\xE0i cho m\u1ED9t c\xE2y A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
+      if (!page || cursor + height > A4.h - PAGE.bottom) {
+        page = { pair: group.pair, blocks: [], nodes: [], paths: [] };
+        pages.push(page);
+        cursor = PAGE.top;
+      }
+      const rowW = block.children.length * cardW + (block.children.length - 1) * PAGE.gap;
+      const startX = (A4.w - rowW) / 2;
+      let childY = cursor;
+      const nodes = [];
+      if (block.parent) {
+        const parent = { ...block.parent, x: (A4.w - cardW) / 2, y: cursor, continued: block.continued, repeated: block.repeated };
+        nodes.push(parent);
+        childY += parent.height + PAGE.connectorGap;
+        for (let i = 0; i < block.children.length; i++) {
+          const cx = startX + i * (cardW + PAGE.gap) + cardW / 2;
+          const sx = parent.x + cardW / 2, sy = parent.y + parent.height, mid = sy + PAGE.connectorGap / 2;
+          page.paths.push({ parentId: parent.member.id, childId: block.children[i].member.id, points: [[sx, sy], [sx, mid], [cx, mid], [cx, childY]] });
+        }
+      }
+      block.children.forEach((card, i) => nodes.push({ ...card, x: startX + i * (cardW + PAGE.gap), y: childY }));
+      page.blocks.push({ ...block, y: cursor, height });
+      page.nodes.push(...nodes);
+      cursor += height + PAGE.blockGap;
+    }
+  }
+  return pages;
+}
+function planTable(members, store, measure) {
+  const widths = [42, 188, 180, 68, 190, A4.w - PAGE.left - PAGE.right - 668];
+  const headings = ["\u0110\u1EDDi / ID", "T\xEAn th\xE1nh / H\u1ECD t\xEAn", "Ng\xE0y sinh / Ng\xE0y m\u1EA5t", "H\u01B0\u1EDFng th\u1ECD", "V\u1EE3 / Ch\u1ED3ng", "Chi / Vai tr\xF2"];
+  const pages = [];
+  let page;
+  let y;
+  for (const member of members) {
+    const fields = exportFields(member, store);
+    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}
+${member.id}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), fields.find((f) => f.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text.replace("H\u01B0\u1EDFng th\u1ECD ", "") || "", fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role].filter(Boolean).join("\n")];
+    const cells = texts.map((text, i) => text.split("\n").flatMap((t) => wrapText(t, widths[i] - 12, (s) => measure(s, { size: 9, weight: "normal" }))));
+    const height = Math.max(34, 12 + Math.max(...cells.map((c) => c.length)) * 12);
+    if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Th\xF4ng tin c\u1EE7a ${member.full_name} qu\xE1 d\xE0i cho m\u1ED9t h\xE0ng A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
+    if (!page || y + height > A4.h - PAGE.bottom) {
+      page = { headings, widths, rows: [] };
+      pages.push(page);
+      y = PAGE.top + 28;
+    }
+    page.rows.push({ member, cells, y, height });
+    y += height;
+  }
+  return pages;
+}
+
+// dist/js/export.js
+var FONT = "Arial, Helvetica, sans-serif";
+var xml = (value) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+var pathString = (points) => points.map(([x, y], i) => `${i ? "L" : "M"} ${x} ${y}`).join(" ");
 var Exporter = class {
-  // A4 dimensions in points (72pt = 1 inch): 595 x 842 (portrait), 842 x 595 (landscape)
-  static A4 = {
-    portrait: { w: 595, h: 842 },
-    landscape: { w: 842, h: 595 }
-  };
-  // A4 layout config: margins and node sizing for A4 landscape - Compact Card
-  static A4_CONFIG_CARD = {
-    marginTop: 40,
-    marginBottom: 30,
-    marginLeft: 20,
-    marginRight: 20,
-    nodeWidth: 110,
-    nodeHeight: 36,
-    siblingGap: 4,
-    generationGap: 46
-  };
-  // A4 layout config: Table-style rendering (no tree, just data rows) - Portrait
-  static A4_CONFIG_TABLE = {
-    marginTop: 35,
-    marginBottom: 25,
-    marginLeft: 20,
-    marginRight: 20,
-    rowHeight: 16,
-    headerHeight: 18,
-    fontSize: 8
-  };
-  static getExportLayout(treeCanvas, scope = "ALL", maxDepth = 0) {
-    const dataStore = treeCanvas.dataStore;
-    const layoutEngine = treeCanvas.layout;
-    if (scope === "CURRENT_VIEW") {
-      return treeCanvas.layoutData;
+  static A4 = { landscape: A4, portrait: { w: A4.h, h: A4.w } };
+  static async ready() {
+    if (typeof document !== "undefined" && document.fonts) {
+      await Promise.all([document.fonts.load(`9px ${FONT}`), document.fonts.load(`bold 12px ${FONT}`)]);
+      await document.fonts.ready;
     }
-    return layoutEngine.calculateLayout(dataStore, scope, maxDepth);
   }
-  // Create a vertical (top-to-bottom) layout optimized for A4 portrait
-  static getA4VerticalLayout(treeCanvas, scope = "ALL", maxDepth = 0) {
-    const dataStore = treeCanvas.dataStore;
-    const cfg = this.A4_CONFIG_CARD;
-    const layoutEngine = new treeCanvas.layout.constructor({
-      nodeWidth: cfg.nodeWidth,
-      nodeHeight: cfg.nodeHeight,
-      siblingGap: cfg.siblingGap,
-      generationGap: cfg.generationGap,
-      orientation: "VERTICAL"
-    });
-    return layoutEngine.calculateLayout(dataStore, scope, maxDepth);
+  static measurer() {
+    const ctx = typeof document === "undefined" ? null : document.createElement("canvas").getContext("2d");
+    return (text, style) => {
+      if (!ctx) return [...text].length * style.size * 0.62;
+      ctx.font = `${style.weight} ${style.size}px ${FONT}`;
+      return ctx.measureText(text).width;
+    };
   }
-  // Paginate layout positions for A4 landscape pages (Card layout)
-  // Uses landscape to accommodate wide generations, splits by height
-  static paginateForA4(layout, cfg = this.A4_CONFIG_CARD) {
-    if (!layout || !layout.bounds || layout.positions.size === 0) return [];
-    const pageW = this.A4.landscape.w - cfg.marginLeft - cfg.marginRight;
-    const pageH = this.A4.landscape.h - cfg.marginTop - cfg.marginBottom;
-    const genGroups = /* @__PURE__ */ new Map();
-    for (const [id, pos] of layout.positions.entries()) {
-      const gen = pos.member.generation;
-      if (!genGroups.has(gen)) genGroups.set(gen, []);
-      genGroups.get(gen).push({ id, pos, member: pos.member });
-    }
-    const sortedGens = Array.from(genGroups.keys()).sort((a, b) => parseInt(a) - parseInt(b));
-    const pages = [];
-    let currentPage = { members: [], links: [], maxY: cfg.marginTop };
-    let currentGenIdx = 0;
-    while (currentGenIdx < sortedGens.length) {
-      const gen = sortedGens[currentGenIdx];
-      const members = genGroups.get(gen);
-      const genHeight = cfg.nodeHeight;
-      if (currentPage.members.length > 0 && currentPage.maxY + cfg.generationGap + genHeight > pageH + cfg.marginTop) {
-        pages.push(currentPage);
-        currentPage = { members: [], links: [], maxY: cfg.marginTop };
-      }
-      for (const m of members) {
-        currentPage.members.push(m);
-      }
-      if (currentPage.members.length > 0 && currentGenIdx > 0) {
-        const prevGen = sortedGens[currentGenIdx - 1];
-        const prevMembers = genGroups.get(prevGen);
-        for (const link of layout.links) {
-          const parentInPrev = prevMembers.some((pm) => pm.id === link.parent_id);
-          const childInCurr = members.some((cm) => cm.id === link.child_id);
-          if (parentInPrev && childInCurr) {
-            currentPage.links.push(link);
-          }
-        }
-      }
-      currentPage.maxY += cfg.generationGap + genHeight;
-      currentGenIdx++;
-    }
-    if (currentPage.members.length > 0) {
-      pages.push(currentPage);
-    }
-    return pages;
+  static getScopeTitle(store, scope = "ALL") {
+    const labels = { ALL: "To\xE0n b\u1ED9 d\xF2ng h\u1ECD", CURRENT_VIEW: "C\xE1c th\xE0nh vi\xEAn \u0111ang hi\u1EC3n th\u1ECB", "Chi 1": "Chi 1", "Chi 2": "Chi 2", PATERNAL_ONLY: "Nh\xE1nh n\u1ED9i t\u1ED9c", MATERNAL_ONLY: "Nh\xE1nh ngo\u1EA1i t\u1ED9c" };
+    return labels[scope] || (scope.startsWith("SUBTREE:") ? `Nh\xE1nh ${store.getMember(scope.slice(8))?.full_name || scope.slice(8)}` : "C\xE2y gia ph\u1EA3");
   }
-  // Paginate for table-style A4 layout (simple row-based pagination) - Landscape
-  static paginateForA4Table(dataStore, scope = "ALL", maxDepth = 0) {
-    const allMembers = dataStore.getAllMembers();
-    let visibleMembers = allMembers;
-    if (typeof scope === "string" && scope.startsWith("SUBTREE:")) {
-      const rootId = scope.split(":")[1];
-      const rootMember = dataStore.getMember(rootId);
-      if (rootMember) {
-        const descendants = dataStore.getDescendants(rootId);
-        descendants.add(rootId);
-        visibleMembers = allMembers.filter((m) => descendants.has(m.id));
-      }
-    } else if (scope === "Chi 1") {
-      visibleMembers = allMembers.filter((m) => m.branch === "Chi 1" || m.branch === "Ng\xE0nh II");
-    } else if (scope === "Chi 2") {
-      visibleMembers = allMembers.filter((m) => m.branch === "Chi 2" || m.branch === "Ng\xE0nh II");
-    } else if (scope === "PATERNAL_ONLY") {
-      visibleMembers = allMembers.filter((m) => m.branch_type && m.branch_type.includes("N\u1ED9i t\u1ED9c"));
-    } else if (scope === "MATERNAL_ONLY") {
-      visibleMembers = allMembers.filter((m) => m.branch_type && m.branch_type.includes("Ngo\u1EA1i t\u1ED9c"));
-    }
-    if (maxDepth > 0) {
-      let minGen = Infinity;
-      for (const m of visibleMembers) {
-        const g = parseInt(m.generation, 10);
-        if (!isNaN(g) && g < minGen) minGen = g;
-      }
-      if (minGen === Infinity) minGen = 1;
-      visibleMembers = visibleMembers.filter((m) => {
-        const g = parseInt(m.generation, 10);
-        return !isNaN(g) && g - minGen + 1 <= maxDepth;
+  static getExportLayout(tree, scope = "ALL", maxDepth = 0) {
+    const members = scopedMembers(tree, scope, maxDepth);
+    const measure = this.measurer();
+    const width = 280;
+    const cards = new Map(members.map((m) => [m.id, measureCard(m, tree.dataStore, width, measure)]));
+    const height = Math.max(100, ...[...cards.values()].map((c) => c.height));
+    const layout = new AutoLayout({ nodeWidth: width, nodeHeight: height, generationGap: 70, siblingGap: 24, orientation: "VERTICAL" }).calculateLayout({ getAllMembers: () => members }, "ALL");
+    return { ...layout, cards, nodeWidth: width, nodeHeight: height };
+  }
+  static a4Pages(tree, scope = "ALL", template = "card", maxDepth = 0) {
+    const members = scopedMembers(tree, scope, maxDepth);
+    const measure = this.measurer();
+    return template === "table" ? planTable(members, tree.dataStore, measure) : planA4(members, tree.dataStore, measure);
+  }
+  static cardSVG(card) {
+    const { x = 0, y = 0, width, height, member, lines } = card;
+    let cursor = y + 17;
+    const text = lines.map((line) => {
+      const fill = line.kind === "badge" || line.kind === "saint" ? "#92400e" : line.kind === "name" ? "#292524" : "#57534e";
+      const value = `<text x="${x + 58}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
+      cursor += line.line;
+      return value;
+    }).join("");
+    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued || card.repeated || member.role === "\u0110\xEDch T\xF4n" ? "#d97706" : "#a8a29e"}" stroke-width="${card.continued || card.repeated ? 1.5 : 0.8}"/>${avatarSVG(member.gender).replace("<svg ", `<svg x="${x + 10}" y="${y + 30}" width="36" height="36" `)}${text}</g>`;
+  }
+  static headerSVG(tree, scope, width, pair = null) {
+    const measure = this.measurer();
+    const title = wrapText(tree.dataStore.lineageInfo.name || "Gia ph\u1EA3 d\xF2ng h\u1ECD", width - 68, (s) => measure(s, { size: 18, weight: "bold" }));
+    const titleLines = title.slice(0, 2);
+    const titleText = titleLines.map((t, i) => `<text x="${width / 2}" y="${27 + i * 20}" text-anchor="middle" font-size="18" font-weight="bold" fill="#78350f">${xml(t)}</text>`).join("");
+    const caption = pair ? pair[0] === pair[1] ? `\u0110\u1EDDi ${pair[0]}` : `\u0110\u1EDDi ${pair[0]}\u2013${pair[1]}` : this.getScopeTitle(tree.dataStore, scope);
+    return `${titleText}<text x="${width / 2}" y="66" text-anchor="middle" font-size="10" fill="#92400e">${xml(caption)}</text><path d="M 34 76 H ${width - 34}" stroke="#d97706" stroke-width="1"/>`;
+  }
+  static a4PageSVG(tree, page, index, total, scope = "ALL", template = "card") {
+    let body = "";
+    if (template === "table") {
+      let x = PAGE.left;
+      body += `<rect x="${x}" y="${PAGE.top}" width="${A4.w - PAGE.left - PAGE.right}" height="28" fill="#fef3c7"/>`;
+      page.headings.forEach((label, i) => {
+        body += `<text x="${x + 6}" y="${PAGE.top + 17}" font-size="9" font-weight="bold">${xml(label)}</text>`;
+        x += page.widths[i];
       });
+      page.rows.forEach((row, r) => {
+        body += `<rect x="${PAGE.left}" y="${row.y}" width="${A4.w - PAGE.left - PAGE.right}" height="${row.height}" fill="${r % 2 ? "#fff" : "#fafaf9"}" stroke="#e7e5e4" stroke-width=".4"/>`;
+        let cx = PAGE.left;
+        row.cells.forEach((lines, i) => {
+          lines.forEach((line, j) => {
+            body += `<text x="${cx + 6}" y="${row.y + 15 + j * 12}" font-size="9" fill="#292524">${xml(line)}</text>`;
+          });
+          cx += page.widths[i];
+        });
+      });
+    } else {
+      body = page.paths.map((p) => `<path data-parent="${xml(p.parentId)}" data-child="${xml(p.childId)}" d="${pathString(p.points)}" fill="none" stroke="#44403c" stroke-width="1"/>`).join("");
+      body += page.nodes.map((card) => this.cardSVG(card)).join("");
     }
-    visibleMembers.sort((a, b) => {
-      const genDiff = (parseInt(a.generation, 10) || 1) - (parseInt(b.generation, 10) || 1);
-      if (genDiff !== 0) return genDiff;
-      return a.id.localeCompare(b.id);
-    });
-    const cfg = this.A4_CONFIG_TABLE;
-    const pageH = this.A4.landscape.h - cfg.marginTop - cfg.marginBottom;
-    const usableH = pageH - cfg.headerHeight;
-    const rowsPerPage = Math.floor(usableH / cfg.rowHeight);
-    const pages = [];
-    for (let i = 0; i < visibleMembers.length; i += rowsPerPage) {
-      pages.push(visibleMembers.slice(i, i + rowsPerPage));
-    }
-    return pages;
+    const continued = template === "card" && page.nodes.some((n) => n.continued || n.repeated);
+    const footer = `Trang ${index}/${total}${page.pair ? ` \xB7 \u0110\u1EDDi ${page.pair.join("\u2013")}` : ""}${continued ? " \xB7 L\u1EB7p l\u1EA1i cha/m\u1EB9 \u0111\u1EC3 n\u1ED1i ti\u1EBFp c\xE2y" : ""}`;
+    return this.svgDocument(A4.w, A4.h, `${this.headerSVG(tree, scope, A4.w, page.pair)}${body}<path d="M 34 ${A4.h - 27} H ${A4.w - 34}" stroke="#d97706" stroke-width=".8"/><text x="${A4.w / 2}" y="${A4.h - 13}" text-anchor="middle" font-size="8" fill="#78716c">${xml(footer)}</text>`);
   }
-  static getScopeTitle(dataStore, scope = "ALL") {
-    if (scope === "ALL") return "To\xE0n B\u1ED9 D\xF2ng H\u1ECD";
-    if (scope === "Chi 1") return "Chi 1 (Th\u01B0\u1EE3ng Chi - Nh\xE1nh C\u1EE5 Tr\u1EA7n Ng\u1ECDc Thanh)";
-    if (scope === "Chi 2") return "Chi 2 (H\u1EA1 Chi - Nh\xE1nh C\u1EE5 Tr\u1EA7n Ng\u1ECDc Ph\xFAc)";
-    if (scope === "PATERNAL_ONLY") return "Nh\xE1nh N\u1ED9i T\u1ED9c (H\u1ECD Tr\u1EA7n)";
-    if (scope === "MATERNAL_ONLY") return "Nh\xE1nh Ngo\u1EA1i T\u1ED9c (Ch\xE1u Ngo\u1EA1i)";
-    if (scope.startsWith("SUBTREE:")) {
-      const id = scope.split(":")[1];
-      const m = dataStore.getMember(id);
-      return m ? `Nh\xE1nh C\u1EE5 ${m.full_name} (${m.id})` : "C\xE0nh Nh\xE1nh Ri\xEAng";
-    }
-    return "B\u1EA3n \u0110\u1ED3 C\xE2y Gia Ph\u1EA3";
+  static svgDocument(width, height, body) {
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>text{font-family:${FONT};}</style><rect width="100%" height="100%" fill="#fff"/>${body}</svg>`;
   }
-  // 1. Direct Canvas 2D Drawing Engine (100% Reliable, never fails on XML/SVG parsing)
-  static renderToCanvas2D(treeCanvas, scope = "ALL", scale = 2, maxDepth = 0) {
-    const layout = this.getExportLayout(treeCanvas, scope, maxDepth);
-    if (!layout || !layout.bounds || layout.positions.size === 0) {
-      alert("Kh\xF4ng c\xF3 th\xE0nh vi\xEAn n\xE0o trong c\xE0nh nh\xE1nh \u0111\xE3 ch\u1ECDn \u0111\u1EC3 xu\u1EA5t.");
-      return null;
-    }
-    const { minX, minY, width, height } = layout.bounds;
-    const padding = 80;
-    const headerHeight = 120;
-    const baseWidth = Math.max(1e3, width + padding * 2);
-    const baseHeight = Math.max(700, height + padding * 2 + headerHeight);
-    const targetScale = Math.min(scale, 9e3 / baseWidth);
-    const canvas = document.createElement("canvas");
-    canvas.width = Math.round(baseWidth * targetScale);
-    canvas.height = Math.round(baseHeight * targetScale);
-    const ctx = canvas.getContext("2d");
-    ctx.scale(targetScale, targetScale);
-    ctx.fillStyle = "#f8fafc";
-    ctx.fillRect(0, 0, baseWidth, baseHeight);
-    ctx.fillStyle = "#cbd5e1";
-    for (let x = 20; x < baseWidth; x += 26) {
-      for (let y = 20; y < baseHeight; y += 26) {
-        ctx.beginPath();
-        ctx.arc(x, y, 1, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-    const lineageName = treeCanvas.dataStore.lineageInfo.name || "Gia Ph\u1EA3 D\xF2ng H\u1ECD";
-    const scopeLabel = this.getScopeTitle(treeCanvas.dataStore, scope);
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#0f172a";
-    ctx.font = 'bold 28px "Playfair Display", Georgia, serif';
-    ctx.fillText(lineageName, baseWidth / 2, 50);
-    ctx.fillStyle = "#b45309";
-    ctx.font = 'bold 16px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`\u2022 ${scopeLabel} \u2022`, baseWidth / 2, 78);
-    ctx.fillStyle = "#64748b";
-    ctx.font = '13px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`S\u1ED1 l\u01B0\u1EE3ng: ${layout.positions.size} th\xE0nh vi\xEAn \u2022 B\u1EA3n v\u1EBD xu\u1EA5t ng\xE0y ${(/* @__PURE__ */ new Date()).toLocaleDateString("vi-VN")}`, baseWidth / 2, 102);
-    const shiftX = padding - minX;
-    const shiftY = padding - minY + headerHeight;
-    ctx.save();
-    ctx.translate(shiftX, shiftY);
-    const nw = treeCanvas.layout.nodeWidth;
-    const nh = treeCanvas.layout.nodeHeight;
+  static fullTreeSVG(tree, scope = "ALL", maxDepth = 0) {
+    const layout = this.getExportLayout(tree, scope, maxDepth);
+    if (!layout.positions.size) throw new Error("Kh\xF4ng c\xF3 th\xE0nh vi\xEAn trong ph\u1EA1m vi \u0111\xE3 ch\u1ECDn.");
+    const width = Math.max(1e3, layout.bounds.width + 68), height = layout.bounds.height + 140;
+    const dx = (width - layout.bounds.width) / 2 - layout.bounds.minX, dy = 100 - layout.bounds.minY;
+    let content = "";
     for (const link of layout.links) {
-      const isChi1 = link.branch === "Chi 1";
-      const isChi2 = link.branch === "Chi 2";
-      ctx.lineWidth = 2.5;
-      ctx.strokeStyle = isChi1 ? "#2563eb" : isChi2 ? "#059669" : "#64748b";
-      const pathData = treeCanvas.layout.generatePath(link);
-      const s = pathData.startPoint;
-      const e = pathData.endPoint;
-      ctx.beginPath();
-      ctx.moveTo(s.x, s.y);
-      if (treeCanvas.layout.orientation === "VERTICAL") {
-        const midY = (s.y + e.y) / 2;
-        ctx.bezierCurveTo(s.x, midY, e.x, midY, e.x, e.y);
-      } else {
-        const midX = (s.x + e.x) / 2;
-        ctx.bezierCurveTo(midX, s.y, midX, e.y, e.x, e.y);
-      }
-      ctx.stroke();
-      ctx.fillStyle = isChi1 ? "#2563eb" : isChi2 ? "#059669" : "#475569";
-      ctx.beginPath();
-      ctx.arc(s.x, s.y, 3.5, 0, Math.PI * 2);
-      ctx.arc(e.x, e.y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
+      const sx = link.source.x + layout.nodeWidth / 2 + dx, sy = link.source.y + layout.nodeHeight + dy;
+      const tx = link.target.x + layout.nodeWidth / 2 + dx, ty = link.target.y + dy, mid = (sy + ty) / 2;
+      content += `<path d="${pathString([[sx, sy], [sx, mid], [tx, mid], [tx, ty]])}" fill="none" stroke="#44403c" stroke-width="1.5"/>`;
     }
-    for (const [id, pos] of layout.positions.entries()) {
-      const m = pos.member;
-      const isMale = m.gender === "Nam";
-      const isDichTon = m.role === "\u0110\xEDch T\xF4n";
-      const x = pos.x;
-      const y = pos.y;
-      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
-      this.fillRoundRect(ctx, x + 2, y + 4, nw, nh, 12);
-      ctx.fillStyle = "#ffffff";
-      this.fillRoundRect(ctx, x, y, nw, nh, 12);
-      ctx.lineWidth = isDichTon ? 3 : 1.5;
-      ctx.strokeStyle = isDichTon ? "#f59e0b" : isMale ? "#2563eb" : "#e11d48";
-      this.strokeRoundRect(ctx, x, y, nw, nh, 12);
-      ctx.fillStyle = isMale ? "#dbeafe" : "#ffe4e6";
-      this.fillRoundRect(ctx, x + 1, y + 1, nw - 2, 24, [11, 11, 0, 0]);
-      ctx.textAlign = "left";
-      ctx.fillStyle = isMale ? "#1e40af" : "#9f1239";
-      ctx.font = 'bold 10px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(`\u0110\u1EDDi ${m.generation} \u2022 ${m.branch || "Ng\xE0nh II"}`, x + 8, y + 16);
-      if (isDichTon) {
-        ctx.textAlign = "right";
-        ctx.fillStyle = "#d97706";
-        ctx.font = 'bold 9px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText("\u{1F451} \u0110\xCDCH T\xD4N", x + nw - 8, y + 16);
-      }
-      const avX = x + 22;
-      const avY = y + 54;
-      ctx.fillStyle = isMale ? "#eff6ff" : "#fff1f2";
-      ctx.beginPath();
-      ctx.arc(avX, avY, 14, 0, Math.PI * 2);
-      ctx.fill();
-      drawAvatar(ctx, m.gender, avX, avY, 14);
-      ctx.textAlign = "left";
-      let textY = y + 44;
-      if (m.christian_name) {
-        ctx.fillStyle = "#d97706";
-        ctx.font = 'bold 9.5px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(`[${m.christian_name}]`, x + 44, textY);
-        textY += 15;
-      }
-      ctx.fillStyle = "#0f172a";
-      ctx.font = 'bold 12.5px "Plus Jakarta Sans", sans-serif';
-      ctx.fillText(m.full_name, x + 44, textY);
-      const dates = lifeDates(m);
-      if (dates) {
-        ctx.fillStyle = "#64748b";
-        ctx.font = '9.5px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(dates, x + 44, textY + 14, nw - 52);
-      }
-      if (spouseCaption(m, treeCanvas.dataStore)) {
-        ctx.fillStyle = "#f8fafc";
-        this.fillRoundRect(ctx, x + 1, y + nh - 20, nw - 2, 19, [0, 0, 11, 11]);
-        ctx.strokeStyle = "#f1f5f9";
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        ctx.moveTo(x + 1, y + nh - 20);
-        ctx.lineTo(x + nw - 1, y + nh - 20);
-        ctx.stroke();
-        ctx.fillStyle = "#64748b";
-        ctx.font = '9.5px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(spouseCaption(m, treeCanvas.dataStore), x + 8, y + nh - 7);
-      }
-    }
-    ctx.restore();
-    return { canvas, width: canvas.width, height: canvas.height, scopeLabel };
+    for (const [id, pos] of layout.positions) content += this.cardSVG({ ...layout.cards.get(id), height: layout.nodeHeight, x: pos.x + dx, y: pos.y + dy });
+    return { svg: this.svgDocument(width, height, this.headerSVG(tree, scope, width) + content), width, height };
   }
-  // 2. Export to PNG File
-  static exportPNG(treeCanvas, scope = "ALL", maxDepth = 0) {
-    const rendered = this.renderToCanvas2D(treeCanvas, scope, 2, maxDepth);
-    if (!rendered) return;
-    rendered.canvas.toBlob((blob) => {
-      if (blob) {
-        const cleanScope = scope.replace(/[^a-zA-Z0-9]/g, "_");
-        this.downloadBlob(blob, `Cay_Gia_Pha_${cleanScope}_${this.getTimestamp()}.png`);
-      } else {
-        alert("L\u1ED7i t\u1EA1o file \u1EA3nh PNG.");
-      }
-    }, "image/png");
+  static async rasterize(svg, width, height, scale = 300 / 72) {
+    const image = new Image();
+    const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }));
+    try {
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => reject(new Error("Kh\xF4ng th\u1EC3 d\u1EF1ng \u1EA3nh xu\u1EA5t. Vui l\xF2ng th\u1EED l\u1EA1i."));
+        image.src = url;
+      });
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.ceil(width * scale);
+      canvas.height = Math.ceil(height * scale);
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      return { canvas, width: canvas.width, height: canvas.height };
+    } finally {
+      URL.revokeObjectURL(url);
+    }
   }
-  // 3. Export to Standalone PDF Document (.pdf)
-  static exportPDF(treeCanvas, scope = "ALL", paperSize = "AUTO", maxDepth = 0) {
-    const rendered = this.renderToCanvas2D(treeCanvas, scope, 1.8, maxDepth);
-    if (!rendered) return;
-    const jpegDataUrl = rendered.canvas.toDataURL("image/jpeg", 0.92);
-    const pdfBlob = this.createPdfBlobFromJpeg(jpegDataUrl, rendered.width, rendered.height, paperSize);
-    const cleanScope = scope.replace(/[^a-zA-Z0-9]/g, "_");
-    this.downloadBlob(pdfBlob, `Cay_Gia_Pha_${cleanScope}_${this.getTimestamp()}.pdf`);
+  static async renderToCanvas2D(tree, scope = "ALL", scale = 2, maxDepth = 0) {
+    await this.ready();
+    const output = this.fullTreeSVG(tree, scope, maxDepth);
+    const renderScale = Math.min(scale, 16e3 / output.width, 16e3 / output.height, Math.sqrt(24e6 / (output.width * output.height)));
+    if (renderScale < 0.35) throw new Error("C\xE2y qu\xE1 l\u1EDBn cho m\u1ED9t \u1EA3nh. H\xE3y xu\u1EA5t PDF A4 nhi\u1EC1u trang ho\u1EB7c SVG.");
+    return { ...await this.rasterize(output.svg, output.width, output.height, renderScale), scopeLabel: this.getScopeTitle(tree.dataStore, scope) };
   }
-  // 4. Print Tree directly or Save as PDF via Browser Dialog
-  static printTree(treeCanvas, scope = "ALL", maxDepth = 0) {
-    const rendered = this.renderToCanvas2D(treeCanvas, scope, 1.5, maxDepth);
-    if (!rendered) return;
-    const imgDataUrl = rendered.canvas.toDataURL("image/png");
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      alert("Tr\xECnh duy\u1EC7t \u0111ang ch\u1EB7n c\u1EEDa s\u1ED5 pop-up. Vui l\xF2ng cho ph\xE9p m\u1EDF pop-up \u0111\u1EC3 in \u1EA5n.");
-      return;
+  static async exportPNG(tree, scope = "ALL", maxDepth = 0) {
+    const rendered = await this.renderToCanvas2D(tree, scope, 2, maxDepth);
+    try {
+      const blob = await new Promise((resolve) => rendered.canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("Kh\xF4ng th\u1EC3 t\u1EA1o \u1EA3nh PNG.");
+      this.downloadBlob(blob, this.filename("Cay", scope, "png"));
+    } finally {
+      rendered.canvas.width = rendered.canvas.height = 0;
     }
-    const title = `${treeCanvas.dataStore.lineageInfo.name} - ${rendered.scopeLabel}`;
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>${title}</title>
-        <style>
-          @page { size: landscape; margin: 10mm; }
-          body { margin: 0; padding: 12px; text-align: center; font-family: sans-serif; background: #fff; }
-          img { max-width: 100%; height: auto; display: block; margin: 0 auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-          @media print {
-            body { padding: 0; background: none; }
-            img { box-shadow: none; max-width: 100%; page-break-inside: avoid; }
-          }
-        </style>
-      </head>
-      <body>
-        <img src="${imgDataUrl}" />
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 300);
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
   }
-  // 5. Export to Vector SVG (.svg)
-  static exportSVG(treeCanvas, scope = "ALL", maxDepth = 0) {
-    const layout = this.getExportLayout(treeCanvas, scope, maxDepth);
-    if (!layout || !layout.bounds || layout.positions.size === 0) {
-      alert("Kh\xF4ng c\xF3 th\xE0nh vi\xEAn n\xE0o trong c\xE0nh nh\xE1nh \u0111\xE3 ch\u1ECDn \u0111\u1EC3 xu\u1EA5t SVG.");
-      return;
-    }
-    const { minX, minY, width, height } = layout.bounds;
-    const padding = 100;
-    const headerHeight = 120;
-    const svgWidth = Math.max(1200, width + padding * 2);
-    const svgHeight = Math.max(800, height + padding * 2 + headerHeight);
-    const shiftX = padding - minX;
-    const shiftY = padding - minY + headerHeight;
-    const lineageName = this.escapeXml(treeCanvas.dataStore.lineageInfo.name || "Gia Ph\u1EA3");
-    const scopeLabel = this.escapeXml(this.getScopeTitle(treeCanvas.dataStore, scope));
-    let svg = `<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}">
-  <style>
-    text { font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-    .tree-link { fill: none; stroke: #64748b; stroke-width: 2.5px; stroke-linecap: round; stroke-linejoin: round; }
-    .tree-link-chi-1 { stroke: #2563eb; }
-    .tree-link-chi-2 { stroke: #059669; }
-    .tree-port { fill: #475569; stroke: #ffffff; stroke-width: 1.5px; }
-    .node-rect { rx: 12; ry: 12; fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5px; }
-    .rect-male { stroke: #2563eb; stroke-width: 2px; }
-    .rect-female { stroke: #e11d48; stroke-width: 2px; }
-    .rect-dich-ton { stroke: #f59e0b; stroke-width: 3px; }
-  </style>
-  <rect width="100%" height="100%" fill="#f8fafc" />
-
-  <g transform="translate(${svgWidth / 2}, 45)">
-    <text font-size="28" font-weight="bold" fill="#0f172a" text-anchor="middle" font-family="Playfair Display, Georgia, serif">
-      ${lineageName}
-    </text>
-    <text y="28" font-size="16" font-weight="bold" fill="#b45309" text-anchor="middle">
-      \u2022 ${scopeLabel} \u2022
-    </text>
-    <text y="52" font-size="13" fill="#64748b" text-anchor="middle">
-      S\u1ED1 l\u01B0\u1EE3ng: ${layout.positions.size} th\xE0nh vi\xEAn \u2022 B\u1EA3n v\u1EBD xu\u1EA5t ng\xE0y ${(/* @__PURE__ */ new Date()).toLocaleDateString("vi-VN")}
-    </text>
-  </g>
-
-  <g transform="translate(${shiftX}, ${shiftY})">
-`;
-    for (const link of layout.links) {
-      const pathData = treeCanvas.layout.generatePath(link);
-      const pathStr = typeof pathData === "string" ? pathData : pathData.path;
-      let branchClass = "tree-link";
-      if (link.branch === "Chi 1") branchClass += " tree-link-chi-1";
-      else if (link.branch === "Chi 2") branchClass += " tree-link-chi-2";
-      svg += `    <path d="${pathStr}" class="${branchClass}" />
-`;
-      if (pathData.startPoint && pathData.endPoint) {
-        svg += `    <circle cx="${pathData.startPoint.x}" cy="${pathData.startPoint.y}" r="3.5" class="tree-port" />
-`;
-        svg += `    <circle cx="${pathData.endPoint.x}" cy="${pathData.endPoint.y}" r="3.5" class="tree-port" />
-`;
-      }
-    }
-    const nw = treeCanvas.layout.nodeWidth;
-    const nh = treeCanvas.layout.nodeHeight;
-    for (const [id, pos] of layout.positions.entries()) {
-      const m = pos.member;
-      const isMale = m.gender === "Nam";
-      const isDichTon = m.role === "\u0110\xEDch T\xF4n";
-      let borderClass = isMale ? "rect-male" : "rect-female";
-      if (isDichTon) borderClass = "rect-dich-ton";
-      const nx = pos.x;
-      const ny = pos.y;
-      const headerFill = isMale ? "#dbeafe" : "#ffe4e6";
-      const headerTextFill = isMale ? "#1e40af" : "#9f1239";
-      svg += `
-    <g transform="translate(${nx}, ${ny})">
-      <rect width="${nw}" height="${nh}" class="node-rect ${borderClass}" filter="drop-shadow(0 4px 6px rgba(0,0,0,0.06))" />
-      <rect width="${nw}" height="24" rx="12" ry="12" fill="${headerFill}" />
-      <rect y="12" width="${nw}" height="12" fill="${headerFill}" />
-      <text x="10" y="16" font-size="10" font-weight="bold" fill="${headerTextFill}">\u0110\u1EDDi ${m.generation} \u2022 ${this.escapeXml(m.branch || "Ng\xE0nh II")}</text>
-      ${isDichTon ? `<text x="${nw - 10}" y="16" font-size="9" font-weight="bold" fill="#d97706" text-anchor="end">DICH TON</text>` : ""}
-      
-      ${avatarSVG(m.gender).replace("<svg ", '<svg x="10" y="33" width="28" height="28" ')}
-      ${m.christian_name ? `<text x="44" y="42" font-size="9.5" font-weight="bold" fill="#d97706">[${this.escapeXml(m.christian_name)}]</text>` : ""}
-      <text x="44" y="${m.christian_name ? 58 : 48}" font-size="12.5" font-weight="bold" fill="#0f172a">${this.escapeXml(m.full_name)}</text>
-      <text x="44" y="${m.christian_name ? 74 : 64}" font-size="9.5" fill="#64748b">${this.escapeXml(lifeDates(m))}</text>
-      ${spouseCaption(m, treeCanvas.dataStore) ? `<text x="10" y="${nh - 10}" font-size="9.5" fill="#78716c">${this.escapeXml(spouseCaption(m, treeCanvas.dataStore))}</text>` : ""}
-    </g>
-`;
-    }
-    svg += `  </g>
-</svg>`;
-    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
-    const cleanScope = scope.replace(/[^a-zA-Z0-9]/g, "_");
-    this.downloadBlob(blob, `Cay_Gia_Pha_${cleanScope}_${this.getTimestamp()}.svg`);
+  static exportSVG(tree, scope = "ALL", maxDepth = 0) {
+    const { svg } = this.fullTreeSVG(tree, scope, maxDepth);
+    this.downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), this.filename("Cay", scope, "svg"));
   }
-  // 6. PDF 1.4 Binary Generator
-  static createPdfBlobFromJpeg(jpegDataUrl, imgWidth, imgHeight, paperSize = "AUTO") {
-    const base64 = jpegDataUrl.split(",")[1];
-    const binaryStr = atob(base64);
-    const jpegBytes = new Uint8Array(binaryStr.length);
-    for (let i = 0; i < binaryStr.length; i++) {
-      jpegBytes[i] = binaryStr.charCodeAt(i);
+  static async exportPDF(tree, scope = "ALL", paperSize = "AUTO", maxDepth = 0) {
+    const rendered = await this.renderToCanvas2D(tree, scope, 2, maxDepth);
+    try {
+      const largest = 2200;
+      const ratio = rendered.width / rendered.height;
+      const page = paperSize === "A4" ? A4 : ratio >= 1 ? { w: largest, h: largest / ratio } : { w: largest * ratio, h: largest };
+      this.downloadBlob(this.createMultiPagePdfBlob([{ dataUrl: rendered.canvas.toDataURL("image/jpeg", 0.95), width: rendered.width, height: rendered.height }], page), this.filename("Cay", scope, "pdf"));
+    } finally {
+      rendered.canvas.width = rendered.canvas.height = 0;
     }
-    const paperDims = {
-      "A0": { w: 3370, h: 2384 },
-      "A1": { w: 2384, h: 1684 },
-      "A2": { w: 1684, h: 1191 },
-      "A3": { w: 1191, h: 842 },
-      "A4": { w: 842, h: 595 }
+  }
+  static async exportA4PDF(tree, scope = "ALL", template = "card", maxDepth = 0) {
+    await this.ready();
+    const pages = this.a4Pages(tree, scope, template, maxDepth);
+    if (!pages.length) throw new Error("Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u trong ph\u1EA1m vi \u0111\xE3 ch\u1ECDn.");
+    const images = [];
+    for (let i = 0; i < pages.length; i++) {
+      const rendered = await this.rasterize(this.a4PageSVG(tree, pages[i], i + 1, pages.length, scope, template), A4.w, A4.h);
+      images.push({ dataUrl: rendered.canvas.toDataURL("image/jpeg", 0.95), width: rendered.width, height: rendered.height });
+      rendered.canvas.width = rendered.canvas.height = 0;
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    }
+    const blob = this.createMultiPagePdfBlob(images, A4);
+    this.downloadBlob(blob, this.filename(template === "table" ? "A4_Bang" : "A4_Cay", scope, "pdf"));
+    return pages.length;
+  }
+  static printWindow() {
+    const win = window.open("", "_blank");
+    if (!win) throw new Error("Vui l\xF2ng cho ph\xE9p m\u1EDF c\u1EEDa s\u1ED5 \u0111\u1EC3 in gia ph\u1EA3.");
+    win.document.write('<!doctype html><html lang="vi"><head><meta charset="utf-8"><title>In gia ph\u1EA3</title></head><body><p>\u0110ang chu\u1EA9n b\u1ECB b\u1EA3n in\u2026</p></body></html>');
+    win.document.close();
+    return win;
+  }
+  static async printA4(tree, scope = "ALL", template = "card", maxDepth = 0) {
+    const win = this.printWindow();
+    try {
+      await this.ready();
+      const pages = this.a4Pages(tree, scope, template, maxDepth);
+      if (!pages.length) throw new Error("Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u trong ph\u1EA1m vi \u0111\xE3 ch\u1ECDn.");
+      const body = pages.map((page, i) => `<section class="a4-page">${this.a4PageSVG(tree, page, i + 1, pages.length, scope, template)}</section>`).join("");
+      await this.fillPrintWindow(win, tree.dataStore.lineageInfo.name, body, true);
+      return pages.length;
+    } catch (error) {
+      win.close();
+      throw error;
+    }
+  }
+  static async printTree(tree, scope = "ALL", maxDepth = 0) {
+    const win = this.printWindow();
+    try {
+      await this.ready();
+      const output = this.fullTreeSVG(tree, scope, maxDepth);
+      await this.fillPrintWindow(win, tree.dataStore.lineageInfo.name, `<section>${output.svg}</section>`, false);
+    } catch (error) {
+      win.close();
+      throw error;
+    }
+  }
+  static async fillPrintWindow(win, title, body, a4) {
+    win.document.title = title || "Gia ph\u1EA3";
+    const style = win.document.createElement("style");
+    style.textContent = `@page{size:${a4 ? "A4 landscape" : "landscape"};margin:0}*{box-sizing:border-box}body{margin:0;background:#e7e5e4}section{background:white;margin:12px auto}section svg{display:block;width:100%;height:100%}.a4-page{width:297mm;height:210mm;break-after:page;page-break-after:always}.a4-page:last-child{break-after:auto;page-break-after:auto}@media print{body{background:white}section{margin:0;break-inside:avoid}section:not(.a4-page){width:100%}}`;
+    win.document.head.append(style);
+    win.document.body.innerHTML = body;
+    if (win.document.fonts) {
+      await win.document.fonts.load(`9px ${FONT}`);
+      await win.document.fonts.ready;
+    }
+    win.focus();
+    win.print();
+  }
+  static exportJSON(store) {
+    this.downloadBlob(new Blob([JSON.stringify({ lineageInfo: store.lineageInfo, members: store.getAllMembers() }, null, 2)], { type: "application/json" }), this.filename("Sao_Luu", "ALL", "json"));
+  }
+  static exportCSV(tree, scope = "ALL", maxDepth = 0) {
+    const members = scopedMembers(tree, scope, maxDepth);
+    const columns = [["M\xE3 ID", "id"], ["T\xEAn Th\xE1nh", "christian_name"], ["H\u1ECD v\xE0 T\xEAn", "full_name"], ["Gi\u1EDBi T\xEDnh", "gender"], ["Th\u1EBF H\u1EC7", "generation"], ["Chi Ng\xE0nh", "branch"], ["Nh\xE1nh N\u1ED9i Ngo\u1EA1i", "branch_type"], ["M\xE3 Cha M\u1EB9", "parent_id"], ["V\u1EE3 Ch\u1ED3ng", "spouse"], ["Ng\xE0y Sinh", "birth_date"], ["Gi\u1ED7 \xC2m L\u1ECBch", "death_date"], ["Ng\xE0y M\u1EA5t D\u01B0\u01A1ng L\u1ECBch", "death_date_solar"], ["H\u01B0\u1EDFng Th\u1ECD Nh\u1EADp Ri\xEAng", "lifespan_override"], ["Tr\u1EA1ng Th\xE1i", "status"], ["Vai Tr\xF2", "role"], ["Ghi Ch\xFA", "notes"], ["M\xE3 Ph\u1ED1i Ng\u1EABu", "spouse_id"], ["Th\u1EE9 T\u1EF1 Anh Em", "sibling_order"], ["H\u01B0\u1EDFng Th\u1ECD T\u1EF1 T\xEDnh", "computed_lifespan"]];
+    const cell = (value) => '"' + String(value ?? "").replace(/"/g, '""') + '"';
+    const rows = [columns.map((c) => cell(c[0])).join(","), ...members.map((m) => columns.map((c) => cell(c[1] === "computed_lifespan" ? lifespanAge(m) : m[c[1]])).join(","))];
+    this.downloadBlob(new Blob(["\uFEFF" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" }), this.filename("Du_Lieu", scope, "csv"));
+  }
+  static createMultiPagePdfBlob(images, page) {
+    if (!images.length) throw new Error("PDF kh\xF4ng c\xF3 trang.");
+    const parts = [], offsets = [0];
+    let position = 0;
+    const append = (value) => {
+      const bytes = typeof value === "string" ? new TextEncoder().encode(value) : value;
+      parts.push(bytes);
+      position += bytes.length;
     };
-    let widthPt, heightPt;
-    if (paperSize && paperDims[paperSize]) {
-      const dim = paperDims[paperSize];
-      widthPt = Math.max(dim.w, dim.h);
-      heightPt = Math.min(dim.w, dim.h);
-    } else {
-      const maxDimPt = 2200;
-      if (imgWidth >= imgHeight) {
-        widthPt = maxDimPt;
-        heightPt = Math.round(imgHeight / imgWidth * maxDimPt);
-      } else {
-        heightPt = maxDimPt;
-        widthPt = Math.round(imgWidth / imgHeight * maxDimPt);
-      }
-    }
-    const scaleX = widthPt / imgWidth;
-    const scaleY = heightPt / imgHeight;
-    const fitScale = Math.min(scaleX, scaleY);
-    const drawnW = Math.round(imgWidth * fitScale);
-    const drawnH = Math.round(imgHeight * fitScale);
-    const offsetX = Math.round((widthPt - drawnW) / 2);
-    const offsetY = Math.round((heightPt - drawnH) / 2);
-    const pdfParts = [];
-    const offsets = [];
-    const append = (strOrBytes) => {
-      const bytes = typeof strOrBytes === "string" ? new TextEncoder().encode(strOrBytes) : strOrBytes;
-      pdfParts.push(bytes);
+    const object = (id, body) => {
+      offsets[id] = position;
+      append(`${id} 0 obj
+${body}
+endobj
+`);
     };
-    const getPos = () => pdfParts.reduce((acc, p) => acc + p.length, 0);
     append("%PDF-1.4\n");
-    offsets.push(getPos());
-    append("1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n");
-    offsets.push(getPos());
-    append("2 0 obj\n<< /Type /Pages /Kids [3 0 R] /Count 1 >>\nendobj\n");
-    offsets.push(getPos());
-    append(`3 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${widthPt} ${heightPt}] /Resources << /XObject << /Im1 4 0 R >> >> /Contents 5 0 R >>
-endobj
-`);
-    offsets.push(getPos());
-    append(`4 0 obj
-<< /Type /XObject /Subtype /Image /Width ${imgWidth} /Height ${imgHeight} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpegBytes.length} >>
+    object(1, "<< /Type /Catalog /Pages 2 0 R >>");
+    object(2, `<< /Type /Pages /Count ${images.length} /Kids [${images.map((_, i) => `${3 + i * 3} 0 R`).join(" ")}] >>`);
+    images.forEach((image, i) => {
+      const id = 3 + i * 3, binary = atob(image.dataUrl.split(",")[1]);
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      object(id, `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${page.w.toFixed(4)} ${page.h.toFixed(4)}] /Resources << /XObject << /Im ${id + 1} 0 R >> >> /Contents ${id + 2} 0 R >>`);
+      offsets[id + 1] = position;
+      append(`${id + 1} 0 obj
+<< /Type /XObject /Subtype /Image /Width ${image.width} /Height ${image.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${bytes.length} >>
 stream
 `);
-    append(jpegBytes);
-    append("\nendstream\nendobj\n");
-    offsets.push(getPos());
-    const content = `q
-${fitScale.toFixed(6)} 0 0 ${fitScale.toFixed(6)} ${offsetX} ${offsetY} cm
-/Im1 Do
-Q
-`;
-    append(`5 0 obj
-<< /Length ${content.length} >>
-stream
-${content}endstream
-endobj
-`);
-    const startXref = getPos();
-    append("xref\n0 6\n0000000000 65535 f \n");
-    for (const off of offsets) {
-      append(String(off).padStart(10, "0") + " 00000 n \n");
-    }
-    append(`trailer
-<< /Size 6 /Root 1 0 R >>
-startxref
-${startXref}
-%%EOF
-`);
-    return new Blob(pdfParts, { type: "application/pdf" });
-  }
-  // ========== A4-Optimized Export Methods ==========
-  // Draw A4 page header (shared by card and table templates)
-  static drawA4Header(ctx, pageW, lineageName, scopeLabel, pageNum, totalPages) {
-    ctx.textAlign = "center";
-    ctx.fillStyle = "#0f172a";
-    ctx.font = 'bold 14px "Playfair Display", Georgia, serif';
-    ctx.fillText(lineageName, pageW / 2, 22);
-    ctx.fillStyle = "#b45309";
-    ctx.font = 'bold 9px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`\u2022 ${scopeLabel} \u2022`, pageW / 2, 36);
-    ctx.fillStyle = "#64748b";
-    ctx.font = '7.5px "Plus Jakarta Sans", sans-serif';
-    ctx.fillText(`Trang ${pageNum}/${totalPages} \u2022 ${(/* @__PURE__ */ new Date()).toLocaleDateString("vi-VN")}`, pageW / 2, 48);
-    ctx.strokeStyle = "#e2e8f0";
-    ctx.lineWidth = 0.5;
-    ctx.beginPath();
-    ctx.moveTo(15, 54);
-    ctx.lineTo(pageW - 15, 54);
-    ctx.stroke();
-  }
-  // Render A4 page - Compact Card layout (landscape, auto-scaled for wide generations)
-  static renderA4PageCard(treeCanvas, pageData, pageNum, totalPages, scope = "ALL") {
-    const cfg = this.A4_CONFIG_CARD;
-    const pageW = this.A4.landscape.w;
-    const pageH = this.A4.landscape.h;
-    const members = pageData.members;
-    const links = pageData.links;
-    if (members.length === 0) {
-      const canvas2 = document.createElement("canvas");
-      canvas2.width = Math.round(pageW * 2);
-      canvas2.height = Math.round(pageH * 2);
-      return { canvas: canvas2, width: canvas2.width, height: canvas2.height, scopeLabel: "" };
-    }
-    const genGroups = /* @__PURE__ */ new Map();
-    for (const m of members) {
-      const gen = m.member.generation;
-      if (!genGroups.has(gen)) genGroups.set(gen, []);
-      genGroups.get(gen).push(m);
-    }
-    const sortedGens = Array.from(genGroups.keys()).sort((a, b) => parseInt(a) - parseInt(b));
-    const contentW = pageW - cfg.marginLeft - cfg.marginRight;
-    let maxGenWidth = 0;
-    for (const genMembers of genGroups.values()) {
-      const totalW = genMembers.length * cfg.nodeWidth + (genMembers.length - 1) * cfg.siblingGap;
-      if (totalW > maxGenWidth) maxGenWidth = totalW;
-    }
-    let scaleX = 1;
-    if (maxGenWidth > contentW) {
-      scaleX = contentW / maxGenWidth;
-    }
-    const naturalHeight = cfg.marginTop + (sortedGens.length - 1) * cfg.generationGap + cfg.nodeHeight + cfg.marginBottom;
-    let scaleY = 1;
-    if (naturalHeight > pageH) {
-      scaleY = pageH / naturalHeight;
-    }
-    const fitScale = Math.min(scaleX, scaleY, 1);
-    const canvas = document.createElement("canvas");
-    const renderScale = 2;
-    canvas.width = Math.round(pageW * renderScale);
-    canvas.height = Math.round(pageH * renderScale);
-    const ctx = canvas.getContext("2d");
-    ctx.scale(renderScale, renderScale);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, pageW, pageH);
-    const lineageName = treeCanvas.dataStore.lineageInfo.name || "Gia Ph\u1EA3 D\xF2ng H\u1ECD";
-    const scopeLabel = this.getScopeTitle(treeCanvas.dataStore, scope);
-    this.drawA4Header(ctx, pageW, lineageName, scopeLabel, pageNum, totalPages);
-    ctx.save();
-    const translationX = cfg.marginLeft + contentW * (1 - fitScale) / 2;
-    ctx.translate(translationX, cfg.marginTop);
-    ctx.scale(fitScale, fitScale);
-    const positions = /* @__PURE__ */ new Map();
-    for (let gi = 0; gi < sortedGens.length; gi++) {
-      const genMembers = genGroups.get(sortedGens[gi]);
-      const totalW = genMembers.length * cfg.nodeWidth + (genMembers.length - 1) * cfg.siblingGap;
-      const startX = (contentW - totalW) / 2;
-      const y = gi * cfg.generationGap;
-      for (let mi = 0; mi < genMembers.length; mi++) {
-        const m = genMembers[mi];
-        const x = startX + mi * (cfg.nodeWidth + cfg.siblingGap);
-        positions.set(m.id, { x, y, member: m.member });
-      }
-    }
-    for (const link of links) {
-      const parentPos = positions.get(link.parent_id);
-      const childPos = positions.get(link.child_id);
-      if (!parentPos || !childPos) continue;
-      const isChi1 = link.branch === "Chi 1";
-      const isChi2 = link.branch === "Chi 2";
-      ctx.lineWidth = 0.8;
-      ctx.strokeStyle = isChi1 ? "#3b82f6" : isChi2 ? "#10b981" : "#cbd5e1";
-      const sx = parentPos.x + cfg.nodeWidth / 2;
-      const sy = parentPos.y + cfg.nodeHeight;
-      const ex = childPos.x + cfg.nodeWidth / 2;
-      const ey = childPos.y;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      const midY = (sy + ey) / 2;
-      ctx.bezierCurveTo(sx, midY, ex, midY, ex, ey);
-      ctx.stroke();
-    }
-    for (const [id, pos] of positions.entries()) {
-      const m = pos.member;
-      const isMale = m.gender === "Nam";
-      const isDichTon = m.role === "\u0110\xEDch T\xF4n";
-      const x = pos.x;
-      const y = pos.y;
-      const nw = cfg.nodeWidth;
-      const nh = cfg.nodeHeight;
-      ctx.fillStyle = "#ffffff";
-      this.fillRoundRect(ctx, x, y, nw, nh, 3);
-      ctx.fillStyle = isMale ? "#3b82f6" : "#e11d48";
-      ctx.fillRect(x, y, 3, nh);
-      ctx.lineWidth = 0.5;
-      ctx.strokeStyle = isDichTon ? "#f59e0b" : "#e2e8f0";
-      this.strokeRoundRect(ctx, x, y, nw, nh, 3);
-      ctx.fillStyle = isMale ? "#dbeafe" : "#ffe4e6";
-      ctx.fillRect(x + 4, y + 2, 18, 10);
-      ctx.fillStyle = isMale ? "#1e40af" : "#9f1239";
-      ctx.font = 'bold 6.5px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = "center";
-      ctx.fillText(`\u0110${m.generation}`, x + 13, y + 10);
-      ctx.textAlign = "left";
-      ctx.fillStyle = "#0f172a";
-      ctx.font = 'bold 8px "Plus Jakarta Sans", sans-serif';
-      const nameX = x + 26;
-      ctx.fillText(m.full_name, nameX, y + 10);
-      const dates = lifeDates(m);
-      if (dates) {
-        ctx.fillStyle = "#64748b";
-        ctx.font = '6.5px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(dates, nameX, y + 19);
-      }
-      if (spouseCaption(m, treeCanvas.dataStore)) {
-        ctx.fillStyle = "#94a3b8";
-        ctx.font = '6px "Plus Jakarta Sans", sans-serif';
-        ctx.fillText(spouseCaption(m, treeCanvas.dataStore), nameX, y + nh - 3);
-      }
-      if (isDichTon) {
-        ctx.fillStyle = "#fef3c7";
-        ctx.fillRect(x + nw - 32, y + 2, 28, 10);
-        ctx.fillStyle = "#d97706";
-        ctx.font = 'bold 6px "Plus Jakarta Sans", sans-serif';
-        ctx.textAlign = "center";
-        ctx.fillText("\u0110T", x + nw - 18, y + 10);
-      }
-    }
-    ctx.restore();
-    if (fitScale < 1) {
-      ctx.fillStyle = "#94a3b8";
-      ctx.font = '7px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = "right";
-      ctx.fillText(`T\u1EF7 l\u1EC7: ${Math.round(fitScale * 100)}%`, pageW - 15, pageH - 10);
-    }
-    return { canvas, width: canvas.width, height: canvas.height, scopeLabel };
-  }
-  // Render A4 page - Table layout (maximum data density, no tree graphics) - Landscape
-  static renderA4PageTable(treeCanvas, pageData, pageNum, totalPages, scope = "ALL") {
-    const cfg = this.A4_CONFIG_TABLE;
-    const pageW = this.A4.landscape.w;
-    const pageH = this.A4.landscape.h;
-    const canvas = document.createElement("canvas");
-    const scale = 2;
-    canvas.width = Math.round(pageW * scale);
-    canvas.height = Math.round(pageH * scale);
-    const ctx = canvas.getContext("2d");
-    ctx.scale(scale, scale);
-    ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, pageW, pageH);
-    const lineageName = treeCanvas.dataStore.lineageInfo.name || "Gia Ph\u1EA3 D\xF2ng H\u1ECD";
-    const scopeLabel = this.getScopeTitle(treeCanvas.dataStore, scope);
-    this.drawA4Header(ctx, pageW, lineageName, scopeLabel, pageNum, totalPages);
-    const members = pageData;
-    if (members.length === 0) return { canvas, width: canvas.width, height: canvas.height, scopeLabel };
-    const colGen = 22;
-    const colGender = 16;
-    const colName = 150;
-    const colDates = 100;
-    const colSpouse = 120;
-    const colBranch = 80;
-    const colRole = 50;
-    const colPadding = 5;
-    const totalColW = colGen + colGender + colName + colDates + colSpouse + colBranch + colRole + colPadding * 8;
-    const startX = cfg.marginLeft;
-    let y = cfg.marginTop;
-    ctx.fillStyle = "#f1f5f9";
-    ctx.fillRect(startX, y, totalColW, cfg.headerHeight);
-    ctx.fillStyle = "#0f172a";
-    ctx.font = `bold ${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
-    ctx.textAlign = "left";
-    let cx = startX + colPadding;
-    ctx.fillText("\u0110\u1EDDi", cx, y + cfg.headerHeight - 5);
-    cx += colGen;
-    ctx.fillText("G\u0110", cx, y + cfg.headerHeight - 5);
-    cx += colGender;
-    ctx.fillText("H\u1ECD v\xE0 T\xEAn", cx, y + cfg.headerHeight - 5);
-    cx += colName;
-    ctx.fillText("Sinh - M\u1EA5t", cx, y + cfg.headerHeight - 5);
-    cx += colDates;
-    ctx.fillText("V\u1EE3/Ch\u1ED3ng", cx, y + cfg.headerHeight - 5);
-    cx += colSpouse;
-    ctx.fillText("Chi", cx, y + cfg.headerHeight - 5);
-    cx += colBranch;
-    ctx.fillText("Vai tr\xF2", cx, y + cfg.headerHeight - 5);
-    y += cfg.headerHeight;
-    ctx.strokeStyle = "#94a3b8";
-    ctx.lineWidth = 0.8;
-    ctx.beginPath();
-    ctx.moveTo(startX, y);
-    ctx.lineTo(startX + totalColW, y);
-    ctx.stroke();
-    y += 2;
-    for (let i = 0; i < members.length; i++) {
-      const m = members[i];
-      const isMale = m.gender === "Nam";
-      const isDichTon = m.role === "\u0110\xEDch T\xF4n";
-      if (i % 2 === 0) {
-        ctx.fillStyle = "#f8fafc";
-        ctx.fillRect(startX, y, totalColW, cfg.rowHeight);
-      }
-      ctx.fillStyle = "#0f172a";
-      ctx.font = `${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
-      ctx.textAlign = "left";
-      cx = startX + colPadding;
-      ctx.fillStyle = isMale ? "#1e40af" : "#9f1239";
-      ctx.fillText(m.generation, cx, y + cfg.rowHeight - 4);
-      cx += colGen;
-      ctx.fillStyle = isMale ? "#3b82f6" : "#e11d48";
-      ctx.fillText(isMale ? "N" : "N\u1EEF", cx, y + cfg.rowHeight - 4);
-      cx += colGender;
-      ctx.fillStyle = "#0f172a";
-      ctx.font = `bold ${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
-      ctx.fillText(m.full_name, cx, y + cfg.rowHeight - 4);
-      ctx.font = `${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
-      cx += colName;
-      ctx.fillStyle = "#64748b";
-      const dates = lifeDates(m);
-      ctx.fillText(dates, cx, y + cfg.rowHeight - 4);
-      cx += colDates;
-      ctx.fillStyle = "#64748b";
-      ctx.fillText(spouseCaption(m, treeCanvas.dataStore), cx, y + cfg.rowHeight - 4);
-      cx += colSpouse;
-      ctx.fillStyle = "#475569";
-      ctx.fillText(m.branch || "", cx, y + cfg.rowHeight - 4);
-      cx += colBranch;
-      if (isDichTon) {
-        ctx.fillStyle = "#d97706";
-        ctx.font = `bold ${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
-        ctx.fillText("\u0110T", cx, y + cfg.rowHeight - 4);
-        ctx.font = `${cfg.fontSize}px "Plus Jakarta Sans", sans-serif`;
-      } else if (m.role) {
-        ctx.fillStyle = "#475569";
-        ctx.fillText(m.role, cx, y + cfg.rowHeight - 4);
-      }
-      y += cfg.rowHeight;
-    }
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = '6.5px "Plus Jakarta Sans", sans-serif';
-    ctx.textAlign = "center";
-    ctx.fillText(`T\u1ED5ng: ${members.length} th\xE0nh vi\xEAn tr\xEAn trang n\xE0y`, pageW / 2, pageH - 12);
-    return { canvas, width: canvas.width, height: canvas.height, scopeLabel };
-  }
-  // Export A4 PDF - with template selection (both use landscape)
-  static exportA4PDF(treeCanvas, scope = "ALL", template = "card", maxDepth = 0) {
-    const lineageName = treeCanvas.dataStore.lineageInfo.name || "Gia Ph\u1EA3";
-    const scopeLabel = this.getScopeTitle(treeCanvas.dataStore, scope);
-    let pages = [];
-    let pageImages = [];
-    if (template === "table") {
-      pages = this.paginateForA4Table(treeCanvas.dataStore, scope, maxDepth);
-      if (pages.length === 0) {
-        alert("Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u \u0111\u1EC3 xu\u1EA5t.");
-        return;
-      }
-      for (let i = 0; i < pages.length; i++) {
-        const rendered = this.renderA4PageTable(treeCanvas, pages[i], i + 1, pages.length, scope);
-        if (rendered) {
-          const jpegDataUrl = rendered.canvas.toDataURL("image/jpeg", 0.92);
-          pageImages.push({ dataUrl: jpegDataUrl, width: rendered.width, height: rendered.height });
-        }
-      }
-    } else {
-      const layout = this.getA4VerticalLayout(treeCanvas, scope, maxDepth);
-      if (!layout || !layout.bounds || layout.positions.size === 0) {
-        alert("Kh\xF4ng c\xF3 th\xE0nh vi\xEAn n\xE0o trong c\xE0nh nh\xE1nh \u0111\xE3 ch\u1ECDn \u0111\u1EC3 xu\u1EA5t.");
-        return;
-      }
-      pages = this.paginateForA4(layout);
-      if (pages.length === 0) {
-        alert("Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u \u0111\u1EC3 xu\u1EA5t.");
-        return;
-      }
-      for (let i = 0; i < pages.length; i++) {
-        const rendered = this.renderA4PageCard(treeCanvas, pages[i], i + 1, pages.length, scope);
-        if (rendered) {
-          const jpegDataUrl = rendered.canvas.toDataURL("image/jpeg", 0.92);
-          pageImages.push({ dataUrl: jpegDataUrl, width: rendered.width, height: rendered.height });
-        }
-      }
-    }
-    const pdfBlob = this.createMultiPagePdfBlob(pageImages, this.A4.landscape);
-    const cleanScope = scope.replace(/[^a-zA-Z0-9]/g, "_");
-    const templateLabel = template === "table" ? "Bang" : "Cay";
-    this.downloadBlob(pdfBlob, `Cay_Gia_Pha_A4_${templateLabel}_${cleanScope}_${this.getTimestamp()}.pdf`);
-  }
-  // Print A4 - with template selection (both use landscape)
-  static printA4(treeCanvas, scope = "ALL", template = "card", maxDepth = 0) {
-    const lineageName = treeCanvas.dataStore.lineageInfo.name || "Gia Ph\u1EA3";
-    const scopeLabel = this.getScopeTitle(treeCanvas.dataStore, scope);
-    let pages = [];
-    let pageImages = [];
-    if (template === "table") {
-      pages = this.paginateForA4Table(treeCanvas.dataStore, scope, maxDepth);
-      if (pages.length === 0) {
-        alert("Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u \u0111\u1EC3 in.");
-        return;
-      }
-      for (let i = 0; i < pages.length; i++) {
-        const rendered = this.renderA4PageTable(treeCanvas, pages[i], i + 1, pages.length, scope);
-        if (rendered) {
-          const pngDataUrl = rendered.canvas.toDataURL("image/png");
-          pageImages.push(pngDataUrl);
-        }
-      }
-    } else {
-      const layout = this.getA4VerticalLayout(treeCanvas, scope, maxDepth);
-      if (!layout || !layout.bounds || layout.positions.size === 0) {
-        alert("Kh\xF4ng c\xF3 th\xE0nh vi\xEAn n\xE0o trong c\xE0nh nh\xE1nh \u0111\xE3 ch\u1ECDn \u0111\u1EC3 in.");
-        return;
-      }
-      pages = this.paginateForA4(layout);
-      if (pages.length === 0) {
-        alert("Kh\xF4ng c\xF3 d\u1EEF li\u1EC7u \u0111\u1EC3 in.");
-        return;
-      }
-      for (let i = 0; i < pages.length; i++) {
-        const rendered = this.renderA4PageCard(treeCanvas, pages[i], i + 1, pages.length, scope);
-        if (rendered) {
-          const pngDataUrl = rendered.canvas.toDataURL("image/png");
-          pageImages.push(pngDataUrl);
-        }
-      }
-    }
-    const title = `${treeCanvas.dataStore.lineageInfo.name} - ${scopeLabel}`;
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      alert("Tr\xECnh duy\u1EC7t \u0111ang ch\u1EB7n c\u1EEDa s\u1ED5 pop-up. Vui l\xF2ng cho ph\xE9p m\u1EDF pop-up \u0111\u1EC3 in \u1EA5n.");
-      return;
-    }
-    let imagesHtml = "";
-    for (let i = 0; i < pageImages.length; i++) {
-      imagesHtml += `<div class="a4-page"><img src="${pageImages[i]}" alt="Trang ${i + 1}" /></div>
-`;
-    }
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="utf-8">
-        <title>${title}</title>
-        <style>
-          @page { size: A4 landscape; margin: 0; }
-          body { margin: 0; padding: 0; text-align: center; font-family: sans-serif; background: #fff; }
-          .a4-page {
-            width: 297mm;
-            height: 210mm;
-            page-break-after: always;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-          }
-          .a4-page:last-child { page-break-after: auto; }
-          .a4-page img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-          }
-          @media print {
-            body { padding: 0; background: none; }
-            .a4-page { page-break-after: always; }
-            .a4-page:last-child { page-break-after: auto; }
-          }
-        </style>
-      </head>
-      <body>
-        ${imagesHtml}
-        <script>
-          window.onload = function() {
-            setTimeout(function() {
-              window.print();
-            }, 500);
-          };
-        <\/script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-  }
-  // Create multi-page PDF from JPEG images
-  static createMultiPagePdfBlob(pageImages, pageSize) {
-    const pdfParts = [];
-    const offsets = [];
-    const append = (strOrBytes) => {
-      const bytes = typeof strOrBytes === "string" ? new TextEncoder().encode(strOrBytes) : strOrBytes;
-      pdfParts.push(bytes);
-    };
-    const getPos = () => pdfParts.reduce((acc, p) => acc + p.length, 0);
-    const imageObjs = [];
-    for (let i = 0; i < pageImages.length; i++) {
-      const base64 = pageImages[i].dataUrl.split(",")[1];
-      const binaryStr = atob(base64);
-      const jpegBytes = new Uint8Array(binaryStr.length);
-      for (let j = 0; j < binaryStr.length; j++) {
-        jpegBytes[j] = binaryStr.charCodeAt(j);
-      }
-      imageObjs.push({ bytes: jpegBytes, width: pageImages[i].width, height: pageImages[i].height });
-    }
-    append("%PDF-1.4\n");
-    offsets.push(getPos());
-    append(`1 0 obj
-<< /Type /Catalog /Pages 2 0 R >>
-endobj
-`);
-    const pagesObjOffset = getPos();
-    offsets.push(pagesObjOffset);
-    append(`2 0 obj
-<< /Type /Pages /Kids [] /Count 0 >>
-endobj
-`);
-    offsets.push(getPos());
-    const xObjectEntries = imageObjs.map((_, i) => `/Im${i} ${4 + i * 3} 0 R`).join(" ");
-    append(`3 0 obj
-<< /XObject << ${xObjectEntries} >> >>
-endobj
-`);
-    const kidsRefs = [];
-    for (let i = 0; i < imageObjs.length; i++) {
-      kidsRefs.push(`${6 + i * 3} 0 R`);
-    }
-    const pagesContent = `2 0 obj
-<< /Type /Pages /Kids [${kidsRefs.join(" ")}] /Count ${imageObjs.length} >>
-endobj
-`;
-    for (let i = 0; i < imageObjs.length; i++) {
-      const img = imageObjs[i];
-      const imgObjNum = 4 + i * 3;
-      const contentObjNum = 5 + i * 3;
-      const pageObjNum = 6 + i * 3;
-      offsets.push(getPos());
-      append(`${imgObjNum} 0 obj
-<< /Type /XObject /Subtype /Image /Width ${img.width} /Height ${img.height} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${img.bytes.length} >>
-stream
-`);
-      append(img.bytes);
+      append(bytes);
       append("\nendstream\nendobj\n");
-      offsets.push(getPos());
-      const scaleX = pageSize.w / img.width;
-      const scaleY = pageSize.h / img.height;
-      const fitScale = Math.min(scaleX, scaleY);
-      const drawnW = img.width * fitScale;
-      const drawnH = img.height * fitScale;
-      const offsetX = (pageSize.w - drawnW) / 2;
-      const offsetY = (pageSize.h - drawnH) / 2;
-      const content = `q
-${fitScale.toFixed(6)} 0 0 ${fitScale.toFixed(6)} ${offsetX.toFixed(2)} ${offsetY.toFixed(2)} cm
-/Im${i} Do
+      const scale = Math.min(page.w / image.width, page.h / image.height), w = image.width * scale, h = image.height * scale;
+      const stream = `q
+${w.toFixed(4)} 0 0 ${h.toFixed(4)} ${((page.w - w) / 2).toFixed(4)} ${((page.h - h) / 2).toFixed(4)} cm
+/Im Do
 Q
 `;
-      append(`${contentObjNum} 0 obj
-<< /Length ${content.length} >>
+      object(id + 2, `<< /Length ${new TextEncoder().encode(stream).length} >>
 stream
-${content}endstream
-endobj
-`);
-      offsets.push(getPos());
-      append(`${pageObjNum} 0 obj
-<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageSize.w} ${pageSize.h}] /Resources 3 0 R /Contents ${contentObjNum} 0 R >>
-endobj
-`);
-    }
-    const startXref = getPos();
+${stream}endstream`);
+    });
+    const xref = position, count = 3 + images.length * 3;
     append(`xref
-0 ${6 + imageObjs.length * 3}
+0 ${count}
 0000000000 65535 f 
 `);
-    for (const off of offsets) {
-      append(String(off).padStart(10, "0") + " 00000 n \n");
-    }
+    for (let i = 1; i < count; i++) append(`${String(offsets[i]).padStart(10, "0")} 00000 n 
+`);
     append(`trailer
-<< /Size ${6 + imageObjs.length * 3} /Root 1 0 R >>
+<< /Size ${count} /Root 1 0 R >>
 startxref
-${startXref}
+${xref}
 %%EOF
 `);
-    return new Blob(pdfParts, { type: "application/pdf" });
+    return new Blob(parts, { type: "application/pdf" });
   }
-  static fillRoundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(x, y, width, height, radius);
-    } else {
-      ctx.rect(x, y, width, height);
-    }
-    ctx.fill();
-  }
-  static strokeRoundRect(ctx, x, y, width, height, radius) {
-    ctx.beginPath();
-    if (typeof ctx.roundRect === "function") {
-      ctx.roundRect(x, y, width, height, radius);
-    } else {
-      ctx.rect(x, y, width, height);
-    }
-    ctx.stroke();
-  }
-  static escapeXml(str) {
-    if (!str) return "";
-    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&apos;");
+  static escapeXml(value) {
+    return xml(value);
   }
   static getTimestamp() {
-    const now = /* @__PURE__ */ new Date();
-    return `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}${String(now.getDate()).padStart(2, "0")}_${String(now.getHours()).padStart(2, "0")}${String(now.getMinutes()).padStart(2, "0")}`;
+    const d = /* @__PURE__ */ new Date();
+    return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}_${String(d.getHours()).padStart(2, "0")}${String(d.getMinutes()).padStart(2, "0")}`;
+  }
+  static filename(label, scope, extension) {
+    return `Gia_Pha_${label}_${scope.replace(/[^a-zA-Z0-9]/g, "_")}_${this.getTimestamp()}.${extension}`;
   }
   static downloadBlob(blob, filename) {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const url = URL.createObjectURL(blob), a = document.createElement("a");
     a.href = url;
     a.download = filename;
-    document.body.appendChild(a);
+    document.body.append(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     setTimeout(() => URL.revokeObjectURL(url), 2e3);
   }
 };
@@ -5160,9 +4545,9 @@ var App = class {
         const scope = getExportScope();
         const template = document.getElementById("select-a4-template")?.value || "card";
         const maxDepth = getExportDepth();
-        const templateLabel = template === "table" ? "B\u1EA3ng D\u1EEF Li\u1EC7u" : "C\xE2y D\u1ECDc";
+        const templateLabel = template === "table" ? "B\u1EA3ng D\u1EEF Li\u1EC7u" : "C\xE2y 2 th\u1EBF h\u1EC7";
         this.showToast(`\u0110ang t\u1EA1o file PDF A4 (${templateLabel})...`, "info");
-        Exporter.exportA4PDF(this.canvas, scope, template, maxDepth);
+        return Exporter.exportA4PDF(this.canvas, scope, template, maxDepth);
       };
     }
     const btnPrintA4 = document.getElementById("btn-print-a4");
@@ -5172,7 +4557,7 @@ var App = class {
         const scope = getExportScope();
         const template = document.getElementById("select-a4-template")?.value || "card";
         const maxDepth = getExportDepth();
-        Exporter.printA4(this.canvas, scope, template, maxDepth);
+        return Exporter.printA4(this.canvas, scope, template, maxDepth);
       };
     }
     const btnPdf = document.getElementById("btn-export-pdf");
@@ -5182,7 +4567,7 @@ var App = class {
         const scope = getExportScope();
         const maxDepth = getExportDepth();
         this.showToast("\u0110ang t\u1EA1o v\xE0 t\u1EA3i file PDF ch\u1EA5t l\u01B0\u1EE3ng cao...", "info");
-        Exporter.exportPDF(this.canvas, scope, "AUTO", maxDepth);
+        return Exporter.exportPDF(this.canvas, scope, "AUTO", maxDepth);
       };
     }
     const btnPrint = document.getElementById("btn-print-tree");
@@ -5191,7 +4576,7 @@ var App = class {
         modalExport.classList.add("hidden");
         const scope = getExportScope();
         const maxDepth = getExportDepth();
-        Exporter.printTree(this.canvas, scope, maxDepth);
+        return Exporter.printTree(this.canvas, scope, maxDepth);
       };
     }
     document.getElementById("btn-export-png").onclick = () => {
@@ -5199,20 +4584,42 @@ var App = class {
       const scope = getExportScope();
       const maxDepth = getExportDepth();
       this.showToast("\u0110ang t\u1EA1o v\xE0 t\u1EA3i \u1EA3nh PNG \u0111\u1ED9 n\xE9t cao...", "info");
-      Exporter.exportPNG(this.canvas, scope, maxDepth);
+      return Exporter.exportPNG(this.canvas, scope, maxDepth);
     };
-    document.getElementById("btn-export-svg").onclick = () => {
+    document.getElementById("btn-export-svg").onclick = async () => {
+      await Exporter.ready();
       const scope = getExportScope();
       const maxDepth = getExportDepth();
       Exporter.exportSVG(this.canvas, scope, maxDepth);
       modalExport.classList.add("hidden");
       this.showToast("\u0110ang t\u1EA3i file Vector SVG...", "success");
     };
+    document.getElementById("btn-export-csv").onclick = () => {
+      modalExport.classList.add("hidden");
+      Exporter.exportCSV(this.canvas, getExportScope(), getExportDepth());
+    };
     document.getElementById("btn-export-json").onclick = () => {
       Exporter.exportJSON(this.dataStore);
       modalExport.classList.add("hidden");
       this.showToast("\u0110\xE3 t\u1EA3i b\u1EA3n sao l\u01B0u JSON.", "success");
     };
+    let exporting = false;
+    for (const button of modalExport.querySelectorAll('button[id^="btn-export-"], #btn-print-a4, #btn-print-tree')) {
+      const action = button.onclick;
+      button.onclick = async () => {
+        if (exporting) return;
+        exporting = true;
+        button.disabled = true;
+        try {
+          await action();
+        } catch (error) {
+          this.showToast(error.message || "Kh\xF4ng th\u1EC3 xu\u1EA5t gia ph\u1EA3. Vui l\xF2ng th\u1EED l\u1EA1i.", "error");
+        } finally {
+          exporting = false;
+          button.disabled = false;
+        }
+      };
+    }
   }
   // ─── Share Panel ───────────────────────────────────────────────────────────
   setupSharePanel() {

@@ -55,8 +55,25 @@ Thay cách gom nguyên thế hệ rồi thu nhỏ toàn bộ đang có bằng b�
 - Tạo PDF thử nhiều trang, kiểm tra kích thước trang, dựng từng trang thành ảnh để rà chữ, đường nối và ngắt trang; đối chiếu với In A4.
 - Kiểm tra PDF nhiều thành viên trên mobile, tổng số trang, thứ tự trang và bộ nhớ trong quá trình xuất.
 
-## Trạng thái
+## Trạng thái triển khai — 07/11/2026
 
-Hai trường mới hiện chỉ dành cho người có quyền truy cập; chưa đưa vào bản công khai hoặc link khách. Khi triển khai xuất file sẽ dùng đúng dữ liệu mà người đang xuất được phép xem.
+Đã triển khai các giai đoạn A–D:
 
-Phần dữ liệu ngày mất dương lịch, hưởng thọ tự tính/nhập riêng và hai tab lịch giỗ được triển khai trước. Các giai đoạn A–D ở trên là bước chỉnh sửa xuất file tiếp theo; thuật toán xuất PDF hiện tại chưa được thay bằng bộ chia cây hai thế hệ trong thay đổi dữ liệu này.
+- Nội dung xuất dùng chung: tên thánh, họ tên, ngày sinh, ngày mất dương lịch, giỗ âm lịch, hưởng thọ và vợ/chồng. Không có dữ liệu thì không tự tạo ngày hoặc tuổi.
+- PNG, SVG, PDF và bản in đều dùng đường nối vuông góc. Canvas tương tác giữ cách vẽ riêng.
+- PDF A4 và In A4 dùng cùng bộ lập trang, khổ 297 × 210 mm. Ba node con tối đa trên một hàng; cha/mẹ lặp lại ở mỗi hàng tiếp để tránh đường nối chạy xuyên node. Mỗi trang chỉ thuộc một cặp đời. Có thể xếp nhiều cây theo chiều dọc nếu đủ chỗ.
+- Cha/mẹ được lặp ở cặp đời tiếp theo có viền nhấn; trang tiếp có ghi chú. Những người không có con/phối ngẫu tách node vẫn được đưa vào phạm vi xuất.
+- Bảng A4 xuống dòng theo nội dung, tính chiều cao từng hàng, lặp tiêu đề cột trên trang mới.
+- CSV mở bằng Excel có cột riêng hai loại lịch, hưởng thọ nhập riêng và hưởng thọ tính từ ngày; nhập lại không biến tuổi tự tính thành tuổi nhập riêng, giữ mã phối ngẫu và thứ tự anh/em. JSON giữ dữ liệu gốc.
+- Dựng PDF tuần tự từng canvas 300 DPI, giải phóng canvas sau mỗi trang. Bản in dùng SVG cùng tọa độ, giữ chữ rõ.
+- Kiểm tra tự động: thứ tự cặp đời; toàn bộ thành viên, quan hệ và thứ tự anh/em; giới hạn vùng in; node không đè nhau; đường nối chỉ ngang/dọc; bộ lọc và độ sâu; CSV nhập lại; xref và kích thước vẽ PDF; bản in dùng đúng các trang của PDF. Có bộ dữ liệu giả 346 người.
+- Đã xuất và rà soát bản PDF 2 trang và 14 trang bằng cách dựng tất cả trang thành ảnh.
+
+Hai trường ngày mất dương lịch/hưởng thọ vẫn theo quyền xem hiện có, không mở rộng bản công khai hoặc link khách. File xuất chỉ lấy dữ liệu được cấp cho người đang xem.
+
+### Giới hạn thực tế
+
+- PDF A4 chứa ảnh 300 DPI: chữ không chọn/tìm kiếm được như PDF văn bản; SVG và bản in giữ chữ dạng vector.
+- Nội dung một node quá dài tới mức cả cây không thể nằm trọn chiều dọc A4 sẽ báo lỗi rõ ràng, không âm thầm cắt chữ; có thể rút gọn nội dung hoặc dùng SVG.
+- Ảnh PNG một tấm giới hạn kích thước/bộ nhớ trên cả hai chiều. Cây quá lớn sẽ được hướng dẫn dùng PDF A4 nhiều trang hoặc SVG.
+- Đối với dữ liệu cũ ghi đời cha/con không liền nhau, bản xuất giữ quan hệ và số đời gốc, không tự sửa dữ liệu; tiêu đề thể hiện cặp đời thực tế.
