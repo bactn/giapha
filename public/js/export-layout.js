@@ -1,5 +1,5 @@
 // Export geometry is independent of the interactive canvas and its curved paths.
-import { lifespanAge, spouseRole } from './member-presentation.js';
+import { lifespanAge, spouseDetails, displayName } from './member-presentation.js';
 import { compareSiblings } from './member-order.js';
 
 export const A4 = Object.freeze({ w: 297 * 72 / 25.4, h: 210 * 72 / 25.4 });
@@ -15,18 +15,16 @@ export function exportFields(member, store) {
   const lunar = known(member.death_date);
   const died = solar || lunar || ['Đã mất', 'Mất sớm'].includes(member.status);
   const age = lifespanAge(member);
-  const partner = store?.getSpouseMember(member.id);
-  const spouse = partner?.full_name || member.spouse;
+  const spouse = spouseDetails(member, store);
   return [
-    { kind: 'badge', text: `Đời ${generation(member)} · ${member.id}${member.branch ? ' · ' + member.branch : ''}` },
-    ...(known(member.christian_name) ? [{ kind: 'saint', text: member.christian_name }] : []),
-    { kind: 'name', text: member.full_name || 'Chưa rõ tên' },
+    { kind: 'badge', text: `Đời ${generation(member)}${member.branch ? ' · ' + member.branch : ''}` },
+    { kind: 'name', text: displayName(member) },
     ...(birth ? [{ kind: 'detail', text: `SN ${birth}` }] : []),
     ...(solar ? [{ kind: 'detail', text: `Mất ${solar} (DL)` }] : []),
     ...(lunar && !/^(?:mất sớm|đã mất|mất)$/i.test(lunar) ? [{ kind: 'detail', text: `Giỗ ${lunar.replace(/\s*(?:âm lịch|âm|ÂL)$/i, '')} (ÂL)` }] : []),
     ...(!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: 'detail', text: member.status === 'Mất sớm' || /^mất sớm$/i.test(lunar) ? 'Mất sớm' : 'Mất: chưa rõ ngày' }] : []),
     ...(died ? [{ kind: 'detail', text: `Hưởng thọ ${age === null ? 'chưa rõ' : age + ' tuổi'}` }] : []),
-    ...(spouse ? [{ kind: 'detail', text: `${spouseRole(member, partner)}: ${spouse}` }] : []),
+    ...(spouse ? [{ kind: 'detail', text: spouse }] : []),
     ...(member.role && member.role !== 'Thành viên' ? [{ kind: 'detail', text: member.role }] : [])
   ];
 }
@@ -71,12 +69,12 @@ export function wrapText(text, width, measure) {
 }
 export const fontFor = kind => kind === 'name' ? { size: 12, weight: 'bold', line: 15 } : kind === 'badge' ? { size: 8, weight: 'bold', line: 11 } : { size: 9, weight: kind === 'saint' ? 'bold' : 'normal', line: 12 };
 export function measureCard(member, store, width, measure) {
-  const textWidth = width - 68;
+  const textWidth = width - 24;
   const lines = exportFields(member, store).flatMap(field => {
     const style = fontFor(field.kind);
     return wrapText(field.text, textWidth, text => measure(text, style)).map(text => ({ text, kind: field.kind, ...style }));
   });
-  return { member, width, height: Math.max(88, 22 + lines.reduce((h, l) => h + l.line, 0)), lines };
+  return { member, width, height: Math.max(106, 58 + lines.reduce((h, l) => h + l.line, 0)), lines };
 }
 
 // Each block is one parent and at most one row of children. Repeating the parent
@@ -149,11 +147,11 @@ export function planA4(members, store, measure) {
 
 export function planTable(members, store, measure) {
   const widths = [42, 188, 180, 68, 190, A4.w - PAGE.left - PAGE.right - 668];
-  const headings = ['Đời / ID', 'Tên thánh / Họ tên', 'Ngày sinh / Ngày mất', 'Hưởng thọ', 'Vợ / Chồng', 'Chi / Vai trò'];
+  const headings = ['Đời', 'Tên thánh / Họ tên', 'Ngày sinh / Ngày mất', 'Hưởng thọ', 'Vợ / Chồng', 'Chi / Vai trò'];
   const pages = []; let page; let y;
   for (const member of members) {
     const fields = exportFields(member, store);
-    const texts = [fields.filter(f => f.kind === 'badge').map(f => `Đ${generation(member)}\n${member.id}`).join(''), fields.filter(f => ['saint','name'].includes(f.kind)).map(f=>f.text).join('\n'), fields.filter(f => f.kind === 'detail' && /^(?:SN |Mất|Giỗ )/.test(f.text)).map(f=>f.text).join('\n'), fields.find(f=>f.text.startsWith('Hưởng thọ'))?.text.replace('Hưởng thọ ','') || '', fields.find(f=>/^(?:Vợ|Chồng)/.test(f.text))?.text || '', [member.branch, member.role].filter(Boolean).join('\n')];
+    const texts = [fields.filter(f => f.kind === 'badge').map(f => `Đ${generation(member)}`).join(''), fields.filter(f => ['saint','name'].includes(f.kind)).map(f=>f.text).join('\n'), fields.filter(f => f.kind === 'detail' && /^(?:SN |Mất|Giỗ )/.test(f.text)).map(f=>f.text).join('\n'), fields.find(f=>f.text.startsWith('Hưởng thọ'))?.text.replace('Hưởng thọ ','') || '', fields.find(f=>/^(?:Vợ|Chồng)/.test(f.text))?.text || '', [member.branch, member.role].filter(Boolean).join('\n')];
     const cells = texts.map((text,i) => text.split('\n').flatMap(t => wrapText(t,widths[i]-12,s=>measure(s,{size:9,weight:'normal'}))));
     const height = Math.max(34, 12 + Math.max(...cells.map(c=>c.length))*12);
     if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Thông tin của ${member.full_name} quá dài cho một hàng A4. Hãy rút gọn nội dung hoặc xuất SVG.`);

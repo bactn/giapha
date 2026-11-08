@@ -77,3 +77,15 @@ Hai trường ngày mất dương lịch/hưởng thọ vẫn theo quyền xem h
 - Nội dung một node quá dài tới mức cả cây không thể nằm trọn chiều dọc A4 sẽ báo lỗi rõ ràng, không âm thầm cắt chữ; có thể rút gọn nội dung hoặc dùng SVG.
 - Ảnh PNG một tấm giới hạn kích thước/bộ nhớ trên cả hai chiều. Cây quá lớn sẽ được hướng dẫn dùng PDF A4 nhiều trang hoặc SVG.
 - Đối với dữ liệu cũ ghi đời cha/con không liền nhau, bản xuất giữ quan hệ và số đời gốc, không tự sửa dữ liệu; tiêu đề thể hiện cặp đời thực tế.
+
+## Chỉnh sửa ngày 08/11/2026
+
+- Ẩn mã thành viên trên node và cột đời của bản in; CSV/JSON vẫn giữ khóa để nhập lại đúng quan hệ.
+- Tên hiển thị dạng `[Tên thánh] Họ tên`, tự xuống dòng khi quá dài. Đời ở dòng riêng.
+- Thông tin vợ/chồng lấy từ hồ sơ liên kết: tên thánh, họ tên, ngày/năm sinh và ngày/năm mất nếu có. Trường hợp chỉ có tên dạng văn bản thì giữ thông tin đã biết.
+- Vùng chữ trong node có lề trái/phải 12 pt; lề trang giữ cân nhau.
+- Canvas tương tác mặc định đường vuông góc và khoảng cách đời gọn hơn; nút “Vuông góc / Đường cong” cho phép đổi qua lại.
+- Nhập ở phần thông tin được gom sau 300 ms ngừng gõ; kết thúc sửa hoặc lưu sẽ ghi ngay bản nháp cuối. Tách xử lý bộ gõ tiếng Việt để không chốt tên giữa lúc đang ghép dấu.
+- Thay đổi tên/ngày tháng chỉ cập nhật node liên quan và nhãn cây thư mục; đổi quan hệ/thế hệ vẫn dàn cây đầy đủ. Không tạo lịch sử cho giá trị không đổi.
+- Sửa tên trực tiếp không kích hoạt chọn/kéo node, Enter của bộ gõ không bị hiểu thành lưu; Enter/blur chỉ ghi một lần. Bấm đúp không bị thao tác mở phần thông tin và dịch chuyển cây chen ngang.
+- Đã kiểm tra sửa tên qua canvas, cây thư mục và ô thông tin ở khung 390 × 844: ba lần sửa tạo ba lần cập nhật dữ liệu, không dàn lại cây. Ô nhập trên mobile dùng cỡ chữ 16 px để hạn chế tự zoom khi mở bàn phím. Chưa đo tốc độ khung hình trên điện thoại thật.

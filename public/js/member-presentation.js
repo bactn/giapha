@@ -37,6 +37,14 @@ export function spouseRole(member, spouse = null) {
   if (spouse?.gender === 'Nam') return 'Chồng';
   return member.gender === 'Nam' ? 'Vợ' : member.gender === 'Nữ' ? 'Chồng' : 'Vợ/Chồng';
 }
+export function displayName(member) {
+  return `${member.christian_name ? '[' + member.christian_name + '] ' : ''}${member.full_name || 'Chưa rõ tên'}`;
+}
+export function spouseDetails(member, store) {
+  const partner = store?.getSpouseMember(member.id);
+  if (partner) return `${spouseRole(member, partner)}: ${displayName(partner)}${lifeDates(partner) ? ' · ' + lifeDates(partner) : ''}`;
+  return member.spouse ? `${spouseRole(member)}: ${member.spouse}` : '';
+}
 export function avatarSVG(gender) {
   const female = gender === 'Nữ';
   const label = female ? 'Avatar nữ' : gender === 'Nam' ? 'Avatar nam' : 'Avatar thành viên';

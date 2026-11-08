@@ -1,6 +1,7 @@
+import { inlineRename } from './input-editing.js';
 // tree-canvas.js - Infinite Pan/Zoom Canvas with Mobile Touch Gestures & Standardized SVG Icons
 import { escapeHTML } from './html.js';
-import { avatarSVG, lifeDates, spouseRole } from './member-presentation.js';
+import { avatarSVG, lifeDates, spouseRole, displayName } from './member-presentation.js';
 export class TreeCanvas {
   constructor(viewportEl, nodesContainerEl, svgEl, linksGroupEl, dataStore, autoLayout) {
     this.viewport = viewportEl;
@@ -32,7 +33,10 @@ export class TreeCanvas {
     this.setupPanAndZoom();
     this.setupTouchGestures();
 
-    this.dataStore.subscribe((event, data) => {
+    this.dataStore.subscribe((event, data, details) => {
+      if (event === 'update' && details?.keys?.every(key => ['full_name','christian_name','birth_date','death_date','death_date_solar','lifespan_override','notes','status'].includes(key))) {
+        this.refreshMember(data); return;
+      }
       if (['load', 'add', 'update', 'delete', 'undo', 'redo'].includes(event)) {
         this.render();
       } else if (event === 'select') {
@@ -110,6 +114,7 @@ export class TreeCanvas {
     }, { passive: false });
 
     this.viewport.addEventListener('touchmove', (e) => {
+      if (e.target.closest('input,textarea,[contenteditable]')) return;
       e.preventDefault();
       if (e.touches.length === 1 && this.isPanning) {
         const touch = e.touches[0];
@@ -278,6 +283,18 @@ export class TreeCanvas {
     this.renderMinimap();
   }
 
+  refreshMember(member) {
+    if (!this.layoutData) return;
+    for (const [id, pos] of this.layoutData.positions) {
+      const current = this.dataStore.getMember(id);
+      if (id !== member.id && current?.spouse_id !== member.id) continue;
+      if (id === member.id) pos.member = member;
+      const card = this.container.querySelector(`.family-node[data-id="${CSS.escape(id)}"]`);
+      if (card) card.replaceWith(this.createNodeElement(current, pos.x, pos.y));
+    }
+    this.highlightSelected(this.dataStore.selectedMemberId);
+  }
+
   createNodeElement(member, x, y) {
     const card = document.createElement('div');
     card.className = 'family-node';
@@ -315,8 +332,7 @@ export class TreeCanvas {
           ${avatarSVG(member.gender)}
         </div>
         <div class="node-info">
-          ${member.christian_name ? `<div class="node-christian-name">[${escapeHTML(member.christian_name)}]</div>` : ''}
-          <div class="node-full-name" title="Bấm đúp để sửa tên">${escapeHTML(member.full_name)}</div>
+          <div class="node-full-name" title="Bấm đúp để sửa tên">${escapeHTML(displayName(member))}</div>
           <div class="node-meta" title="${escapeHTML(lifeDates(member))}">${escapeHTML(lifeDates(member))}</div>
         </div>
       </div>
@@ -372,8 +388,14 @@ export class TreeCanvas {
     }
     card.onclick = (e) => {
       e.stopPropagation();
+      if (e.target.closest('input')) return;
       this.dataStore.selectMember(member.id);
-      window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: member.id }));
+      clearTimeout(this.inspectorTimer);
+      const reveal = () => {
+        if (this.dataStore.selectedMemberId === member.id) window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: member.id }));
+      };
+      if (e.target.closest('.node-full-name')) this.inspectorTimer = setTimeout(reveal, 300);
+      else reveal();
     };
 
     // Quick Delete button (✕)
@@ -392,6 +414,7 @@ export class TreeCanvas {
     const nameEl = card.querySelector('.node-full-name');
     nameEl.ondblclick = (e) => {
       e.stopPropagation();
+      clearTimeout(this.inspectorTimer);
       this.startInlineEdit(nameEl, member);
     };
 
@@ -441,6 +464,7 @@ export class TreeCanvas {
     // Quick action: Edit in Left Inspector
     card.querySelector('.action-edit').onclick = (e) => {
       e.stopPropagation();
+      if (e.target.closest('input')) return;
       this.dataStore.selectMember(member.id);
       window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: member.id }));
     };
@@ -476,26 +500,7 @@ export class TreeCanvas {
     input.value = currentName;
 
     nameEl.replaceWith(input);
-    input.focus();
-    input.select();
-
-    const commit = () => {
-      const val = input.value.trim();
-      if (val && val !== currentName) {
-        this.dataStore.updateMember(member.id, { full_name: val });
-      } else {
-        input.replaceWith(nameEl);
-      }
-    };
-
-    input.onblur = commit;
-    input.onkeydown = (e) => {
-      if (e.key === 'Enter') {
-        commit();
-      } else if (e.key === 'Escape') {
-        input.replaceWith(nameEl);
-      }
-    };
+    inlineRename(input, currentName, value => this.dataStore.updateMember(member.id, { full_name: value }), () => input.replaceWith(nameEl));
   }
 
   setupNodeDrag(card, memberId) {

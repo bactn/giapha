@@ -198,8 +198,8 @@ export class SupabaseController {
     };
   }
 
-  capture() { return copy({ lineageInfo: this.app.dataStore.lineageInfo, members: this.app.dataStore.getAllMembers() }); }
-  hasDraft() { return Boolean(this.base && !this.guest && snapshotChanges(this.base, this.capture()).length); }
+  capture() { this.app.flushInspectorEdits?.(); return copy({ lineageInfo: this.app.dataStore.lineageInfo, members: this.app.dataStore.getAllMembers() }); }
+  hasDraft() { return Boolean(this.base && !this.guest && (this.app.inspectorEdits?.pending.size || snapshotChanges(this.base, this.capture()).length)); }
   canLeave() { return !this.saving && (!this.hasDraft() || confirm('Có bản nháp chưa lưu. Bạn có muốn rời gia phả này? Hãy xuất JSON trước nếu cần sao lưu.')); }
 
   async showPicker() { return this.portal.showMine(); }

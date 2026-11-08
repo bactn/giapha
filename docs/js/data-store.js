@@ -24,9 +24,9 @@ export class DataStore {
     return () => this.listeners.delete(callback);
   }
 
-  notify(event = 'update', data = null) {
+  notify(event = 'update', data = null, details = null) {
     for (const listener of this.listeners) {
-      listener(event, data);
+      listener(event, data, details);
     }
   }
 
@@ -318,6 +318,7 @@ export class DataStore {
   updateMember(id, updates) {
     const existing = this.members.get(id);
     if (!existing) return null;
+    if (Object.entries(updates).every(([key, value]) => existing[key] === value)) return existing;
 
     this.recordSnapshot();
 
@@ -353,8 +354,8 @@ export class DataStore {
 
     const updated = { ...existing, ...updates };
     this.members.set(id, updated);
-    this.recalculateStats();
-    this.notify('update', updated);
+    if ('generation' in updates) this.recalculateStats();
+    this.notify('update', updated, { keys: Object.keys(updates) });
     return updated;
   }
 

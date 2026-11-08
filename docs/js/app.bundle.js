@@ -1,3 +1,59 @@
+// dist/js/input-editing.js
+var PendingEdits = class {
+  constructor(delay = 300) {
+    this.delay = delay;
+    this.pending = /* @__PURE__ */ new Map();
+  }
+  queue(key, commit, schedule = true) {
+    this.cancel(key);
+    const entry = { commit, timer: null };
+    if (schedule) entry.timer = setTimeout(() => this.flush(key), this.delay);
+    this.pending.set(key, entry);
+  }
+  flush(key) {
+    if (key === void 0) {
+      for (const k of [...this.pending.keys()]) this.flush(k);
+      return;
+    }
+    const entry = this.pending.get(key);
+    if (!entry) return;
+    clearTimeout(entry.timer);
+    this.pending.delete(key);
+    entry.commit();
+  }
+  cancel(key) {
+    const e = this.pending.get(key);
+    if (e) clearTimeout(e.timer);
+    this.pending.delete(key);
+  }
+  clear() {
+    for (const key of this.pending.keys()) this.cancel(key);
+  }
+};
+function inlineRename(input, original, save, restore) {
+  let finished = false;
+  const finish = (cancel) => {
+    if (finished) return;
+    finished = true;
+    input.onblur = null;
+    const value = input.value.trim();
+    restore();
+    if (!cancel && value && value !== original) save(value);
+  };
+  for (const event of ["click", "dblclick", "mousedown", "touchstart"]) input.addEventListener(event, (e) => e.stopPropagation());
+  input.onblur = () => finish(false);
+  input.onkeydown = (event) => {
+    event.stopPropagation();
+    if (event.isComposing || event.keyCode === 229) return;
+    if (event.key === "Enter" || event.key === "Escape") {
+      event.preventDefault();
+      finish(event.key === "Escape");
+    }
+  };
+  input.focus({ preventScroll: true });
+  input.select();
+}
+
 // dist/js/member-order.js
 function compareSiblings(a, b) {
   const rank = (m) => typeof m.sibling_order === "number" && Number.isFinite(m.sibling_order) ? m.sibling_order : Infinity;
@@ -27,9 +83,9 @@ var DataStore = class {
     this.listeners.add(callback);
     return () => this.listeners.delete(callback);
   }
-  notify(event = "update", data = null) {
+  notify(event = "update", data = null, details = null) {
     for (const listener of this.listeners) {
-      listener(event, data);
+      listener(event, data, details);
     }
   }
   recordSnapshot() {
@@ -282,6 +338,7 @@ var DataStore = class {
   updateMember(id, updates) {
     const existing = this.members.get(id);
     if (!existing) return null;
+    if (Object.entries(updates).every(([key, value]) => existing[key] === value)) return existing;
     this.recordSnapshot();
     if (updates.parent_id && updates.parent_id !== existing.parent_id) {
       if (this.wouldCreateCycle(id, updates.parent_id)) {
@@ -308,8 +365,8 @@ var DataStore = class {
     }
     const updated = { ...existing, ...updates };
     this.members.set(id, updated);
-    this.recalculateStats();
-    this.notify("update", updated);
+    if ("generation" in updates) this.recalculateStats();
+    this.notify("update", updated, { keys: Object.keys(updates) });
     return updated;
   }
   deleteMember(id, deleteChildren = false) {
@@ -443,6 +500,7 @@ var AutoLayout = class {
     this.nodeHeight = options.nodeHeight || 140;
     this.siblingGap = options.siblingGap || 35;
     this.generationGap = options.generationGap || 130;
+    this.connectionStyle = options.connectionStyle || "ORTHOGONAL";
     this.orientation = options.orientation || "VERTICAL";
   }
   calculateLayout(dataStore, filterOption = "ALL", maxDepth = 0) {
@@ -633,7 +691,7 @@ var AutoLayout = class {
       const ty = t.y;
       const midY = (sy + ty) / 2;
       return {
-        path: `M ${sx} ${sy} C ${sx} ${midY}, ${tx} ${midY}, ${tx} ${ty}`,
+        path: this.connectionStyle === "CURVED" ? `M ${sx} ${sy} C ${sx} ${midY}, ${tx} ${midY}, ${tx} ${ty}` : `M ${sx} ${sy} V ${midY} H ${tx} V ${ty}`,
         startPoint: { x: sx, y: sy },
         endPoint: { x: tx, y: ty }
       };
@@ -644,7 +702,7 @@ var AutoLayout = class {
       const ty = t.y + this.nodeHeight / 2;
       const midX = (sx + tx) / 2;
       return {
-        path: `M ${sx} ${sy} C ${midX} ${sy}, ${midX} ${ty}, ${tx} ${ty}`,
+        path: this.connectionStyle === "CURVED" ? `M ${sx} ${sy} C ${midX} ${sy}, ${midX} ${ty}, ${tx} ${ty}` : `M ${sx} ${sy} H ${midX} V ${ty} H ${tx}`,
         startPoint: { x: sx, y: sy },
         endPoint: { x: tx, y: ty }
       };
@@ -699,6 +757,14 @@ function spouseRole(member, spouse = null) {
   if (spouse?.gender === "Nam") return "Ch\u1ED3ng";
   return member.gender === "Nam" ? "V\u1EE3" : member.gender === "N\u1EEF" ? "Ch\u1ED3ng" : "V\u1EE3/Ch\u1ED3ng";
 }
+function displayName(member) {
+  return `${member.christian_name ? "[" + member.christian_name + "] " : ""}${member.full_name || "Ch\u01B0a r\xF5 t\xEAn"}`;
+}
+function spouseDetails(member, store) {
+  const partner = store?.getSpouseMember(member.id);
+  if (partner) return `${spouseRole(member, partner)}: ${displayName(partner)}${lifeDates(partner) ? " \xB7 " + lifeDates(partner) : ""}`;
+  return member.spouse ? `${spouseRole(member)}: ${member.spouse}` : "";
+}
 function avatarSVG(gender) {
   const female = gender === "N\u1EEF";
   const label = female ? "Avatar n\u1EEF" : gender === "Nam" ? "Avatar nam" : "Avatar th\xE0nh vi\xEAn";
@@ -735,7 +801,11 @@ var TreeCanvas = class {
   init() {
     this.setupPanAndZoom();
     this.setupTouchGestures();
-    this.dataStore.subscribe((event, data) => {
+    this.dataStore.subscribe((event, data, details) => {
+      if (event === "update" && details?.keys?.every((key) => ["full_name", "christian_name", "birth_date", "death_date", "death_date_solar", "lifespan_override", "notes", "status"].includes(key))) {
+        this.refreshMember(data);
+        return;
+      }
       if (["load", "add", "update", "delete", "undo", "redo"].includes(event)) {
         this.render();
       } else if (event === "select") {
@@ -798,6 +868,7 @@ var TreeCanvas = class {
       }
     }, { passive: false });
     this.viewport.addEventListener("touchmove", (e) => {
+      if (e.target.closest("input,textarea,[contenteditable]")) return;
       e.preventDefault();
       if (e.touches.length === 1 && this.isPanning) {
         const touch = e.touches[0];
@@ -930,6 +1001,17 @@ var TreeCanvas = class {
     this.highlightSelected(this.dataStore.selectedMemberId);
     this.renderMinimap();
   }
+  refreshMember(member) {
+    if (!this.layoutData) return;
+    for (const [id, pos] of this.layoutData.positions) {
+      const current = this.dataStore.getMember(id);
+      if (id !== member.id && current?.spouse_id !== member.id) continue;
+      if (id === member.id) pos.member = member;
+      const card = this.container.querySelector(`.family-node[data-id="${CSS.escape(id)}"]`);
+      if (card) card.replaceWith(this.createNodeElement(current, pos.x, pos.y));
+    }
+    this.highlightSelected(this.dataStore.selectedMemberId);
+  }
   createNodeElement(member, x, y) {
     const card = document.createElement("div");
     card.className = "family-node";
@@ -963,8 +1045,7 @@ var TreeCanvas = class {
           ${avatarSVG(member.gender)}
         </div>
         <div class="node-info">
-          ${member.christian_name ? `<div class="node-christian-name">[${escapeHTML(member.christian_name)}]</div>` : ""}
-          <div class="node-full-name" title="B\u1EA5m \u0111\xFAp \u0111\u1EC3 s\u1EEDa t\xEAn">${escapeHTML(member.full_name)}</div>
+          <div class="node-full-name" title="B\u1EA5m \u0111\xFAp \u0111\u1EC3 s\u1EEDa t\xEAn">${escapeHTML(displayName(member))}</div>
           <div class="node-meta" title="${escapeHTML(lifeDates(member))}">${escapeHTML(lifeDates(member))}</div>
         </div>
       </div>
@@ -1018,8 +1099,14 @@ var TreeCanvas = class {
     }
     card.onclick = (e) => {
       e.stopPropagation();
+      if (e.target.closest("input")) return;
       this.dataStore.selectMember(member.id);
-      window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: member.id }));
+      clearTimeout(this.inspectorTimer);
+      const reveal = () => {
+        if (this.dataStore.selectedMemberId === member.id) window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: member.id }));
+      };
+      if (e.target.closest(".node-full-name")) this.inspectorTimer = setTimeout(reveal, 300);
+      else reveal();
     };
     card.querySelector(".btn-node-delete-quick").onclick = (e) => {
       e.stopPropagation();
@@ -1032,6 +1119,7 @@ var TreeCanvas = class {
     const nameEl = card.querySelector(".node-full-name");
     nameEl.ondblclick = (e) => {
       e.stopPropagation();
+      clearTimeout(this.inspectorTimer);
       this.startInlineEdit(nameEl, member);
     };
     card.querySelector(".action-add-child").onclick = (e) => {
@@ -1073,6 +1161,7 @@ var TreeCanvas = class {
     }
     card.querySelector(".action-edit").onclick = (e) => {
       e.stopPropagation();
+      if (e.target.closest("input")) return;
       this.dataStore.selectMember(member.id);
       window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: member.id }));
     };
@@ -1104,24 +1193,7 @@ var TreeCanvas = class {
     input.className = "node-inline-input";
     input.value = currentName;
     nameEl.replaceWith(input);
-    input.focus();
-    input.select();
-    const commit = () => {
-      const val = input.value.trim();
-      if (val && val !== currentName) {
-        this.dataStore.updateMember(member.id, { full_name: val });
-      } else {
-        input.replaceWith(nameEl);
-      }
-    };
-    input.onblur = commit;
-    input.onkeydown = (e) => {
-      if (e.key === "Enter") {
-        commit();
-      } else if (e.key === "Escape") {
-        input.replaceWith(nameEl);
-      }
-    };
+    inlineRename(input, currentName, (value) => this.dataStore.updateMember(member.id, { full_name: value }), () => input.replaceWith(nameEl));
   }
   setupNodeDrag(card, memberId) {
     let startX, startY, isDragging = false;
@@ -1222,7 +1294,11 @@ var MindNodeTextEditor = class {
     this.init();
   }
   init() {
-    this.dataStore.subscribe((event, data) => {
+    this.dataStore.subscribe((event, data, details) => {
+      if (event === "update" && details?.keys?.every((key) => ["full_name", "christian_name", "birth_date", "death_date", "death_date_solar", "lifespan_override", "notes", "status"].includes(key))) {
+        this.refreshMemberLabels(data);
+        return;
+      }
       if (["load", "add", "update", "delete", "undo", "redo"].includes(event)) {
         this.render();
       } else if (event === "select") {
@@ -1267,6 +1343,28 @@ var MindNodeTextEditor = class {
     const badge = document.getElementById("outline-count-badge");
     if (badge) badge.textContent = this.dataStore.members.size;
     this.highlightSelected(this.dataStore.selectedMemberId);
+  }
+  refreshMemberLabels(member) {
+    for (const wrapper of this.container.querySelectorAll(".outline-node-wrapper")) {
+      const row = wrapper.querySelector(":scope > .outline-node-row");
+      if (wrapper.dataset.id === member.id) {
+        const title = row.querySelector(".outline-node-title");
+        if (title) title.textContent = (member.role === "\u0110\xEDch T\xF4n" ? "\u{1F451} " : "") + displayName(member);
+        const toggle = row.querySelector("[aria-expanded]");
+        if (toggle) {
+          toggle.title = `${toggle.getAttribute("aria-expanded") === "true" ? "Thu g\u1ECDn" : "M\u1EDF r\u1ED9ng"} nh\xE1nh ${member.full_name}`;
+          toggle.setAttribute("aria-label", toggle.title);
+        }
+      }
+      const owner = this.dataStore.getMember(wrapper.dataset.id);
+      if (owner?.spouse_id === member.id) {
+        const label = row.querySelector(".outline-spouse-label");
+        if (label) {
+          label.textContent = ` ${spouseRole(owner, member)}: ${displayName(member)}`;
+          label.title = `Ph\u1ED1i ng\u1EABu: ${displayName(member)}`;
+        }
+      }
+    }
   }
   renderTreeNode(member, depth, parentElement) {
     const children = this.dataStore.getChildren(member.id);
@@ -1356,12 +1454,19 @@ var MindNodeTextEditor = class {
     };
     actionGroup.appendChild(delBtn);
     row.appendChild(actionGroup);
-    row.onclick = () => {
+    row.onclick = (event) => {
+      if (event.target.closest("input")) return;
       this.dataStore.selectMember(member.id);
-      window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: member.id }));
+      clearTimeout(this.inspectorTimer);
+      const reveal = () => {
+        if (this.dataStore.selectedMemberId === member.id) window.dispatchEvent(new CustomEvent("node-selected-for-inspector", { detail: member.id }));
+      };
+      if (event.target.closest(".outline-node-title")) this.inspectorTimer = setTimeout(reveal, 300);
+      else reveal();
     };
     row.ondblclick = (e) => {
       e.stopPropagation();
+      clearTimeout(this.inspectorTimer);
       this.startInlineRename(row, title, member);
     };
     this.setupDragEvents(row, member.id);
@@ -1416,24 +1521,7 @@ var MindNodeTextEditor = class {
     input.className = "outline-inline-input";
     input.value = currentName;
     titleSpan.replaceWith(input);
-    input.focus();
-    input.select();
-    const commit = () => {
-      const val = input.value.trim();
-      if (val && val !== currentName) {
-        this.dataStore.updateMember(member.id, { full_name: val });
-      } else {
-        input.replaceWith(titleSpan);
-      }
-    };
-    input.onblur = commit;
-    input.onkeydown = (e) => {
-      if (e.key === "Enter") {
-        commit();
-      } else if (e.key === "Escape") {
-        input.replaceWith(titleSpan);
-      }
-    };
+    inlineRename(input, currentName, (value) => this.dataStore.updateMember(member.id, { full_name: value }), () => input.replaceWith(titleSpan));
   }
   addChildTo(parentId) {
     const parent = this.dataStore.getMember(parentId);
@@ -1975,18 +2063,16 @@ function exportFields(member, store) {
   const lunar = known(member.death_date);
   const died = solar || lunar || ["\u0110\xE3 m\u1EA5t", "M\u1EA5t s\u1EDBm"].includes(member.status);
   const age = lifespanAge(member);
-  const partner = store?.getSpouseMember(member.id);
-  const spouse = partner?.full_name || member.spouse;
+  const spouse = spouseDetails(member, store);
   return [
-    { kind: "badge", text: `\u0110\u1EDDi ${generation(member)} \xB7 ${member.id}${member.branch ? " \xB7 " + member.branch : ""}` },
-    ...known(member.christian_name) ? [{ kind: "saint", text: member.christian_name }] : [],
-    { kind: "name", text: member.full_name || "Ch\u01B0a r\xF5 t\xEAn" },
+    { kind: "badge", text: `\u0110\u1EDDi ${generation(member)}${member.branch ? " \xB7 " + member.branch : ""}` },
+    { kind: "name", text: displayName(member) },
     ...birth ? [{ kind: "detail", text: `SN ${birth}` }] : [],
     ...solar ? [{ kind: "detail", text: `M\u1EA5t ${solar} (DL)` }] : [],
     ...lunar && !/^(?:mất sớm|đã mất|mất)$/i.test(lunar) ? [{ kind: "detail", text: `Gi\u1ED7 ${lunar.replace(/\s*(?:âm lịch|âm|ÂL)$/i, "")} (\xC2L)` }] : [],
     ...!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: "detail", text: member.status === "M\u1EA5t s\u1EDBm" || /^mất sớm$/i.test(lunar) ? "M\u1EA5t s\u1EDBm" : "M\u1EA5t: ch\u01B0a r\xF5 ng\xE0y" }] : [],
     ...died ? [{ kind: "detail", text: `H\u01B0\u1EDFng th\u1ECD ${age === null ? "ch\u01B0a r\xF5" : age + " tu\u1ED5i"}` }] : [],
-    ...spouse ? [{ kind: "detail", text: `${spouseRole(member, partner)}: ${spouse}` }] : [],
+    ...spouse ? [{ kind: "detail", text: spouse }] : [],
     ...member.role && member.role !== "Th\xE0nh vi\xEAn" ? [{ kind: "detail", text: member.role }] : []
   ];
 }
@@ -2042,12 +2128,12 @@ function wrapText(text, width, measure) {
 }
 var fontFor = (kind) => kind === "name" ? { size: 12, weight: "bold", line: 15 } : kind === "badge" ? { size: 8, weight: "bold", line: 11 } : { size: 9, weight: kind === "saint" ? "bold" : "normal", line: 12 };
 function measureCard(member, store, width, measure) {
-  const textWidth = width - 68;
+  const textWidth = width - 24;
   const lines = exportFields(member, store).flatMap((field) => {
     const style = fontFor(field.kind);
     return wrapText(field.text, textWidth, (text) => measure(text, style)).map((text) => ({ text, kind: field.kind, ...style }));
   });
-  return { member, width, height: Math.max(88, 22 + lines.reduce((h, l) => h + l.line, 0)), lines };
+  return { member, width, height: Math.max(106, 58 + lines.reduce((h, l) => h + l.line, 0)), lines };
 }
 function planA4(members, store, measure) {
   if (!members.length) return [];
@@ -2123,14 +2209,13 @@ function planA4(members, store, measure) {
 }
 function planTable(members, store, measure) {
   const widths = [42, 188, 180, 68, 190, A4.w - PAGE.left - PAGE.right - 668];
-  const headings = ["\u0110\u1EDDi / ID", "T\xEAn th\xE1nh / H\u1ECD t\xEAn", "Ng\xE0y sinh / Ng\xE0y m\u1EA5t", "H\u01B0\u1EDFng th\u1ECD", "V\u1EE3 / Ch\u1ED3ng", "Chi / Vai tr\xF2"];
+  const headings = ["\u0110\u1EDDi", "T\xEAn th\xE1nh / H\u1ECD t\xEAn", "Ng\xE0y sinh / Ng\xE0y m\u1EA5t", "H\u01B0\u1EDFng th\u1ECD", "V\u1EE3 / Ch\u1ED3ng", "Chi / Vai tr\xF2"];
   const pages = [];
   let page;
   let y;
   for (const member of members) {
     const fields = exportFields(member, store);
-    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}
-${member.id}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), fields.find((f) => f.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text.replace("H\u01B0\u1EDFng th\u1ECD ", "") || "", fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role].filter(Boolean).join("\n")];
+    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), fields.find((f) => f.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text.replace("H\u01B0\u1EDFng th\u1ECD ", "") || "", fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role].filter(Boolean).join("\n")];
     const cells = texts.map((text, i) => text.split("\n").flatMap((t) => wrapText(t, widths[i] - 12, (s) => measure(s, { size: 9, weight: "normal" }))));
     const height = Math.max(34, 12 + Math.max(...cells.map((c) => c.length)) * 12);
     if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Th\xF4ng tin c\u1EE7a ${member.full_name} qu\xE1 d\xE0i cho m\u1ED9t h\xE0ng A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
@@ -2185,14 +2270,14 @@ var Exporter = class {
   }
   static cardSVG(card) {
     const { x = 0, y = 0, width, height, member, lines } = card;
-    let cursor = y + 17;
+    let cursor = y + 51;
     const text = lines.map((line) => {
       const fill = line.kind === "badge" || line.kind === "saint" ? "#92400e" : line.kind === "name" ? "#292524" : "#57534e";
-      const value = `<text x="${x + 58}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
+      const value = `<text x="${x + 12}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
       cursor += line.line;
       return value;
     }).join("");
-    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued || card.repeated || member.role === "\u0110\xEDch T\xF4n" ? "#d97706" : "#a8a29e"}" stroke-width="${card.continued || card.repeated ? 1.5 : 0.8}"/>${avatarSVG(member.gender).replace("<svg ", `<svg x="${x + 10}" y="${y + 30}" width="36" height="36" `)}${text}</g>`;
+    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued || card.repeated || member.role === "\u0110\xEDch T\xF4n" ? "#d97706" : "#a8a29e"}" stroke-width="${card.continued || card.repeated ? 1.5 : 0.8}"/>${avatarSVG(member.gender).replace("<svg ", `<svg x="${x + 12}" y="${y + 10}" width="28" height="28" `)}${text}</g>`;
   }
   static headerSVG(tree, scope, width, pair = null) {
     const measure = this.measurer();
@@ -3229,10 +3314,11 @@ var SupabaseController = class {
     };
   }
   capture() {
+    this.app.flushInspectorEdits?.();
     return copy({ lineageInfo: this.app.dataStore.lineageInfo, members: this.app.dataStore.getAllMembers() });
   }
   hasDraft() {
-    return Boolean(this.base && !this.guest && snapshotChanges(this.base, this.capture()).length);
+    return Boolean(this.base && !this.guest && (this.app.inspectorEdits?.pending.size || snapshotChanges(this.base, this.capture()).length));
   }
   canLeave() {
     return !this.saving && (!this.hasDraft() || confirm("C\xF3 b\u1EA3n nh\xE1p ch\u01B0a l\u01B0u. B\u1EA1n c\xF3 mu\u1ED1n r\u1EDDi gia ph\u1EA3 n\xE0y? H\xE3y xu\u1EA5t JSON tr\u01B0\u1EDBc n\u1EBFu c\u1EA7n sao l\u01B0u."));
@@ -3690,7 +3776,7 @@ var SupabaseController = class {
 var App = class {
   constructor() {
     this.dataStore = new DataStore();
-    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 140, siblingGap: 35, generationGap: 130 });
+    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 140, siblingGap: 35, generationGap: 80 });
     this.viewportEl = document.getElementById("canvas-viewport");
     this.nodesContainerEl = document.getElementById("canvas-nodes-container");
     this.svgEl = document.getElementById("canvas-svg");
@@ -4095,6 +4181,12 @@ var App = class {
     });
   }
   setupLeftInspector() {
+    this.inspectorEdits = new PendingEdits();
+    this.flushInspectorEdits = () => this.inspectorEdits.flush();
+    this.dataStore.subscribe((event) => {
+      if (event === "load") this.inspectorEdits.clear();
+    });
+    window.addEventListener("pagehide", () => this.flushInspectorEdits());
     document.getElementById("btn-lifespan-auto").onclick = () => {
       const id = this.dataStore.selectedMemberId;
       if (id) {
@@ -4135,10 +4227,9 @@ var App = class {
     fields.forEach(({ id, key }) => {
       const el = document.getElementById(id);
       if (!el) return;
-      const updateField = () => {
-        const selId = this.dataStore.selectedMemberId;
+      const updateField = (selId = this.dataStore.selectedMemberId, value = el.value) => {
         if (!selId) return;
-        const val = el.value.trim();
+        const val = value.trim();
         if (key === "lifespan_override" && val !== "" && (!Number.isInteger(Number(val)) || Number(val) < 0 || Number(val) > 200)) return;
         try {
           this.dataStore.updateMember(selId, { [key]: val });
@@ -4154,8 +4245,31 @@ var App = class {
           alert(err.message);
         }
       };
-      el.addEventListener("input", updateField);
-      el.addEventListener("change", updateField);
+      let composing = false;
+      const draftKey = () => id;
+      const queue = () => {
+        const memberId = this.dataStore.selectedMemberId, value = el.value;
+        this.inspectorEdits.queue(draftKey(), () => updateField(memberId, value), !composing);
+      };
+      el.addEventListener("compositionstart", () => {
+        composing = true;
+        this.inspectorEdits.cancel(draftKey());
+      });
+      el.addEventListener("compositionend", () => {
+        composing = false;
+        queue();
+      });
+      el.addEventListener("input", queue);
+      el.addEventListener("change", () => {
+        if (!composing) {
+          queue();
+          this.inspectorEdits.flush(draftKey());
+        }
+      });
+      el.addEventListener("blur", () => {
+        composing = false;
+        this.inspectorEdits.flush(draftKey());
+      });
     });
     btnDelete.onclick = () => {
       const selId = this.dataStore.selectedMemberId;
@@ -4163,6 +4277,7 @@ var App = class {
       this.canvas.confirmDelete(selId);
     };
     btnSave.onclick = async () => {
+      this.flushInspectorEdits?.();
       try {
         const payload = {
           lineage_info: this.dataStore.lineageInfo,
@@ -4219,6 +4334,7 @@ var App = class {
     }
   }
   populateInspector(memberId) {
+    this.flushInspectorEdits?.();
     const emptyState = document.getElementById("inspector-empty-state");
     const formWrapper = document.getElementById("inspector-form-wrapper");
     const indicator = document.getElementById("inspector-selected-indicator");
@@ -4235,7 +4351,7 @@ var App = class {
     document.getElementById("inspect-header-name").textContent = m.full_name;
     document.getElementById("btn-inspect-move-left").disabled = !this.dataStore.canMoveSibling(m.id, -1);
     document.getElementById("btn-inspect-move-right").disabled = !this.dataStore.canMoveSibling(m.id, 1);
-    document.getElementById("inspect-header-meta").textContent = `M\xE3: ${m.id} \u2022 \u0110\u1EDDi ${m.generation} \u2022 ${m.branch || "Ng\xE0nh II"}`;
+    document.getElementById("inspect-header-meta").textContent = `\u0110\u1EDDi ${m.generation} \u2022 ${m.branch || "Ng\xE0nh II"}`;
     document.getElementById("inspect-avatar").innerHTML = avatarSVG(m.gender);
     document.getElementById("inspect-christian-name").value = m.christian_name || "";
     document.getElementById("inspect-full-name").value = m.full_name || "";
@@ -4270,6 +4386,15 @@ var App = class {
     document.getElementById("inspect-notes").value = m.notes || "";
   }
   setupToolbarButtons() {
+    const connector = document.getElementById("btn-toggle-connection");
+    connector.onclick = () => {
+      this.layout.connectionStyle = this.layout.connectionStyle === "ORTHOGONAL" ? "CURVED" : "ORTHOGONAL";
+      const orthogonal = this.layout.connectionStyle === "ORTHOGONAL";
+      this.layout.generationGap = orthogonal ? 80 : 130;
+      connector.textContent = orthogonal ? "Vu\xF4ng g\xF3c" : "\u0110\u01B0\u1EDDng cong";
+      connector.setAttribute("aria-pressed", String(orthogonal));
+      this.canvas.render();
+    };
     this.setupHeaderMenus();
     document.getElementById("btn-zoom-in").onclick = () => this.canvas.setZoom(this.canvas.scale * 1.2);
     document.getElementById("btn-zoom-out").onclick = () => this.canvas.setZoom(this.canvas.scale * 0.8);
@@ -4297,12 +4422,14 @@ var App = class {
     const btnUndo = document.getElementById("btn-undo");
     if (btnUndo) {
       btnUndo.onclick = () => {
+        this.flushInspectorEdits?.();
         if (this.dataStore.undo()) this.showToast("\u0110\xE3 ho\xE0n t\xE1c.", "info");
       };
     }
     const btnRedo = document.getElementById("btn-redo");
     if (btnRedo) {
       btnRedo.onclick = () => {
+        this.flushInspectorEdits?.();
         if (this.dataStore.redo()) this.showToast("\u0110\xE3 l\xE0m l\u1EA1i.", "info");
       };
     }
@@ -4611,6 +4738,7 @@ var App = class {
         exporting = true;
         button.disabled = true;
         try {
+          this.flushInspectorEdits?.();
           await action();
         } catch (error) {
           this.showToast(error.message || "Kh\xF4ng th\u1EC3 xu\u1EA5t gia ph\u1EA3. Vui l\xF2ng th\u1EED l\u1EA1i.", "error");

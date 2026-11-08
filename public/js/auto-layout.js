@@ -6,6 +6,7 @@ export class AutoLayout {
     this.nodeHeight = options.nodeHeight || 140;
     this.siblingGap = options.siblingGap || 35;
     this.generationGap = options.generationGap || 130;
+    this.connectionStyle = options.connectionStyle || 'ORTHOGONAL';
     this.orientation = options.orientation || 'VERTICAL'; // 'VERTICAL' (Top->Down) or 'HORIZONTAL' (Left->Right)
   }
 
@@ -227,7 +228,7 @@ export class AutoLayout {
 
       const midY = (sy + ty) / 2;
       return {
-        path: `M ${sx} ${sy} C ${sx} ${midY}, ${tx} ${midY}, ${tx} ${ty}`,
+        path: this.connectionStyle === 'CURVED' ? `M ${sx} ${sy} C ${sx} ${midY}, ${tx} ${midY}, ${tx} ${ty}` : `M ${sx} ${sy} V ${midY} H ${tx} V ${ty}`,
         startPoint: { x: sx, y: sy },
         endPoint: { x: tx, y: ty }
       };
@@ -239,7 +240,7 @@ export class AutoLayout {
 
       const midX = (sx + tx) / 2;
       return {
-        path: `M ${sx} ${sy} C ${midX} ${sy}, ${midX} ${ty}, ${tx} ${ty}`,
+        path: this.connectionStyle === 'CURVED' ? `M ${sx} ${sy} C ${midX} ${sy}, ${midX} ${ty}, ${tx} ${ty}` : `M ${sx} ${sy} H ${midX} V ${ty} H ${tx}`,
         startPoint: { x: sx, y: sy },
         endPoint: { x: tx, y: ty }
       };

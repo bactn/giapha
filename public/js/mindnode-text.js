@@ -1,5 +1,6 @@
+import { inlineRename } from './input-editing.js';
 // mindnode-text.js - MindNode-style Text/Outline Tree Editor with Clean SVG Icons
-import { spouseRole } from './member-presentation.js';
+import { spouseRole, displayName } from './member-presentation.js';
 export class MindNodeTextEditor {
   constructor(container, dataStore) {
     this.container = container;
@@ -11,7 +12,10 @@ export class MindNodeTextEditor {
   }
 
   init() {
-    this.dataStore.subscribe((event, data) => {
+    this.dataStore.subscribe((event, data, details) => {
+      if (event === 'update' && details?.keys?.every(key => ['full_name','christian_name','birth_date','death_date','death_date_solar','lifespan_override','notes','status'].includes(key))) {
+        this.refreshMemberLabels(data); return;
+      }
       if (['load', 'add', 'update', 'delete', 'undo', 'redo'].includes(event)) {
         this.render();
       } else if (event === 'select') {
@@ -72,6 +76,23 @@ export class MindNodeTextEditor {
     if (badge) badge.textContent = this.dataStore.members.size;
 
     this.highlightSelected(this.dataStore.selectedMemberId);
+  }
+
+  refreshMemberLabels(member) {
+    for (const wrapper of this.container.querySelectorAll('.outline-node-wrapper')) {
+      const row = wrapper.querySelector(':scope > .outline-node-row');
+      if (wrapper.dataset.id === member.id) {
+        const title = row.querySelector('.outline-node-title');
+        if (title) title.textContent = (member.role === 'Đích Tôn' ? '👑 ' : '') + displayName(member);
+        const toggle = row.querySelector('[aria-expanded]');
+        if (toggle) { toggle.title = `${toggle.getAttribute('aria-expanded') === 'true' ? 'Thu gọn' : 'Mở rộng'} nhánh ${member.full_name}`; toggle.setAttribute('aria-label', toggle.title); }
+      }
+      const owner = this.dataStore.getMember(wrapper.dataset.id);
+      if (owner?.spouse_id === member.id) {
+        const label = row.querySelector('.outline-spouse-label');
+        if (label) { label.textContent = ` ${spouseRole(owner,member)}: ${displayName(member)}`; label.title = `Phối ngẫu: ${displayName(member)}`; }
+      }
+    }
   }
 
   renderTreeNode(member, depth, parentElement) {
@@ -184,14 +205,21 @@ export class MindNodeTextEditor {
     row.appendChild(actionGroup);
 
     // Selection click
-    row.onclick = () => {
+    row.onclick = (event) => {
+      if (event.target.closest('input')) return;
       this.dataStore.selectMember(member.id);
-      window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: member.id }));
+      clearTimeout(this.inspectorTimer);
+      const reveal = () => {
+        if (this.dataStore.selectedMemberId === member.id) window.dispatchEvent(new CustomEvent('node-selected-for-inspector', { detail: member.id }));
+      };
+      if (event.target.closest('.outline-node-title')) this.inspectorTimer = setTimeout(reveal, 300);
+      else reveal();
     };
 
     // Double click to inline rename (MindNode behavior)
     row.ondblclick = (e) => {
       e.stopPropagation();
+      clearTimeout(this.inspectorTimer);
       this.startInlineRename(row, title, member);
     };
 
@@ -260,26 +288,7 @@ export class MindNodeTextEditor {
     input.value = currentName;
 
     titleSpan.replaceWith(input);
-    input.focus();
-    input.select();
-
-    const commit = () => {
-      const val = input.value.trim();
-      if (val && val !== currentName) {
-        this.dataStore.updateMember(member.id, { full_name: val });
-      } else {
-        input.replaceWith(titleSpan);
-      }
-    };
-
-    input.onblur = commit;
-    input.onkeydown = (e) => {
-      if (e.key === 'Enter') {
-        commit();
-      } else if (e.key === 'Escape') {
-        input.replaceWith(titleSpan);
-      }
-    };
+    inlineRename(input, currentName, value => this.dataStore.updateMember(member.id, { full_name: value }), () => input.replaceWith(titleSpan));
   }
 
   addChildTo(parentId) {

@@ -365,3 +365,10 @@ body {
     transform-origin: top left;
   }
 }
+
+/* Avoid keyboard auto-zoom and preserve text selection on phones. */
+@media (max-width: 1023px) {
+  #inspector-form-wrapper input, #inspector-form-wrapper textarea, #inspector-form-wrapper select,
+  .outline-inline-input, .node-inline-input { font-size:16px; }
+}
+.node-inline-input, .outline-inline-input { touch-action:manipulation; user-select:text; -webkit-user-select:text; }

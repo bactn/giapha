@@ -42,13 +42,13 @@ export class Exporter {
   }
   static cardSVG(card) {
     const {x=0,y=0,width,height,member,lines}=card;
-    let cursor=y+17;
+    let cursor=y+51;
     const text=lines.map(line=>{
       const fill=line.kind==='badge'||line.kind==='saint'?'#92400e':line.kind==='name'?'#292524':'#57534e';
-      const value=`<text x="${x+58}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
+      const value=`<text x="${x+12}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
       cursor+=line.line; return value;
     }).join('');
-    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued||card.repeated||member.role==='Đích Tôn'?'#d97706':'#a8a29e'}" stroke-width="${card.continued||card.repeated?1.5:.8}"/>${avatarSVG(member.gender).replace('<svg ',`<svg x="${x+10}" y="${y+30}" width="36" height="36" `)}${text}</g>`;
+    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued||card.repeated||member.role==='Đích Tôn'?'#d97706':'#a8a29e'}" stroke-width="${card.continued||card.repeated?1.5:.8}"/>${avatarSVG(member.gender).replace('<svg ',`<svg x="${x+12}" y="${y+10}" width="28" height="28" `)}${text}</g>`;
   }
   static headerSVG(tree,scope,width,pair=null) {
     const measure=this.measurer();

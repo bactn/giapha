@@ -13,7 +13,7 @@ function checkGeometry(pages) {
     for(const n of page.nodes) {
       assert(n.x>=PAGE.left-.001);assert(n.x+n.width<=A4.w-PAGE.right+.001);
       assert(n.y>=PAGE.top);assert(n.y+n.height<=A4.h-PAGE.bottom+.001);
-      for(const line of n.lines) assert(measure(line.text,line)<=n.width-68+.001);
+      for(const line of n.lines) assert(measure(line.text,line)<=n.width-24+.001);
     }
     for(const path of page.paths) {
       assert(page.nodes.some(n=>n.member.id===path.parentId));assert(page.nodes.some(n=>n.member.id===path.childId));
@@ -55,7 +55,7 @@ test('branch, subtree, spouse, depth and current-view filters are shared by card
 test('content preserves Christian name, separate calendars, manual age, missing dates and escaped text',()=>{
   const m=member('A',1,'',{christian_name:'Giuse',full_name:'A <script>',birth_date:'1930',death_date_solar:'2010',death_date:'20/03 Âm',status:'Đã mất',lifespan_override:85});
   const s=storeFor([m]); const texts=exportFields(m,s).map(f=>f.text);
-  assert(texts.includes('Giuse'));assert(texts.includes('SN 1930'));assert(texts.includes('Mất 2010 (DL)'));assert(texts.includes('Giỗ 20/03 (ÂL)'));assert(texts.includes('Hưởng thọ 85 tuổi'));
+  assert(texts.includes('[Giuse] A <script>'));assert(texts.includes('SN 1930'));assert(texts.includes('Mất 2010 (DL)'));assert(texts.includes('Giỗ 20/03 (ÂL)'));assert(texts.includes('Hưởng thọ 85 tuổi'));
   const page=Exporter.a4Pages({dataStore:s},'ALL')[0];const svg=Exporter.a4PageSVG({dataStore:s},page,1,1);
   assert(svg.includes('A &lt;script&gt;'));assert(!svg.includes('<script>'));
   assert(exportFields(member('B',1,'',{status:'Đã mất'}),s).some(f=>f.text==='Hưởng thọ chưa rõ'));
@@ -112,4 +112,16 @@ test('346 members with many roots, spouses and eight generations retain complete
   checkGeometry(pages);
   assert.equal(new Set(pages.flatMap(p=>p.nodes.map(n=>n.member.id))).size,346);
   assert.equal(pages.flatMap(p=>p.paths).length,340);
+});
+test('printed nodes hide identifiers, combine saint/name and include complete spouse dates with symmetric content padding',()=>{
+  const store=storeFor([member('P001',1,'',{christian_name:'Giuse',spouse_id:'P002'}),member('P002',1,'',{christian_name:'Maria',gender:'Nữ',birth_date:'1935',death_date_solar:'2015',status:'Đã mất'})]);
+  const fields=exportFields(store.getMember('P001'),store);
+  assert(fields.some(f=>f.kind==='name'&&f.text==='[Giuse] Trần Ngọc P001'));
+  assert(!fields.find(f=>f.kind==='badge').text.includes('P001'));
+  assert(fields.some(f=>f.text==='Vợ: [Maria] Trần Ngọc P002 · SN 1935 - Mất 2015'));
+  const pages=Exporter.a4Pages({dataStore:store});
+  const card=pages[0].nodes.find(n=>n.member.id==='P001');
+  assert(card.lines.every(l=>measure(l.text,l)<=card.width-24));
+  const table=Exporter.a4Pages({dataStore:store},'ALL','table');
+  assert.equal(table[0].headings[0],'Đời');assert(!table[0].rows[0].cells[0].join('').includes('P001'));
 });

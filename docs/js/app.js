@@ -1,4 +1,5 @@
 // app.js - Main Application Orchestrator with Responsive Drawer & Touch Handling
+import { PendingEdits } from './input-editing.js';
 import { DataStore } from './data-store.js';
 import { AutoLayout } from './auto-layout.js';
 import { TreeCanvas } from './tree-canvas.js';
@@ -17,7 +18,7 @@ import { avatarSVG, lifespanAge } from './member-presentation.js';
 class App {
   constructor() {
     this.dataStore = new DataStore();
-    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 140, siblingGap: 35, generationGap: 130 });
+    this.layout = new AutoLayout({ nodeWidth: 230, nodeHeight: 140, siblingGap: 35, generationGap: 80 });
 
     this.viewportEl = document.getElementById('canvas-viewport');
     this.nodesContainerEl = document.getElementById('canvas-nodes-container');
@@ -507,6 +508,11 @@ class App {
   }
 
   setupLeftInspector() {
+    this.inspectorEdits = new PendingEdits();
+    this.flushInspectorEdits = () => this.inspectorEdits.flush();
+    this.dataStore.subscribe(event => { if (event === 'load') this.inspectorEdits.clear(); });
+    window.addEventListener('pagehide', () => this.flushInspectorEdits());
+
     document.getElementById('btn-lifespan-auto').onclick=()=>{const id=this.dataStore.selectedMemberId;if(id){this.dataStore.updateMember(id,{lifespan_override:''});this.populateInspector(id);}};
     for (const [id,step] of [['btn-inspect-move-left',-1],['btn-inspect-move-right',1]]) {
       document.getElementById(id).onclick=()=>{
@@ -541,11 +547,10 @@ class App {
       const el = document.getElementById(id);
       if (!el) return;
 
-      const updateField = () => {
-        const selId = this.dataStore.selectedMemberId;
+      const updateField = (selId = this.dataStore.selectedMemberId, value = el.value) => {
         if (!selId) return;
 
-        const val = el.value.trim();
+        const val = value.trim();
         if(key==='lifespan_override' && val!=='' && (!Number.isInteger(Number(val)) || Number(val)<0 || Number(val)>200)) return;
         try {
           this.dataStore.updateMember(selId, { [key]: val });
@@ -562,8 +567,17 @@ class App {
         }
       };
 
-      el.addEventListener('input', updateField);
-      el.addEventListener('change', updateField);
+      let composing = false;
+      const draftKey = () => id;
+      const queue = () => {
+        const memberId = this.dataStore.selectedMemberId, value = el.value;
+        this.inspectorEdits.queue(draftKey(), () => updateField(memberId, value), !composing);
+      };
+      el.addEventListener('compositionstart', () => { composing = true; this.inspectorEdits.cancel(draftKey()); });
+      el.addEventListener('compositionend', () => { composing = false; queue(); });
+      el.addEventListener('input', queue);
+      el.addEventListener('change', () => { if (!composing) { queue(); this.inspectorEdits.flush(draftKey()); } });
+      el.addEventListener('blur', () => { composing = false; this.inspectorEdits.flush(draftKey()); });
     });
 
     btnDelete.onclick = () => {
@@ -573,6 +587,7 @@ class App {
     };
 
     btnSave.onclick = async () => {
+      this.flushInspectorEdits?.();
       try {
         const payload = {
           lineage_info: this.dataStore.lineageInfo,
@@ -641,6 +656,7 @@ class App {
   }
 
   populateInspector(memberId) {
+    this.flushInspectorEdits?.();
     const emptyState = document.getElementById('inspector-empty-state');
     const formWrapper = document.getElementById('inspector-form-wrapper');
     const indicator = document.getElementById('inspector-selected-indicator');
@@ -660,7 +676,7 @@ class App {
     document.getElementById('inspect-header-name').textContent = m.full_name;
     document.getElementById('btn-inspect-move-left').disabled=!this.dataStore.canMoveSibling(m.id,-1);
     document.getElementById('btn-inspect-move-right').disabled=!this.dataStore.canMoveSibling(m.id,1);
-    document.getElementById('inspect-header-meta').textContent = `Mã: ${m.id} • Đời ${m.generation} • ${m.branch || 'Ngành II'}`;
+    document.getElementById('inspect-header-meta').textContent = `Đời ${m.generation} • ${m.branch || 'Ngành II'}`;
     document.getElementById('inspect-avatar').innerHTML = avatarSVG(m.gender);
 
     document.getElementById('inspect-christian-name').value = m.christian_name || '';
@@ -701,6 +717,15 @@ class App {
   }
 
   setupToolbarButtons() {
+    const connector = document.getElementById('btn-toggle-connection');
+    connector.onclick = () => {
+      this.layout.connectionStyle = this.layout.connectionStyle === 'ORTHOGONAL' ? 'CURVED' : 'ORTHOGONAL';
+      const orthogonal = this.layout.connectionStyle === 'ORTHOGONAL';
+      this.layout.generationGap = orthogonal ? 80 : 130;
+      connector.textContent = orthogonal ? 'Vuông góc' : 'Đường cong';
+      connector.setAttribute('aria-pressed', String(orthogonal));
+      this.canvas.render();
+    };
     this.setupHeaderMenus();
     // Zoom In, Out, Reset, Fit
     document.getElementById('btn-zoom-in').onclick = () => this.canvas.setZoom(this.canvas.scale * 1.2);
@@ -735,12 +760,14 @@ class App {
     const btnUndo = document.getElementById('btn-undo');
     if (btnUndo) {
       btnUndo.onclick = () => {
+        this.flushInspectorEdits?.();
         if (this.dataStore.undo()) this.showToast('Đã hoàn tác.', 'info');
       };
     }
     const btnRedo = document.getElementById('btn-redo');
     if (btnRedo) {
       btnRedo.onclick = () => {
+        this.flushInspectorEdits?.();
         if (this.dataStore.redo()) this.showToast('Đã làm lại.', 'info');
       };
     }
@@ -1095,7 +1122,7 @@ class App {
       button.onclick = async () => {
         if (exporting) return;
         exporting = true; button.disabled = true;
-        try { await action(); }
+        try { this.flushInspectorEdits?.(); await action(); }
         catch (error) { this.showToast(error.message || 'Không thể xuất gia phả. Vui lòng thử lại.', 'error'); }
         finally { exporting = false; button.disabled = false; }
       };
