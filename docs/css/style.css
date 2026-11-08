@@ -233,12 +233,16 @@ body {
   font-weight: 600;
 }
 
-/* Spouse label inline in outline tree */
+/* The primary member name gets the full column before the spouse line. */
 .outline-spouse-label {
   color: #e11d48;
   font-size: 11px;
-  margin-left: 2px;
-  font-weight: 500;
+  display: block;
+  margin: 3px 4px 0;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .outline-toggle-btn {
@@ -259,12 +263,14 @@ body {
 .outline-toggle-btn svg { width:15px; height:15px; }
 .outline-toggle-btn:disabled { pointer-events:none; opacity:.55; }
 .outline-toggle-btn:focus-visible { outline:2px solid #b45309; outline-offset:1px; }
+.outline-member-text { flex:1; min-width:0; }
 .outline-node-title {
-  flex: 1;
+  display: block;
+  font-weight:600;
+  line-height:1.5;
   font-size: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
   padding: 0 4px;
 }
 .outline-inline-input {
@@ -372,3 +378,9 @@ body {
   .outline-inline-input, .node-inline-input { font-size:16px; }
 }
 .node-inline-input, .outline-inline-input { touch-action:manipulation; user-select:text; -webkit-user-select:text; }
+
+@media (max-width:1023px) {
+  .outline-node-title { font-size:13px; }
+  .outline-node-actions { display:none; }
+  .outline-node-row.selected > .outline-node-actions { display:flex; opacity:1; }
+}

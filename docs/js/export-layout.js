@@ -3,7 +3,7 @@ import { lifespanAge, spouseDetails, displayName } from './member-presentation.j
 import { compareSiblings } from './member-order.js';
 
 export const A4 = Object.freeze({ w: 297 * 72 / 25.4, h: 210 * 72 / 25.4 });
-export const PAGE = Object.freeze({ left: 34, right: 34, top: 88, bottom: 38, gap: 18, cardWidth: 240, connectorGap: 28, blockGap: 20 });
+export const PAGE = Object.freeze({ left: 34, right: 34, top: 88, bottom: 38, gap: 14, cardWidth: 180, connectorGap: 28, blockGap: 20 });
 const known = value => {
   const text = String(value ?? '').trim();
   return /^(?:[-?–—]+|không rõ|chưa rõ|unknown|null)$/i.test(text) ? '' : text;
@@ -69,12 +69,50 @@ export function wrapText(text, width, measure) {
 }
 export const fontFor = kind => kind === 'name' ? { size: 12, weight: 'bold', line: 15 } : kind === 'badge' ? { size: 8, weight: 'bold', line: 11 } : { size: 9, weight: kind === 'saint' ? 'bold' : 'normal', line: 12 };
 export function measureCard(member, store, width, measure) {
-  const textWidth = width - 24;
-  const lines = exportFields(member, store).flatMap(field => {
+  const padding = 12, avatarSize = 34, avatarGap = 10, headingGap = 6, detailGap = 10;
+  const headerX = padding + avatarSize + avatarGap;
+  const headerWidth = width - headerX - padding;
+  const fields = exportFields(member, store);
+  const wrap = (field, maxWidth) => {
     const style = fontFor(field.kind);
-    return wrapText(field.text, textWidth, text => measure(text, style)).map(text => ({ text, kind: field.kind, ...style }));
-  });
-  return { member, width, height: Math.max(106, 58 + lines.reduce((h, l) => h + l.line, 0)), lines };
+    return wrapText(field.text, maxWidth, text => measure(text, style)).map(text => ({ text, kind: field.kind, ...style, maxWidth }));
+  };
+  const badges = fields.filter(f => f.kind === 'badge').flatMap(f => wrap(f, headerWidth));
+  const names = fields.filter(f => f.kind === 'name').flatMap(f => wrap(f, headerWidth));
+  const headingHeight = badges.reduce((h,l) => h+l.line, 0) + headingGap + names.reduce((h,l) => h+l.line, 0);
+  const headerHeight = Math.max(avatarSize, headingHeight);
+  let cursor = padding + (headerHeight - headingHeight) / 2;
+  const lines = [];
+  for (const line of badges) { lines.push({ ...line, x: headerX + headerWidth / 2, y: cursor + line.size, anchor: 'middle' }); cursor += line.line; }
+  cursor += headingGap;
+  for (const line of names) { lines.push({ ...line, x: headerX + headerWidth / 2, y: cursor + line.size, anchor: 'middle' }); cursor += line.line; }
+  cursor = padding + headerHeight + detailGap;
+  const details = fields.filter(f => !['badge','name'].includes(f.kind)).flatMap(f => wrap(f, width - padding * 2));
+  for (const line of details) {
+    const lineHeight = 14;
+    lines.push({ ...line, line: lineHeight, x: padding, y: cursor + line.size, anchor: 'start' }); cursor += lineHeight;
+  }
+  return { member, width, height: Math.max(94, cursor + padding), lines,
+    avatar: { x: padding, y: padding + (headerHeight - avatarSize) / 2, size: avatarSize }, headerHeight };
+}
+
+// Omit only isolated spouse cards whose details appear in a retained partner's
+// card. Keep people with their own parent/children, unrelated roots, and the
+// explicitly selected subtree root. CSV/JSON and the editable tree are untouched.
+export function withoutStandaloneSpouses(members, store, keepId = null) {
+  const ids = new Set(members.map(m => m.id));
+  const parents = new Set(members.map(m => m.parent_id).filter(id => ids.has(id)));
+  const connected = m => m.id === keepId || ids.has(m.parent_id) || parents.has(m.id);
+  const order = new Map(members.map((m,i) => [m.id,i]));
+  const omitted = new Set();
+  for (const member of members) {
+    if (connected(member)) continue;
+    const represented = members.some(owner => owner.id !== member.id && !omitted.has(owner.id)
+      && store.getSpouseMember(owner.id)?.id === member.id
+      && (connected(owner) || store.getSpouseMember(member.id)?.id !== owner.id || order.get(owner.id) < order.get(member.id)));
+    if (represented) omitted.add(member.id);
+  }
+  return members.filter(m => !omitted.has(m.id));
 }
 
 // Each block is one parent and at most one row of children. Repeating the parent
@@ -82,9 +120,20 @@ export function measureCard(member, store, width, measure) {
 export function planA4(members, store, measure) {
   if (!members.length) return [];
   const usableW = A4.w - PAGE.left - PAGE.right;
-  const columns = Math.floor((usableW + PAGE.gap) / (PAGE.cardWidth + PAGE.gap));
-  const cardW = (usableW - (columns - 1) * PAGE.gap) / columns;
-  const cards = new Map(members.map(m => [m.id, measureCard(m, store, cardW, measure)]));
+  const maxColumns = Math.min(4, Math.floor((usableW + PAGE.gap) / (PAGE.cardWidth + PAGE.gap)));
+  const usableH = A4.h - PAGE.top - PAGE.bottom;
+  // Try four cards first. Long names/spouse details can require wider cards;
+  // reduce the column count rather than shrink the type or clip the content.
+  let columns = maxColumns, cardW, cards;
+  for (; columns >= 1; columns--) {
+    cardW = (usableW - (columns - 1) * PAGE.gap) / columns;
+    cards = new Map(members.map(m => [m.id, measureCard(m, store, cardW, measure)]));
+    const fits = members.every(m => {
+      const card = cards.get(m.id), parent = cards.get(m.parent_id);
+      return card.height + (parent ? parent.height + PAGE.connectorGap : 0) <= usableH;
+    });
+    if (fits || columns === 1) break;
+  }
   const groups = new Map(); const covered = new Set();
   const firstGen = Math.min(...members.map(generation));
   const add = (pair, block) => {

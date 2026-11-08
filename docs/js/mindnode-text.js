@@ -153,21 +153,24 @@ export class MindNodeTextEditor {
     }
     title.textContent = label;
     title.title = "Bấm đúp để sửa tên";
-    row.appendChild(title);
+    const textBlock = document.createElement('div');
+    textBlock.className = 'outline-member-text';
+    textBlock.appendChild(title);
+    row.appendChild(textBlock);
 
-    // Spouse indicator inline (⚭ Spouse Name)
+    // Keep the member's full name first; the partner is a secondary line.
     const spouseMember = this.dataStore.getSpouseMember(member.id);
     if (spouseMember) {
       const spouseLabel = document.createElement('span');
       spouseLabel.className = 'outline-spouse-label';
-      spouseLabel.textContent = ` ${spouseRole(member,spouseMember)}: ${spouseMember.full_name}`;
+      spouseLabel.textContent = `${spouseRole(member,spouseMember)}: ${displayName(spouseMember)}`;
       spouseLabel.title = `Phối ngẫu: ${spouseMember.full_name} (${spouseMember.id})`;
-      row.appendChild(spouseLabel);
+      textBlock.appendChild(spouseLabel);
     }
 
     // Action buttons container (visible on hover)
     const actionGroup = document.createElement('div');
-    actionGroup.className = 'flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-1';
+    actionGroup.className = 'outline-node-actions flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-1';
 
     // Quick add child hover button (+)
     const addBtn = document.createElement('button');

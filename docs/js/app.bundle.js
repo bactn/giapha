@@ -1415,17 +1415,20 @@ var MindNodeTextEditor = class {
     }
     title.textContent = label;
     title.title = "B\u1EA5m \u0111\xFAp \u0111\u1EC3 s\u1EEDa t\xEAn";
-    row.appendChild(title);
+    const textBlock = document.createElement("div");
+    textBlock.className = "outline-member-text";
+    textBlock.appendChild(title);
+    row.appendChild(textBlock);
     const spouseMember = this.dataStore.getSpouseMember(member.id);
     if (spouseMember) {
       const spouseLabel = document.createElement("span");
       spouseLabel.className = "outline-spouse-label";
-      spouseLabel.textContent = ` ${spouseRole(member, spouseMember)}: ${spouseMember.full_name}`;
+      spouseLabel.textContent = `${spouseRole(member, spouseMember)}: ${displayName(spouseMember)}`;
       spouseLabel.title = `Ph\u1ED1i ng\u1EABu: ${spouseMember.full_name} (${spouseMember.id})`;
-      row.appendChild(spouseLabel);
+      textBlock.appendChild(spouseLabel);
     }
     const actionGroup = document.createElement("div");
-    actionGroup.className = "flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-1";
+    actionGroup.className = "outline-node-actions flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0 ml-1";
     const addBtn = document.createElement("button");
     addBtn.className = "w-5 h-5 flex items-center justify-center rounded text-slate-400 hover:text-amber-700 hover:bg-amber-50";
     addBtn.innerHTML = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>`;
@@ -2051,7 +2054,7 @@ var LunarCalendarManager = class {
 
 // dist/js/export-layout.js
 var A4 = Object.freeze({ w: 297 * 72 / 25.4, h: 210 * 72 / 25.4 });
-var PAGE = Object.freeze({ left: 34, right: 34, top: 88, bottom: 38, gap: 18, cardWidth: 240, connectorGap: 28, blockGap: 20 });
+var PAGE = Object.freeze({ left: 34, right: 34, top: 88, bottom: 38, gap: 14, cardWidth: 180, connectorGap: 28, blockGap: 20 });
 var known = (value) => {
   const text = String(value ?? "").trim();
   return /^(?:[-?–—]+|không rõ|chưa rõ|unknown|null)$/i.test(text) ? "" : text;
@@ -2128,19 +2131,73 @@ function wrapText(text, width, measure) {
 }
 var fontFor = (kind) => kind === "name" ? { size: 12, weight: "bold", line: 15 } : kind === "badge" ? { size: 8, weight: "bold", line: 11 } : { size: 9, weight: kind === "saint" ? "bold" : "normal", line: 12 };
 function measureCard(member, store, width, measure) {
-  const textWidth = width - 24;
-  const lines = exportFields(member, store).flatMap((field) => {
+  const padding = 12, avatarSize = 34, avatarGap = 10, headingGap = 6, detailGap = 10;
+  const headerX = padding + avatarSize + avatarGap;
+  const headerWidth = width - headerX - padding;
+  const fields = exportFields(member, store);
+  const wrap = (field, maxWidth) => {
     const style = fontFor(field.kind);
-    return wrapText(field.text, textWidth, (text) => measure(text, style)).map((text) => ({ text, kind: field.kind, ...style }));
-  });
-  return { member, width, height: Math.max(106, 58 + lines.reduce((h, l) => h + l.line, 0)), lines };
+    return wrapText(field.text, maxWidth, (text) => measure(text, style)).map((text) => ({ text, kind: field.kind, ...style, maxWidth }));
+  };
+  const badges = fields.filter((f) => f.kind === "badge").flatMap((f) => wrap(f, headerWidth));
+  const names = fields.filter((f) => f.kind === "name").flatMap((f) => wrap(f, headerWidth));
+  const headingHeight = badges.reduce((h, l) => h + l.line, 0) + headingGap + names.reduce((h, l) => h + l.line, 0);
+  const headerHeight = Math.max(avatarSize, headingHeight);
+  let cursor = padding + (headerHeight - headingHeight) / 2;
+  const lines = [];
+  for (const line of badges) {
+    lines.push({ ...line, x: headerX + headerWidth / 2, y: cursor + line.size, anchor: "middle" });
+    cursor += line.line;
+  }
+  cursor += headingGap;
+  for (const line of names) {
+    lines.push({ ...line, x: headerX + headerWidth / 2, y: cursor + line.size, anchor: "middle" });
+    cursor += line.line;
+  }
+  cursor = padding + headerHeight + detailGap;
+  const details = fields.filter((f) => !["badge", "name"].includes(f.kind)).flatMap((f) => wrap(f, width - padding * 2));
+  for (const line of details) {
+    const lineHeight = 14;
+    lines.push({ ...line, line: lineHeight, x: padding, y: cursor + line.size, anchor: "start" });
+    cursor += lineHeight;
+  }
+  return {
+    member,
+    width,
+    height: Math.max(94, cursor + padding),
+    lines,
+    avatar: { x: padding, y: padding + (headerHeight - avatarSize) / 2, size: avatarSize },
+    headerHeight
+  };
+}
+function withoutStandaloneSpouses(members, store, keepId = null) {
+  const ids = new Set(members.map((m) => m.id));
+  const parents = new Set(members.map((m) => m.parent_id).filter((id) => ids.has(id)));
+  const connected = (m) => m.id === keepId || ids.has(m.parent_id) || parents.has(m.id);
+  const order = new Map(members.map((m, i) => [m.id, i]));
+  const omitted = /* @__PURE__ */ new Set();
+  for (const member of members) {
+    if (connected(member)) continue;
+    const represented = members.some((owner) => owner.id !== member.id && !omitted.has(owner.id) && store.getSpouseMember(owner.id)?.id === member.id && (connected(owner) || store.getSpouseMember(member.id)?.id !== owner.id || order.get(owner.id) < order.get(member.id)));
+    if (represented) omitted.add(member.id);
+  }
+  return members.filter((m) => !omitted.has(m.id));
 }
 function planA4(members, store, measure) {
   if (!members.length) return [];
   const usableW = A4.w - PAGE.left - PAGE.right;
-  const columns = Math.floor((usableW + PAGE.gap) / (PAGE.cardWidth + PAGE.gap));
-  const cardW = (usableW - (columns - 1) * PAGE.gap) / columns;
-  const cards = new Map(members.map((m) => [m.id, measureCard(m, store, cardW, measure)]));
+  const maxColumns = Math.min(4, Math.floor((usableW + PAGE.gap) / (PAGE.cardWidth + PAGE.gap)));
+  const usableH = A4.h - PAGE.top - PAGE.bottom;
+  let columns = maxColumns, cardW, cards;
+  for (; columns >= 1; columns--) {
+    cardW = (usableW - (columns - 1) * PAGE.gap) / columns;
+    cards = new Map(members.map((m) => [m.id, measureCard(m, store, cardW, measure)]));
+    const fits = members.every((m) => {
+      const card = cards.get(m.id), parent = cards.get(m.parent_id);
+      return card.height + (parent ? parent.height + PAGE.connectorGap : 0) <= usableH;
+    });
+    if (fits || columns === 1) break;
+  }
   const groups = /* @__PURE__ */ new Map();
   const covered = /* @__PURE__ */ new Set();
   const firstGen = Math.min(...members.map(generation));
@@ -2254,8 +2311,9 @@ var Exporter = class {
     const labels = { ALL: "To\xE0n b\u1ED9 d\xF2ng h\u1ECD", CURRENT_VIEW: "C\xE1c th\xE0nh vi\xEAn \u0111ang hi\u1EC3n th\u1ECB", "Chi 1": "Chi 1", "Chi 2": "Chi 2", PATERNAL_ONLY: "Nh\xE1nh n\u1ED9i t\u1ED9c", MATERNAL_ONLY: "Nh\xE1nh ngo\u1EA1i t\u1ED9c" };
     return labels[scope] || (scope.startsWith("SUBTREE:") ? `Nh\xE1nh ${store.getMember(scope.slice(8))?.full_name || scope.slice(8)}` : "C\xE2y gia ph\u1EA3");
   }
-  static getExportLayout(tree, scope = "ALL", maxDepth = 0) {
-    const members = scopedMembers(tree, scope, maxDepth);
+  static getExportLayout(tree, scope = "ALL", maxDepth = 0, omitSpouses = false) {
+    const scoped = scopedMembers(tree, scope, maxDepth);
+    const members = omitSpouses ? withoutStandaloneSpouses(scoped, tree.dataStore, scope.startsWith("SUBTREE:") ? scope.slice(8) : null) : scoped;
     const measure = this.measurer();
     const width = 280;
     const cards = new Map(members.map((m) => [m.id, measureCard(m, tree.dataStore, width, measure)]));
@@ -2264,20 +2322,18 @@ var Exporter = class {
     return { ...layout, cards, nodeWidth: width, nodeHeight: height };
   }
   static a4Pages(tree, scope = "ALL", template = "card", maxDepth = 0) {
-    const members = scopedMembers(tree, scope, maxDepth);
+    const members = withoutStandaloneSpouses(scopedMembers(tree, scope, maxDepth), tree.dataStore, scope.startsWith("SUBTREE:") ? scope.slice(8) : null);
     const measure = this.measurer();
     return template === "table" ? planTable(members, tree.dataStore, measure) : planA4(members, tree.dataStore, measure);
   }
   static cardSVG(card) {
     const { x = 0, y = 0, width, height, member, lines } = card;
-    let cursor = y + 51;
     const text = lines.map((line) => {
       const fill = line.kind === "badge" || line.kind === "saint" ? "#92400e" : line.kind === "name" ? "#292524" : "#57534e";
-      const value = `<text x="${x + 12}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
-      cursor += line.line;
-      return value;
+      return `<text x="${x + line.x}" y="${y + line.y}" text-anchor="${line.anchor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
     }).join("");
-    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued || card.repeated || member.role === "\u0110\xEDch T\xF4n" ? "#d97706" : "#a8a29e"}" stroke-width="${card.continued || card.repeated ? 1.5 : 0.8}"/>${avatarSVG(member.gender).replace("<svg ", `<svg x="${x + 12}" y="${y + 10}" width="28" height="28" `)}${text}</g>`;
+    const avatar = card.avatar;
+    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued || card.repeated || member.role === "\u0110\xEDch T\xF4n" ? "#d97706" : "#a8a29e"}" stroke-width="${card.continued || card.repeated ? 1.5 : 0.8}"/>${avatarSVG(member.gender).replace("<svg ", `<svg x="${x + avatar.x}" y="${y + avatar.y}" width="${avatar.size}" height="${avatar.size}" `)}${text}</g>`;
   }
   static headerSVG(tree, scope, width, pair = null) {
     const measure = this.measurer();
@@ -2317,8 +2373,8 @@ var Exporter = class {
   static svgDocument(width, height, body) {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>text{font-family:${FONT};}</style><rect width="100%" height="100%" fill="#fff"/>${body}</svg>`;
   }
-  static fullTreeSVG(tree, scope = "ALL", maxDepth = 0) {
-    const layout = this.getExportLayout(tree, scope, maxDepth);
+  static fullTreeSVG(tree, scope = "ALL", maxDepth = 0, omitSpouses = false) {
+    const layout = this.getExportLayout(tree, scope, maxDepth, omitSpouses);
     if (!layout.positions.size) throw new Error("Kh\xF4ng c\xF3 th\xE0nh vi\xEAn trong ph\u1EA1m vi \u0111\xE3 ch\u1ECDn.");
     const width = Math.max(1e3, layout.bounds.width + 68), height = layout.bounds.height + 140;
     const dx = (width - layout.bounds.width) / 2 - layout.bounds.minX, dy = 100 - layout.bounds.minY;
@@ -2352,9 +2408,9 @@ var Exporter = class {
       URL.revokeObjectURL(url);
     }
   }
-  static async renderToCanvas2D(tree, scope = "ALL", scale = 2, maxDepth = 0) {
+  static async renderToCanvas2D(tree, scope = "ALL", scale = 2, maxDepth = 0, omitSpouses = false) {
     await this.ready();
-    const output = this.fullTreeSVG(tree, scope, maxDepth);
+    const output = this.fullTreeSVG(tree, scope, maxDepth, omitSpouses);
     const renderScale = Math.min(scale, 16e3 / output.width, 16e3 / output.height, Math.sqrt(24e6 / (output.width * output.height)));
     if (renderScale < 0.35) throw new Error("C\xE2y qu\xE1 l\u1EDBn cho m\u1ED9t \u1EA3nh. H\xE3y xu\u1EA5t PDF A4 nhi\u1EC1u trang ho\u1EB7c SVG.");
     return { ...await this.rasterize(output.svg, output.width, output.height, renderScale), scopeLabel: this.getScopeTitle(tree.dataStore, scope) };
@@ -2374,7 +2430,7 @@ var Exporter = class {
     this.downloadBlob(new Blob([svg], { type: "image/svg+xml;charset=utf-8" }), this.filename("Cay", scope, "svg"));
   }
   static async exportPDF(tree, scope = "ALL", paperSize = "AUTO", maxDepth = 0) {
-    const rendered = await this.renderToCanvas2D(tree, scope, 2, maxDepth);
+    const rendered = await this.renderToCanvas2D(tree, scope, 2, maxDepth, true);
     try {
       const largest = 2200;
       const ratio = rendered.width / rendered.height;
@@ -2424,7 +2480,7 @@ var Exporter = class {
     const win = this.printWindow();
     try {
       await this.ready();
-      const output = this.fullTreeSVG(tree, scope, maxDepth);
+      const output = this.fullTreeSVG(tree, scope, maxDepth, true);
       await this.fillPrintWindow(win, tree.dataStore.lineageInfo.name, `<section>${output.svg}</section>`, false);
     } catch (error) {
       win.close();

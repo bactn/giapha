@@ -16,7 +16,7 @@ Chuẩn hóa một bộ thông tin dùng chung cho PNG, SVG, PDF khổ lớn, PD
 2. Ngày/năm sinh nếu có.
 3. Ngày mất dương lịch nếu có; ngày giỗ âm lịch nếu có, ghi rõ loại lịch để tránh nhầm.
 4. Hưởng thọ: ưu tiên giá trị nhập riêng; nếu không có thì tính theo ngày sinh/ngày mất dương lịch. Khi thiếu ngày/tháng chỉ tính chênh lệch năm. Nếu chưa tính được thì ghi “chưa rõ” cho người đã mất, không tự tạo tuổi 0.
-5. Giữ thông tin nhận diện đời, mã thành viên và nhánh; quan hệ vợ/chồng ghi thành chữ.
+5. Giữ thông tin đời và nhánh trên bản in; mã thành viên giữ trong CSV/JSON để nhập lại đúng quan hệ. Quan hệ vợ/chồng ghi thành chữ.
 
 JSON sao lưu giữ nguyên toàn bộ dữ liệu gốc, gồm hai trường ngày mất và giá trị hưởng thọ nhập riêng. CSV/Excel cần thêm cột riêng cho ngày mất dương lịch, giỗ âm lịch và hưởng thọ; không gộp hai lịch vào một cột.
 
@@ -61,8 +61,8 @@ Thay cách gom nguyên thế hệ rồi thu nhỏ toàn bộ đang có bằng b�
 
 - Nội dung xuất dùng chung: tên thánh, họ tên, ngày sinh, ngày mất dương lịch, giỗ âm lịch, hưởng thọ và vợ/chồng. Không có dữ liệu thì không tự tạo ngày hoặc tuổi.
 - PNG, SVG, PDF và bản in đều dùng đường nối vuông góc. Canvas tương tác giữ cách vẽ riêng.
-- PDF A4 và In A4 dùng cùng bộ lập trang, khổ 297 × 210 mm. Ba node con tối đa trên một hàng; cha/mẹ lặp lại ở mỗi hàng tiếp để tránh đường nối chạy xuyên node. Mỗi trang chỉ thuộc một cặp đời. Có thể xếp nhiều cây theo chiều dọc nếu đủ chỗ.
-- Cha/mẹ được lặp ở cặp đời tiếp theo có viền nhấn; trang tiếp có ghi chú. Những người không có con/phối ngẫu tách node vẫn được đưa vào phạm vi xuất.
+- PDF A4 và In A4 dùng cùng bộ lập trang, khổ 297 × 210 mm. Tối đa bốn node con trên một hàng, giảm số cột khi nội dung quá dài; cha/mẹ lặp lại ở mỗi hàng tiếp để tránh đường nối chạy xuyên node. Mỗi trang chỉ thuộc một cặp đời. Có thể xếp nhiều cây theo chiều dọc nếu đủ chỗ.
+- Cha/mẹ được lặp ở cặp đời tiếp theo có viền nhấn; trang tiếp có ghi chú. Những người không có con vẫn được đưa vào phạm vi xuất. Phối ngẫu đứng riêng được bỏ khi thông tin đã có trong node của người còn lại; người có nhánh cha/mẹ hoặc con riêng vẫn được giữ.
 - Bảng A4 xuống dòng theo nội dung, tính chiều cao từng hàng, lặp tiêu đề cột trên trang mới.
 - CSV mở bằng Excel có cột riêng hai loại lịch, hưởng thọ nhập riêng và hưởng thọ tính từ ngày; nhập lại không biến tuổi tự tính thành tuổi nhập riêng, giữ mã phối ngẫu và thứ tự anh/em. JSON giữ dữ liệu gốc.
 - Dựng PDF tuần tự từng canvas 300 DPI, giải phóng canvas sau mỗi trang. Bản in dùng SVG cùng tọa độ, giữ chữ rõ.
@@ -89,3 +89,13 @@ Hai trường ngày mất dương lịch/hưởng thọ vẫn theo quyền xem h
 - Thay đổi tên/ngày tháng chỉ cập nhật node liên quan và nhãn cây thư mục; đổi quan hệ/thế hệ vẫn dàn cây đầy đủ. Không tạo lịch sử cho giá trị không đổi.
 - Sửa tên trực tiếp không kích hoạt chọn/kéo node, Enter của bộ gõ không bị hiểu thành lưu; Enter/blur chỉ ghi một lần. Bấm đúp không bị thao tác mở phần thông tin và dịch chuyển cây chen ngang.
 - Đã kiểm tra sửa tên qua canvas, cây thư mục và ô thông tin ở khung 390 × 844: ba lần sửa tạo ba lần cập nhật dữ liệu, không dàn lại cây. Ô nhập trên mobile dùng cỡ chữ 16 px để hạn chế tự zoom khi mở bàn phím. Chưa đo tốc độ khung hình trên điện thoại thật.
+
+
+### Bố cục bốn node và tên chính trong cây thư mục
+
+- Đầu node PDF chia hai cột: avatar 34 pt ở trái; Đời/Chi và tên thánh/họ tên căn giữa trong cột phải, cùng trục ngang với avatar. Giữa Đời/Chi và họ tên có khoảng giãn 6 pt. Các thông tin khác nằm dưới, dòng cao 14 pt, lề trái/phải 12 pt.
+- A4 ngang thử bốn node mỗi hàng trước, khoảng cách giữa node 14 pt. Nếu nội dung quá dài theo chiều dọc thì thử ít cột hơn, không thu cỡ chữ và không cắt nội dung.
+- Bỏ node phối ngẫu đứng riêng khỏi PDF/bản in nếu thông tin đã được thể hiện trong node vợ/chồng. Giữ người có quan hệ cha/mẹ–con trong phạm vi, cụ tổ độc lập và gốc cây con được chọn; một cặp phối ngẫu đứng riêng luôn giữ ít nhất một node. Dữ liệu gốc, CSV/JSON và cây tương tác không bị xoá người.
+- Cây thư mục ưu tiên trọn tên chính trước, cho xuống dòng; tên vợ/chồng là dòng phụ bên dưới. Mobile chỉ hiện nhóm nút thao tác trên dòng được chọn để tên có thêm chỗ.
+- Kiểm tra PDF mẫu hai trang bằng bộ xuất thực tế, dựng lại cả hai trang thành ảnh: bốn con trên một hàng, avatar/họ tên đúng vị trí, thông tin phối ngẫu vẫn đầy đủ và không có node phối ngẫu trùng lặp.
+- Kiểm tra cây thư mục ở 390 × 844 với tên chính dài: tên xuống hai dòng đầy đủ, dòng vợ/chồng nằm dưới và không tràn ngang.

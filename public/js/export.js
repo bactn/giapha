@@ -1,7 +1,7 @@
 // All exports use measured, complete card content and orthogonal connectors.
 import { avatarSVG, lifespanAge } from './member-presentation.js';
 import { AutoLayout } from './auto-layout.js';
-import { A4, PAGE, scopedMembers, measureCard, planA4, planTable, wrapText } from './export-layout.js';
+import { A4, PAGE, scopedMembers, measureCard, planA4, planTable, wrapText, withoutStandaloneSpouses } from './export-layout.js';
 
 const FONT = 'Arial, Helvetica, sans-serif';
 const xml = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
@@ -26,8 +26,9 @@ export class Exporter {
     const labels={ALL:'Toàn bộ dòng họ',CURRENT_VIEW:'Các thành viên đang hiển thị','Chi 1':'Chi 1','Chi 2':'Chi 2',PATERNAL_ONLY:'Nhánh nội tộc',MATERNAL_ONLY:'Nhánh ngoại tộc'};
     return labels[scope] || (scope.startsWith('SUBTREE:') ? `Nhánh ${store.getMember(scope.slice(8))?.full_name || scope.slice(8)}` : 'Cây gia phả');
   }
-  static getExportLayout(tree, scope='ALL', maxDepth=0) {
-    const members=scopedMembers(tree,scope,maxDepth);
+  static getExportLayout(tree, scope='ALL', maxDepth=0, omitSpouses=false) {
+    const scoped=scopedMembers(tree,scope,maxDepth);
+    const members=omitSpouses ? withoutStandaloneSpouses(scoped,tree.dataStore,scope.startsWith('SUBTREE:')?scope.slice(8):null) : scoped;
     const measure=this.measurer();
     const width=280;
     const cards=new Map(members.map(m=>[m.id,measureCard(m,tree.dataStore,width,measure)]));
@@ -36,20 +37,20 @@ export class Exporter {
     return {...layout,cards,nodeWidth:width,nodeHeight:height};
   }
   static a4Pages(tree,scope='ALL',template='card',maxDepth=0) {
-    const members=scopedMembers(tree,scope,maxDepth);
+    const members=withoutStandaloneSpouses(scopedMembers(tree,scope,maxDepth),tree.dataStore,scope.startsWith('SUBTREE:')?scope.slice(8):null);
     const measure=this.measurer();
     return template==='table' ? planTable(members,tree.dataStore,measure) : planA4(members,tree.dataStore,measure);
   }
   static cardSVG(card) {
     const {x=0,y=0,width,height,member,lines}=card;
-    let cursor=y+51;
     const text=lines.map(line=>{
       const fill=line.kind==='badge'||line.kind==='saint'?'#92400e':line.kind==='name'?'#292524':'#57534e';
-      const value=`<text x="${x+12}" y="${cursor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
-      cursor+=line.line; return value;
+      return `<text x="${x+line.x}" y="${y+line.y}" text-anchor="${line.anchor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
     }).join('');
-    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued||card.repeated||member.role==='Đích Tôn'?'#d97706':'#a8a29e'}" stroke-width="${card.continued||card.repeated?1.5:.8}"/>${avatarSVG(member.gender).replace('<svg ',`<svg x="${x+12}" y="${y+10}" width="28" height="28" `)}${text}</g>`;
+    const avatar=card.avatar;
+    return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued||card.repeated||member.role==='Đích Tôn'?'#d97706':'#a8a29e'}" stroke-width="${card.continued||card.repeated?1.5:.8}"/>${avatarSVG(member.gender).replace('<svg ',`<svg x="${x+avatar.x}" y="${y+avatar.y}" width="${avatar.size}" height="${avatar.size}" `)}${text}</g>`;
   }
+
   static headerSVG(tree,scope,width,pair=null) {
     const measure=this.measurer();
     const title=wrapText(tree.dataStore.lineageInfo.name||'Gia phả dòng họ',width-68,s=>measure(s,{size:18,weight:'bold'}));
@@ -81,8 +82,8 @@ export class Exporter {
   static svgDocument(width,height,body) {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>text{font-family:${FONT};}</style><rect width="100%" height="100%" fill="#fff"/>${body}</svg>`;
   }
-  static fullTreeSVG(tree,scope='ALL',maxDepth=0) {
-    const layout=this.getExportLayout(tree,scope,maxDepth);
+  static fullTreeSVG(tree,scope='ALL',maxDepth=0,omitSpouses=false) {
+    const layout=this.getExportLayout(tree,scope,maxDepth,omitSpouses);
     if(!layout.positions.size) throw new Error('Không có thành viên trong phạm vi đã chọn.');
     const width=Math.max(1000,layout.bounds.width+68),height=layout.bounds.height+140;
     const dx=(width-layout.bounds.width)/2-layout.bounds.minX,dy=100-layout.bounds.minY;
@@ -105,9 +106,9 @@ export class Exporter {
       return {canvas,width:canvas.width,height:canvas.height};
     } finally {URL.revokeObjectURL(url);}
   }
-  static async renderToCanvas2D(tree,scope='ALL',scale=2,maxDepth=0) {
+  static async renderToCanvas2D(tree,scope='ALL',scale=2,maxDepth=0,omitSpouses=false) {
     await this.ready();
-    const output=this.fullTreeSVG(tree,scope,maxDepth);
+    const output=this.fullTreeSVG(tree,scope,maxDepth,omitSpouses);
     // Bound both axes and area on mobile; suggest A4 instead of a blank canvas.
     const renderScale=Math.min(scale,16000/output.width,16000/output.height,Math.sqrt(24000000/(output.width*output.height)));
     if(renderScale<.35) throw new Error('Cây quá lớn cho một ảnh. Hãy xuất PDF A4 nhiều trang hoặc SVG.');
@@ -123,7 +124,7 @@ export class Exporter {
     this.downloadBlob(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}),this.filename('Cay',scope,'svg'));
   }
   static async exportPDF(tree,scope='ALL',paperSize='AUTO',maxDepth=0) {
-    const rendered=await this.renderToCanvas2D(tree,scope,2,maxDepth);
+    const rendered=await this.renderToCanvas2D(tree,scope,2,maxDepth,true);
     try {
       const largest=2200;
       const ratio=rendered.width/rendered.height;
@@ -165,7 +166,7 @@ export class Exporter {
   }
   static async printTree(tree,scope='ALL',maxDepth=0) {
     const win=this.printWindow();
-    try {await this.ready();const output=this.fullTreeSVG(tree,scope,maxDepth);await this.fillPrintWindow(win,tree.dataStore.lineageInfo.name,`<section>${output.svg}</section>`,false);}
+    try {await this.ready();const output=this.fullTreeSVG(tree,scope,maxDepth,true);await this.fillPrintWindow(win,tree.dataStore.lineageInfo.name,`<section>${output.svg}</section>`,false);}
     catch(error){win.close();throw error;}
   }
   static async fillPrintWindow(win,title,body,a4) {

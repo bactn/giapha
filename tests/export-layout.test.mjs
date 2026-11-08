@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { DataStore } from '../public/js/data-store.js';
 import { AutoLayout } from '../public/js/auto-layout.js';
 import { Exporter } from '../public/js/export.js';
-import { A4, PAGE, planA4, exportFields, scopedMembers, wrapText } from '../public/js/export-layout.js';
+import { A4, PAGE, planA4, exportFields, scopedMembers, wrapText, withoutStandaloneSpouses, measureCard } from '../public/js/export-layout.js';
 import { ExcelParser } from '../public/js/excel-parser.js';
 const measure=(text,style)=>[...text].length*style.size*.62;
 const storeFor=members=>{const s=new DataStore();s.loadState({lineageInfo:{name:'Dòng họ thử'},members});return s;};
@@ -13,7 +13,12 @@ function checkGeometry(pages) {
     for(const n of page.nodes) {
       assert(n.x>=PAGE.left-.001);assert(n.x+n.width<=A4.w-PAGE.right+.001);
       assert(n.y>=PAGE.top);assert(n.y+n.height<=A4.h-PAGE.bottom+.001);
-      for(const line of n.lines) assert(measure(line.text,line)<=n.width-24+.001);
+      for(const line of n.lines) {
+        assert(measure(line.text,line)<=line.maxWidth+.001);
+        assert(line.y-line.size>=0);assert(line.y<n.height);
+        if(line.anchor==='middle') {assert(line.x-line.maxWidth/2>=12-.001);assert(line.x+line.maxWidth/2<=n.width-12+.001);}
+        else {assert.equal(line.x,12);assert(line.x+line.maxWidth<=n.width-12+.001);}
+      }
     }
     for(const path of page.paths) {
       assert(page.nodes.some(n=>n.member.id===path.parentId));assert(page.nodes.some(n=>n.member.id===path.childId));
@@ -39,7 +44,7 @@ test('A4 overlaps successive pairs, repeats parents for continuation, covers eve
   const childOrder=pages.flatMap(p=>p.paths.filter(e=>e.parentId==='ROOT').map(e=>e.childId));assert.deepEqual(childOrder,Array.from({length:31},(_,i)=>'C'+(30-i)));
   assert(pages.some(p=>p.nodes.some(n=>n.member.id==='ROOT'&&n.continued)));
 });
-test('branch, subtree, spouse, depth and current-view filters are shared by card, table and image output',()=>{
+test('PDF scopes omit represented standalone spouses while full image scopes keep all records',()=>{
   const s=storeFor([member('A',1,'',{spouse_id:'B',branch:'Chi 1'}),member('B',1,'',{gender:'Nữ',branch:'Chi 1'}),member('C',2,'A',{branch:'Chi 1'}),member('D',3,'C',{branch:'Chi 1'}),member('E',1,'',{branch:'Chi 2'})]);
   const tree={dataStore:s,layout:new AutoLayout(),layoutData:{positions:new Map([['E',{}]])}};
   assert.deepEqual(scopedMembers(tree,'SUBTREE:A',2).map(m=>m.id),['A','B','C']);
@@ -47,7 +52,7 @@ test('branch, subtree, spouse, depth and current-view filters are shared by card
   for(const template of ['card','table']) {
     const pages=Exporter.a4Pages(tree,'Chi 1',template,2);
     const ids=new Set(template==='card'?pages.flatMap(p=>p.nodes.map(n=>n.member.id)):pages.flatMap(p=>p.rows.map(r=>r.member.id)));
-    assert.deepEqual([...ids].sort(),['A','B','C']);
+    assert.deepEqual([...ids].sort(),['A','C']);
   }
   assert.deepEqual([...Exporter.getExportLayout(tree,'Chi 1',2).positions.keys()].sort(),['A','B','C']);
   assert.equal(scopedMembers(tree,'SUBTREE:missing').length,0);
@@ -57,7 +62,7 @@ test('content preserves Christian name, separate calendars, manual age, missing 
   const s=storeFor([m]); const texts=exportFields(m,s).map(f=>f.text);
   assert(texts.includes('[Giuse] A <script>'));assert(texts.includes('SN 1930'));assert(texts.includes('Mất 2010 (DL)'));assert(texts.includes('Giỗ 20/03 (ÂL)'));assert(texts.includes('Hưởng thọ 85 tuổi'));
   const page=Exporter.a4Pages({dataStore:s},'ALL')[0];const svg=Exporter.a4PageSVG({dataStore:s},page,1,1);
-  assert(svg.includes('A &lt;script&gt;'));assert(!svg.includes('<script>'));
+  assert(svg.includes('&lt;script&gt;'));assert(!svg.includes('<script>'));
   assert(exportFields(member('B',1,'',{status:'Đã mất'}),s).some(f=>f.text==='Hưởng thọ chưa rõ'));
   assert(!exportFields(member('C',1),s).some(f=>f.text.startsWith('Hưởng thọ')));
 });
@@ -124,4 +129,47 @@ test('printed nodes hide identifiers, combine saint/name and include complete sp
   assert(card.lines.every(l=>measure(l.text,l)<=card.width-24));
   const table=Exporter.a4Pages({dataStore:store},'ALL','table');
   assert.equal(table[0].headings[0],'Đời');assert(!table[0].rows[0].cells[0].join('').includes('P001'));
+});
+test('A4 fits four child cards per row, centers header text beside the avatar and retains readable type',()=>{
+  const store=storeFor([member('A',1,'',{christian_name:'Giuse',branch:'Chi 1'}),...Array.from({length:9},(_,i)=>member('C'+i,2,'A',{christian_name:'Maria',birth_date:'1990'}))]);
+  const pages=Exporter.a4Pages({dataStore:store});checkGeometry(pages);
+  const blocks=pages.flatMap(p=>p.blocks).filter(b=>b.parent?.member.id==='A');
+  assert.deepEqual(blocks.map(b=>b.children.length),[4,4,1]);
+  assert.deepEqual(pages.flatMap(p=>p.paths.map(p=>p.childId)),Array.from({length:9},(_,i)=>'C'+i));
+  const card=pages[0].nodes[0],heading=card.lines.filter(l=>['badge','name'].includes(l.kind));
+  assert(heading.every(l=>l.anchor==='middle' && l.x>card.avatar.x+card.avatar.size));
+  assert.equal(card.avatar.y+card.avatar.size/2,12+card.headerHeight/2);
+  const lastBadge=heading.filter(l=>l.kind==='badge').at(-1),firstName=heading.find(l=>l.kind==='name');
+  assert(firstName.y-firstName.size-lastBadge.y>=6);
+  assert(card.lines.filter(l=>l.kind==='name').every(l=>l.size===12));
+});
+test('PDF hides only standalone spouses represented by a retained partner and preserves ancestors, selected roots and raw records',()=>{
+  const members=[member('A',1,'',{spouse_id:'B',christian_name:'Giuse'}),member('B',1,'',{spouse_id:'A',christian_name:'Maria',gender:'Nữ',birth_date:'1930',death_date_solar:'2010'}),member('C',2,'A'),member('OTHER',1)];
+  const store=storeFor(members),before=JSON.stringify(store.getAllMembers());
+  const pdf=withoutStandaloneSpouses(scopedMembers({dataStore:store}),store);
+  assert.deepEqual(pdf.map(m=>m.id),['A','OTHER','C']);
+  const pages=Exporter.a4Pages({dataStore:store});assert(!pages.some(p=>p.nodes.some(n=>n.member.id==='B')));
+  const a=pages.flatMap(p=>p.nodes).find(n=>n.member.id==='A');
+  assert(a.lines.filter(l=>l.kind==='detail').map(l=>l.text).join(' ').includes('Vợ: [Maria] Trần Ngọc B · SN 1930 - Mất 2010'));
+  assert.deepEqual([...Exporter.getExportLayout({dataStore:store},'ALL',0,true).positions.keys()].sort(),['A','C','OTHER']);
+  assert.deepEqual([...Exporter.getExportLayout({dataStore:store}).positions.keys()].sort(),['A','B','C','OTHER']);
+  const selected=Exporter.a4Pages({dataStore:store},'SUBTREE:B');assert(selected.some(p=>p.nodes.some(n=>n.member.id==='B')));
+  assert.equal(JSON.stringify(store.getAllMembers()),before);
+  const withChild=storeFor([...members,member('D',2,'B')]);assert(withoutStandaloneSpouses(withChild.getAllMembers(),withChild).some(m=>m.id==='B'));
+  const withParent=storeFor(members.map(m=>m.id==='B'?{...m,parent_id:'OTHER'}:m));assert(withoutStandaloneSpouses(withParent.getAllMembers(),withParent).some(m=>m.id==='B'));
+});
+test('isolated reciprocal or legacy one-way spouse pairs retain one card, never drop both',()=>{
+  for(const links of [{a:'B',b:'A'},{a:'',b:'A'},{a:'B',b:''}]){
+    const store=storeFor([member('A',1,'',{spouse_id:links.a}),member('B',1,'',{spouse_id:links.b})]);
+    const kept=withoutStandaloneSpouses(store.getAllMembers(),store);
+    assert.equal(kept.length,1);assert(store.getSpouseMember(kept[0].id));
+  }
+  const alone=storeFor([member('B',1,'',{spouse_id:'missing'})]);assert.equal(withoutStandaloneSpouses(alone.getAllMembers(),alone).length,1);
+});
+test('very long headers/details use fewer columns when needed without shrinking text or clipping',()=>{
+  const store=storeFor([member('A',1,'',{full_name:'Trần '+ 'Tên '.repeat(30),spouse:'Maria '+ 'Phối '.repeat(25)}),...Array.from({length:4},(_,i)=>member('C'+i,2,'A',{full_name:'Trần '+ 'Ngọc '.repeat(30)}))]);
+  const pages=Exporter.a4Pages({dataStore:store});checkGeometry(pages);
+  const blocks=pages.flatMap(p=>p.blocks);assert(blocks[0].children.length<4);
+  assert(new Set(pages.flatMap(p=>p.nodes.map(n=>n.member.id))).size===5);
+  assert(pages.flatMap(p=>p.nodes).every(n=>n.lines.filter(l=>l.kind==='name').every(l=>l.size===12)));
 });
