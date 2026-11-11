@@ -63,7 +63,7 @@ test('content preserves Christian name, separate calendars, manual age, missing 
   assert(texts.includes('[Giuse] A <script>'));assert(texts.includes('SN 1930'));assert(texts.includes('Mất 2010 (DL)'));assert(texts.includes('Giỗ 20/03 (ÂL)'));assert(texts.includes('Hưởng thọ 85 tuổi'));
   const page=Exporter.a4Pages({dataStore:s},'ALL')[0];const svg=Exporter.a4PageSVG({dataStore:s},page,1,1);
   assert(svg.includes('&lt;script&gt;'));assert(!svg.includes('<script>'));
-  assert(exportFields(member('B',1,'',{status:'Đã mất'}),s).some(f=>f.text==='Hưởng thọ chưa rõ'));
+  assert(exportFields(member('B',1,'',{status:'Đã mất'}),s).some(f=>f.text==='Hưởng thọ(chưa rõ)'));
   assert(!exportFields(member('C',1),s).some(f=>f.text.startsWith('Hưởng thọ')));
 });
 test('wrapping preserves all characters without ellipsis, including oversized single words',()=>{

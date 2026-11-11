@@ -34,7 +34,7 @@ export function exportFields(member, store) {
     ...(solar ? [{ kind: 'detail', text: `Mất ${solar} (DL)` }] : []),
     ...(lunar && !/^(?:mất sớm|đã mất|mất)$/i.test(lunar) ? [{ kind: 'detail', text: `Giỗ ${lunar.replace(/\s*(?:âm lịch|âm|ÂL)$/i, '')} (ÂL)` }] : []),
     ...(!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: 'detail', text: member.status === 'Mất sớm' || /^mất sớm$/i.test(lunar) ? 'Mất sớm' : 'Mất: chưa rõ ngày' }] : []),
-    ...(died ? [{ kind: 'detail', text: `Hưởng thọ ${age === null ? 'chưa rõ' : age + ' tuổi'}` }] : []),
+    ...(died ? [{ kind: 'detail', text: age === null ? 'Hưởng thọ(chưa rõ)' : `Hưởng thọ ${age} tuổi` }] : []),
     ...(spouse ? [{ kind: 'detail', text: spouse }] : []),
     ...(member.role && member.role !== 'Thành viên' ? [{ kind: /^đích tôn$/i.test(member.role.trim()) ? 'heir' : 'detail', text: member.role.replace(/phối ngẫu/gi, 'Vợ/chồng') }] : [])
   ];
@@ -295,7 +295,7 @@ export function planTable(members, store, measure) {
   const pages = []; let page; let y;
   for (const member of familyOrder(members)) {
     const fields = exportFields(member, store);
-    const texts = [fields.filter(f => f.kind === 'badge').map(f => `Đ${generation(member)}`).join(''), fields.filter(f => ['saint','name'].includes(f.kind)).map(f=>f.text).join('\n'), fields.filter(f => f.kind === 'detail' && /^(?:SN |Mất|Giỗ )/.test(f.text)).map(f=>f.text).join('\n'), fields.find(f=>f.text.startsWith('Hưởng thọ'))?.text.replace('Hưởng thọ ','') || '', fields.find(f=>/^(?:Vợ|Chồng)/.test(f.text))?.text || '', [member.branch, member.role?.replace(/phối ngẫu/gi, 'Vợ/chồng')].filter(Boolean).join('\n')];
+    const texts = [fields.filter(f => f.kind === 'badge').map(f => `Đ${generation(member)}`).join(''), fields.filter(f => ['saint','name'].includes(f.kind)).map(f=>f.text).join('\n'), fields.filter(f => f.kind === 'detail' && /^(?:SN |Mất|Giỗ )/.test(f.text)).map(f=>f.text).join('\n'), fields.find(f=>f.text.startsWith('Hưởng thọ'))?.text.replace(/^Hưởng thọ ?/,'') || '', fields.find(f=>/^(?:Vợ|Chồng)/.test(f.text))?.text || '', [member.branch, member.role?.replace(/phối ngẫu/gi, 'Vợ/chồng')].filter(Boolean).join('\n')];
     const cells = texts.map((text,i) => text.split('\n').flatMap(t => wrapText(t,widths[i]-12,s=>measure(s,{size:9,weight:'normal'}))));
     const height = Math.max(34, 12 + Math.max(...cells.map(c=>c.length))*12);
     if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Thông tin của ${member.full_name} quá dài cho một hàng A4. Hãy rút gọn nội dung hoặc xuất SVG.`);
