@@ -173,3 +173,28 @@ test('very long headers/details use fewer columns when needed without shrinking 
   assert(new Set(pages.flatMap(p=>p.nodes.map(n=>n.member.id))).size===5);
   assert(pages.flatMap(p=>p.nodes).every(n=>n.lines.filter(l=>l.kind==='name').every(l=>l.size===12)));
 });
+
+test('PDF finishes each branch before the next and keeps links from shared parents', () => {
+  const store = storeFor([
+    member('root', 1, '', { branch: 'Ngành II' }),
+    member('b2', 2, 'root', { branch: 'Chi 2' }),
+    member('a2', 2, 'root', { branch: 'Chi 1' }),
+    member('a3', 3, 'a2', { branch: 'Chi 1' }),
+    member('b3', 3, 'b2', { branch: 'Chi 2' }),
+    member('other', 2, '', { branch: '' })
+  ]);
+  const tree = { dataStore: store };
+  const pages = Exporter.a4Pages(tree);
+  assert.deepEqual(pages.map(page => page.branch), ['Ngành II', 'Chi 1', 'Chi 1', 'Chi 2', 'Chi 2', 'Chưa phân chi']);
+  assert.deepEqual(pages.flatMap(page => page.paths.map(path => [path.parentId, path.childId])),
+    [['root', 'a2'], ['a2', 'a3'], ['root', 'b2'], ['b2', 'b3']]);
+  checkGeometry(pages);
+  assert.match(Exporter.a4PageSVG(tree, pages[1], 2, pages.length), /Chi 1 · Đời 1–2/);
+  const table = Exporter.a4Pages(tree, 'ALL', 'table');
+  assert.deepEqual(table.flatMap(page => page.rows.map(row => row.member.id)),
+    ['root', 'a2', 'a3', 'b2', 'b3', 'other']);
+  const { svg } = Exporter.fullTreeSVG(tree, 'ALL', 0, true);
+  const markers = ['a2', 'a3', 'b2', 'b3'].map(id => svg.indexOf('data-member-id="' + id + '"'));
+  assert(markers.every(value => value >= 0));
+  assert(Math.max(...markers.slice(0, 2)) < Math.min(...markers.slice(2)));
+});

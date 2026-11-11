@@ -53,6 +53,31 @@ export function scopedMembers(tree, scope = 'ALL', maxDepth = 0) {
   return [...members].sort((a, b) => generation(a) - generation(b) || compareSiblings(a, b));
 }
 
+export function pdfBranchSections(members) {
+  const sections = new Map();
+  for (const member of members) {
+    const branch = String(member.branch ?? '').trim();
+    if (!sections.has(branch)) sections.set(branch, []);
+    sections.get(branch).push(member);
+  }
+  const rank = branch => branch === 'Ngành II' ? 0 : branch ? 1 : 2;
+  const branches = [...sections.keys()].sort((a, b) =>
+    rank(a) - rank(b) || a.localeCompare(b, 'vi', { numeric: true }));
+  if (branches.filter(branch => rank(branch) === 1).length < 2) {
+    return [{ label: '', members, context: [] }];
+  }
+  const byId = new Map(members.map(member => [member.id, member]));
+  return branches.map(branch => {
+    const branchMembers = sections.get(branch);
+    const ids = new Set(branchMembers.map(member => member.id));
+    const parentIds = new Set(branchMembers.map(member => member.parent_id));
+    const context = [...parentIds]
+      .filter(id => byId.has(id) && !ids.has(id))
+      .map(id => byId.get(id));
+    return { label: branch || 'Chưa phân chi', members: branchMembers, context };
+  });
+}
+
 export function wrapText(text, width, measure) {
   const lines = []; let line = '';
   for (const word of String(text).split(/\s+/).filter(Boolean)) {
@@ -117,8 +142,9 @@ export function withoutStandaloneSpouses(members, store, keepId = null) {
 
 // Each block is one parent and at most one row of children. Repeating the parent
 // on subsequent rows/pages prevents connectors running through earlier rows.
-export function planA4(members, store, measure) {
+export function planA4(members, store, measure, context = []) {
   if (!members.length) return [];
+  const parents = [...context, ...members];
   const usableW = A4.w - PAGE.left - PAGE.right;
   const maxColumns = Math.min(4, Math.floor((usableW + PAGE.gap) / (PAGE.cardWidth + PAGE.gap)));
   const usableH = A4.h - PAGE.top - PAGE.bottom;
@@ -127,7 +153,7 @@ export function planA4(members, store, measure) {
   let columns = maxColumns, cardW, cards;
   for (; columns >= 1; columns--) {
     cardW = (usableW - (columns - 1) * PAGE.gap) / columns;
-    cards = new Map(members.map(m => [m.id, measureCard(m, store, cardW, measure)]));
+    cards = new Map(parents.map(m => [m.id, measureCard(m, store, cardW, measure)]));
     const fits = members.every(m => {
       const card = cards.get(m.id), parent = cards.get(m.parent_id);
       return card.height + (parent ? parent.height + PAGE.connectorGap : 0) <= usableH;
@@ -141,7 +167,7 @@ export function planA4(members, store, measure) {
     if (!groups.has(key)) groups.set(key, { pair, blocks: [] });
     groups.get(key).blocks.push(block);
   };
-  for (const parent of members) {
+  for (const parent of parents) {
     const children = members.filter(m => m.parent_id === parent.id).sort(compareSiblings);
     const childGens = [...new Set(children.map(generation))].sort((a,b) => a-b);
     for (const childGen of childGens) {
