@@ -9,6 +9,17 @@ const known = value => {
   return /^(?:[-?–—]+|không rõ|chưa rõ|unknown|null)$/i.test(text) ? '' : text;
 };
 export const generation = m => Number.parseInt(m.generation, 10) || 1;
+export function parentCaption(member, store, branch = '') {
+  if (!member) return '';
+  const parent = store.getMember(member.parent_id);
+  const parentName = known(parent?.full_name) || known(member.parent_name);
+  if (!parentName) return '';
+  const partner = parent && store.getSpouseMember(parent.id);
+  const partnerName = known(partner?.full_name) || known(parent?.spouse);
+  const names = [...new Set([parentName, partnerName].filter(Boolean))].join(' - ');
+  return [`Đời ${generation(member)}`, known(member.branch) || branch, `Con Ông/bà: ${names}`]
+    .filter(Boolean).join(' · ');
+}
 export function exportFields(member, store) {
   const birth = known(member.birth_date).replace(/^SN\s*/i, '');
   const solar = known(member.death_date_solar);

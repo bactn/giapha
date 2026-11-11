@@ -1,7 +1,7 @@
 // All exports use measured, complete card content and orthogonal connectors.
 import { avatarSVG, lifespanAge } from './member-presentation.js';
 import { AutoLayout } from './auto-layout.js';
-import { A4, PAGE, scopedMembers, measureCard, planA4, planTable, wrapText, pdfMembers, pdfBranchSections } from './export-layout.js';
+import { A4, PAGE, scopedMembers, measureCard, planA4, planTable, wrapText, pdfMembers, pdfBranchSections, parentCaption } from './export-layout.js';
 
 const FONT = 'Arial, Helvetica, sans-serif';
 const xml = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
@@ -58,7 +58,7 @@ export class Exporter {
     return `<g data-member-id="${xml(member.id)}"><rect x="${x}" y="${y}" width="${width}" height="${height}" rx="8" fill="#fff" stroke="${card.continued||card.repeated||member.role==='Đích Tôn'?'#d97706':'#a8a29e'}" stroke-width="${card.continued||card.repeated?1.5:.8}"/>${avatarSVG(member.gender).replace('<svg ',`<svg x="${x+avatar.x}" y="${y+avatar.y}" width="${avatar.size}" height="${avatar.size}" `)}${text}</g>`;
   }
 
-  static headerSVG(tree,scope,width,pair=null,branch='') {
+  static headerSVG(tree,scope,width,pair=null,branch='',parentage='') {
     const measure=this.measurer();
     const title=wrapText(tree.dataStore.lineageInfo.name||'Gia phả dòng họ',width-68,s=>measure(s,{size:18,weight:'bold'}));
     // A4 reserves two header lines. Oversized titles continue in the scope caption.
@@ -66,7 +66,13 @@ export class Exporter {
     const titleText=titleLines.map((t,i)=>`<text x="${width/2}" y="${27+i*20}" text-anchor="middle" font-size="18" font-weight="bold" fill="#78350f">${xml(t)}</text>`).join('');
     const detail=pair ? pair[0]===pair[1]?`Đời ${pair[0]}`:`Đời ${pair[0]}–${pair[1]}` : '';
     const caption = [branch, detail].filter(Boolean).join(' · ') || this.getScopeTitle(tree.dataStore,scope);
-    return `${titleText}<text x="${width/2}" y="66" text-anchor="middle" font-size="10" fill="#92400e">${xml(caption)}</text><path d="M 34 76 H ${width-34}" stroke="#d97706" stroke-width="1"/>`;
+    const parentageWidth = measure(parentage, { size: 10, weight: 'normal' });
+    const fit = parentageWidth > width - 68 ? ` textLength="${width - 68}" lengthAdjust="spacingAndGlyphs"` : '';
+    const ancestry = parentage
+      ? `<text x="${width/2}" y="76" text-anchor="middle" font-size="10" fill="#57534e"${fit}>${xml(parentage)}</text>`
+      : '';
+    const ruleY = parentage ? 82 : 76;
+    return `${titleText}<text x="${width/2}" y="${parentage ? 62 : 66}" text-anchor="middle" font-size="10" fill="#92400e">${xml(caption)}</text>${ancestry}<path d="M 34 ${ruleY} H ${width-34}" stroke="#d97706" stroke-width="1"/>`;
   }
   static a4PageSVG(tree,page,index,total,scope='ALL',template='card') {
     let body='';
@@ -83,9 +89,11 @@ export class Exporter {
       body=page.paths.map(p=>`<path data-parent="${xml(p.parentId)}" data-child="${xml(p.childId)}" d="${pathString(p.points)}" fill="none" stroke="#44403c" stroke-width="1"/>`).join('');
       body+=page.nodes.map(card=>this.cardSVG(card)).join('');
     }
+    const lead = template === 'card' ? page.blocks[0]?.parent?.member || page.nodes[0]?.member : null;
+    const parentage = parentCaption(lead, tree.dataStore, page.branch);
     const continued=template==='card' && page.nodes.some(n=>n.continued || n.repeated);
     const footer=`Trang ${index}/${total}${page.pair?` · Đời ${page.pair.join('–')}`:''}${continued?' · Lặp lại cha/mẹ để nối tiếp cây':''}`;
-    return this.svgDocument(A4.w,A4.h,`${this.headerSVG(tree,scope,A4.w,page.pair,page.branch)}${body}<path d="M 34 ${A4.h-27} H ${A4.w-34}" stroke="#d97706" stroke-width=".8"/><text x="${A4.w/2}" y="${A4.h-13}" text-anchor="middle" font-size="8" fill="#78716c">${xml(footer)}</text>`);
+    return this.svgDocument(A4.w,A4.h,`${this.headerSVG(tree,scope,A4.w,page.pair,page.branch,parentage)}${body}<path d="M 34 ${A4.h-27} H ${A4.w-34}" stroke="#d97706" stroke-width=".8"/><text x="${A4.w/2}" y="${A4.h-13}" text-anchor="middle" font-size="8" fill="#78716c">${xml(footer)}</text>`);
   }
   static svgDocument(width,height,body) {
     return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>text{font-family:${FONT};}</style><rect width="100%" height="100%" fill="#fff"/>${body}</svg>`;

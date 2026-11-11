@@ -235,3 +235,22 @@ test('new members use the Trần Ngọc default and children inherit the parent 
   assert.equal(partner.role, 'Vợ/chồng');
   assert.equal(dataStore.addMember({}).full_name, 'Trần Ngọc');
 });
+
+test('A4 headers identify the leading parent card and its parents outside the export scope', () => {
+  const dataStore = storeFor([
+    member('V', 6, '', { full_name: 'Trần Ngọc Vị', spouse_id: 'S' }),
+    member('S', 6, '', { full_name: 'Vũ Thị Suý', gender: 'Nữ' }),
+    member('B', 7, 'V', { full_name: 'Trần Ngọc Bi', branch: 'Chi 1' }),
+    member('C', 8, 'B', { branch: 'Chi 1' })
+  ]);
+  const tree = { dataStore };
+  const [page] = Exporter.a4Pages(tree, 'SUBTREE:B');
+  const svg = Exporter.a4PageSVG(tree, page, 1, 1, 'SUBTREE:B');
+  assert.match(svg, /Đời 7 · Chi 1 · Con Ông\/bà: Trần Ngọc Vị - Vũ Thị Suý/);
+  assert.match(svg, /Đời 7–8/);
+  assert.equal(page.nodes.some(node => node.member.id === 'V'), false);
+
+  dataStore.updateMember('V', { spouse_id: '', spouse: '' });
+  const oneParent = Exporter.a4PageSVG(tree, page, 1, 1, 'SUBTREE:B');
+  assert.match(oneParent, /Con Ông\/bà: Trần Ngọc Vị<\/text>/);
+});
