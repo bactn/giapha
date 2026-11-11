@@ -3796,7 +3796,9 @@ function scopedMembers(tree, scope = "ALL", maxDepth = 0) {
 function pdfBranchSections(members) {
   const sections = /* @__PURE__ */ new Map();
   for (const member of members) {
-    const branch = String(member.branch ?? "").trim();
+    const value = String(member.branch ?? "").trim();
+    const number = value.match(/^chi\s*(\d+)\b|\(chi\s*(\d+)\)/i);
+    const branch = number ? `Chi ${Number(number[1] || number[2])}` : value.toLowerCase() === "ng\xE0nh ii" ? "Ng\xE0nh II" : "";
     if (!sections.has(branch)) sections.set(branch, []);
     sections.get(branch).push(member);
   }

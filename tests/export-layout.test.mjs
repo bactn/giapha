@@ -180,8 +180,8 @@ test('PDF finishes each branch before the next and keeps links from shared paren
     member('b2', 2, 'root', { branch: 'Chi 2' }),
     member('a2', 2, 'root', { branch: 'Chi 1' }),
     member('a3', 3, 'a2', { branch: 'Chi 1' }),
-    member('b3', 3, 'b2', { branch: 'Chi 2' }),
-    member('other', 2, '', { branch: '' })
+    member('b3', 3, 'b2', { branch: 'Hạ Chi (Chi 2)' }),
+    member('other', 2, '', { branch: 'Dữ liệu chi chưa chuẩn hóa' })
   ]);
   const tree = { dataStore: store };
   const pages = Exporter.a4Pages(tree);
