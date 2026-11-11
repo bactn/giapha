@@ -90,7 +90,7 @@ export class MindNodeTextEditor {
       const owner = this.dataStore.getMember(wrapper.dataset.id);
       if (owner?.spouse_id === member.id) {
         const label = row.querySelector('.outline-spouse-label');
-        if (label) { label.textContent = ` ${spouseRole(owner,member)}: ${displayName(member)}`; label.title = `Phối ngẫu: ${displayName(member)}`; }
+        if (label) { label.textContent = ` ${spouseRole(owner,member)}: ${displayName(member)}`; label.title = `Vợ/chồng: ${displayName(member)}`; }
       }
     }
   }
@@ -164,7 +164,7 @@ export class MindNodeTextEditor {
       const spouseLabel = document.createElement('span');
       spouseLabel.className = 'outline-spouse-label';
       spouseLabel.textContent = `${spouseRole(member,spouseMember)}: ${displayName(spouseMember)}`;
-      spouseLabel.title = `Phối ngẫu: ${spouseMember.full_name} (${spouseMember.id})`;
+      spouseLabel.title = `Vợ/chồng: ${spouseMember.full_name} (${spouseMember.id})`;
       textBlock.appendChild(spouseLabel);
     }
 
@@ -300,7 +300,6 @@ export class MindNodeTextEditor {
 
     const newGen = (parseInt(parent.generation, 10) || 1) + 1;
     const newChild = this.dataStore.addMember({
-      full_name: 'Người Mới',
       parent_id: parentId,
       parent_name: parent.full_name,
       generation: newGen,
@@ -329,7 +328,7 @@ export class MindNodeTextEditor {
     // Check if already has a spouse linked
     const existingSpouse = this.dataStore.getSpouseMember(memberId);
     if (existingSpouse) {
-      alert(`${member.full_name} đã có phối ngẫu là ${existingSpouse.full_name}. Nếu muốn thay đổi, hãy hủy liên kết trước.`);
+      alert(`${member.full_name} đã có vợ/chồng là ${existingSpouse.full_name}. Nếu muốn thay đổi, hãy hủy liên kết trước.`);
       return;
     }
 
@@ -357,7 +356,6 @@ export class MindNodeTextEditor {
     if (!sibling) return;
 
     const newSibling = this.dataStore.addMember({
-      full_name: 'Người Mới',
       parent_id: sibling.parent_id,
       parent_name: sibling.parent_name,
       generation: sibling.generation,

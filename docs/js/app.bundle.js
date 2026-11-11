@@ -1851,7 +1851,7 @@ var DataStore = class {
   getRootMembers() {
     const roots = [];
     for (const m of this.members.values()) {
-      if (m.branch_type?.includes("Ph\u1ED1i ng\u1EABu") && m.spouse_id && this.members.has(m.spouse_id) && this.getChildren(m.id).length === 0) continue;
+      if (/phối ngẫu|vợ\/chồng/i.test(m.branch_type || "") && m.spouse_id && this.members.has(m.spouse_id) && this.getChildren(m.id).length === 0) continue;
       if (!m.parent_id || m.parent_id === "-" || !this.members.has(m.parent_id)) {
         roots.push(m);
       }
@@ -1997,10 +1997,10 @@ var DataStore = class {
     const newMember = {
       id,
       christian_name: memberData.christian_name || "",
-      full_name: memberData.full_name || "Ng\u01B0\u1EDDi M\u1EDBi",
+      full_name: memberData.full_name || "Tr\u1EA7n Ng\u1ECDc",
       gender: memberData.gender || "Nam",
       generation: String(generation2 || 1),
-      branch: memberData.branch || "Chi 1",
+      branch: memberData.branch || this.members.get(memberData.parent_id)?.branch || "Chi 1",
       branch_type: memberData.branch_type || "N\u1ED9i t\u1ED9c (Tr\u1EF1c h\u1EC7)",
       parent_id: memberData.parent_id || "-",
       parent_name: memberData.parent_name || "",
@@ -2111,11 +2111,11 @@ var DataStore = class {
     const spouse = {
       id: spouseId,
       christian_name: "",
-      full_name: "Ph\u1ED1i Ng\u1EABu",
+      full_name: "Tr\u1EA7n Ng\u1ECDc",
       gender: oppositeGender,
       generation: member.generation,
       branch: member.branch,
-      branch_type: "Ngo\u1EA1i t\u1ED9c (Ph\u1ED1i ng\u1EABu)",
+      branch_type: "Ngo\u1EA1i t\u1ED9c (V\u1EE3/ch\u1ED3ng)",
       parent_id: "-",
       parent_name: "",
       spouse: member.full_name,
@@ -2123,7 +2123,7 @@ var DataStore = class {
       birth_date: "",
       death_date: "",
       status: "C\xF2n s\u1ED1ng",
-      role: "Ph\u1ED1i ng\u1EABu",
+      role: "V\u1EE3/ch\u1ED3ng",
       notes: ""
     };
     this.members.set(spouseId, spouse);
@@ -2159,7 +2159,7 @@ var DataStore = class {
         gender: oppositeGender,
         generation: member.generation,
         branch: member.branch,
-        branch_type: "Ngo\u1EA1i t\u1ED9c (Ph\u1ED1i ng\u1EABu)",
+        branch_type: "Ngo\u1EA1i t\u1ED9c (V\u1EE3/ch\u1ED3ng)",
         parent_id: "-",
         parent_name: "",
         spouse: member.full_name,
@@ -2167,7 +2167,7 @@ var DataStore = class {
         birth_date: "",
         death_date: "",
         status: "C\xF2n s\u1ED1ng",
-        role: "Ph\u1ED1i ng\u1EABu",
+        role: "V\u1EE3/ch\u1ED3ng",
         notes: ""
       };
       this.members.set(spouseId, spouse);
@@ -2763,7 +2763,7 @@ var TreeCanvas = class {
           <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
           <span>Con</span>
         </button>
-        <button class="node-action-btn action-add-spouse" title="Th\xEAm ph\u1ED1i ng\u1EABu">
+        <button class="node-action-btn action-add-spouse" title="Th\xEAm v\u1EE3/ch\u1ED3ng">
           <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
           <span>V\u1EE3/Ch\u1ED3ng</span>
         </button>
@@ -2814,7 +2814,6 @@ var TreeCanvas = class {
       e.stopPropagation();
       const newGen = (parseInt(member.generation, 10) || 1) + 1;
       const child = this.dataStore.addMember({
-        full_name: "Ng\u01B0\u1EDDi M\u1EDBi",
         parent_id: member.id,
         parent_name: member.full_name,
         generation: newGen,
@@ -2827,7 +2826,7 @@ var TreeCanvas = class {
       e.stopPropagation();
       const existingSpouse = this.dataStore.getSpouseMember(member.id);
       if (existingSpouse) {
-        alert(`${member.full_name} \u0111\xE3 c\xF3 ph\u1ED1i ng\u1EABu l\xE0 ${existingSpouse.full_name}. N\u1EBFu mu\u1ED1n thay \u0111\u1ED5i, h\xE3y h\u1EE7y li\xEAn k\u1EBFt tr\u01B0\u1EDBc.`);
+        alert(`${member.full_name} \u0111\xE3 c\xF3 v\u1EE3/ch\u1ED3ng l\xE0 ${existingSpouse.full_name}. N\u1EBFu mu\u1ED1n thay \u0111\u1ED5i, h\xE3y h\u1EE7y li\xEAn k\u1EBFt tr\u01B0\u1EDBc.`);
         return;
       }
       const spouse = this.dataStore.addSpouseAsMember(member.id);
@@ -3049,7 +3048,7 @@ var MindNodeTextEditor = class {
         const label = row.querySelector(".outline-spouse-label");
         if (label) {
           label.textContent = ` ${spouseRole(owner, member)}: ${displayName(member)}`;
-          label.title = `Ph\u1ED1i ng\u1EABu: ${displayName(member)}`;
+          label.title = `V\u1EE3/ch\u1ED3ng: ${displayName(member)}`;
         }
       }
     }
@@ -3112,7 +3111,7 @@ var MindNodeTextEditor = class {
       const spouseLabel = document.createElement("span");
       spouseLabel.className = "outline-spouse-label";
       spouseLabel.textContent = `${spouseRole(member, spouseMember)}: ${displayName(spouseMember)}`;
-      spouseLabel.title = `Ph\u1ED1i ng\u1EABu: ${spouseMember.full_name} (${spouseMember.id})`;
+      spouseLabel.title = `V\u1EE3/ch\u1ED3ng: ${spouseMember.full_name} (${spouseMember.id})`;
       textBlock.appendChild(spouseLabel);
     }
     const actionGroup = document.createElement("div");
@@ -3219,7 +3218,6 @@ var MindNodeTextEditor = class {
     if (!parent) return;
     const newGen = (parseInt(parent.generation, 10) || 1) + 1;
     const newChild = this.dataStore.addMember({
-      full_name: "Ng\u01B0\u1EDDi M\u1EDBi",
       parent_id: parentId,
       parent_name: parent.full_name,
       generation: newGen,
@@ -3242,7 +3240,7 @@ var MindNodeTextEditor = class {
     if (!member) return;
     const existingSpouse = this.dataStore.getSpouseMember(memberId);
     if (existingSpouse) {
-      alert(`${member.full_name} \u0111\xE3 c\xF3 ph\u1ED1i ng\u1EABu l\xE0 ${existingSpouse.full_name}. N\u1EBFu mu\u1ED1n thay \u0111\u1ED5i, h\xE3y h\u1EE7y li\xEAn k\u1EBFt tr\u01B0\u1EDBc.`);
+      alert(`${member.full_name} \u0111\xE3 c\xF3 v\u1EE3/ch\u1ED3ng l\xE0 ${existingSpouse.full_name}. N\u1EBFu mu\u1ED1n thay \u0111\u1ED5i, h\xE3y h\u1EE7y li\xEAn k\u1EBFt tr\u01B0\u1EDBc.`);
       return;
     }
     const spouse = this.dataStore.addSpouseAsMember(memberId);
@@ -3264,7 +3262,6 @@ var MindNodeTextEditor = class {
     const sibling = this.dataStore.getMember(siblingId);
     if (!sibling) return;
     const newSibling = this.dataStore.addMember({
-      full_name: "Ng\u01B0\u1EDDi M\u1EDBi",
       parent_id: sibling.parent_id,
       parent_name: sibling.parent_name,
       generation: sibling.generation,
@@ -3421,7 +3418,7 @@ var ExcelParser = class {
       else if (norm.includes("nhanh") || norm.includes("noingoai") || norm.includes("chau")) colMap.branch_type = idx;
       else if (norm.includes("machame") || norm.includes("idcha") || norm.includes("cha") || norm.includes("parent")) colMap.parent_id = idx;
       else if (norm.includes("tenchame") || norm.includes("tencha") || norm.includes("parentname")) colMap.parent_name = idx;
-      else if (norm === "maphoingau") colMap.spouse_id = idx;
+      else if (["maphoingau", "mavochong"].includes(norm)) colMap.spouse_id = idx;
       else if (norm === "thutuanhem") colMap.sibling_order = idx;
       else if (norm === "huongthotutinh") {
       } else if (norm.includes("vochong") || norm.includes("phoingau") || norm.includes("spouse")) colMap.spouse = idx;
@@ -3764,7 +3761,7 @@ function exportFields(member, store) {
     ...!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: "detail", text: member.status === "M\u1EA5t s\u1EDBm" || /^mất sớm$/i.test(lunar) ? "M\u1EA5t s\u1EDBm" : "M\u1EA5t: ch\u01B0a r\xF5 ng\xE0y" }] : [],
     ...died ? [{ kind: "detail", text: `H\u01B0\u1EDFng th\u1ECD ${age === null ? "ch\u01B0a r\xF5" : age + " tu\u1ED5i"}` }] : [],
     ...spouse ? [{ kind: "detail", text: spouse }] : [],
-    ...member.role && member.role !== "Th\xE0nh vi\xEAn" ? [{ kind: "detail", text: member.role }] : []
+    ...member.role && member.role !== "Th\xE0nh vi\xEAn" ? [{ kind: "detail", text: member.role.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng") }] : []
   ];
 }
 function scopedMembers(tree, scope = "ALL", maxDepth = 0) {
@@ -3793,12 +3790,52 @@ function scopedMembers(tree, scope = "ALL", maxDepth = 0) {
   }
   return [...members].sort((a, b) => generation(a) - generation(b) || compareSiblings(a, b));
 }
+function pdfMembers(tree, scope, maxDepth) {
+  const store = tree.dataStore;
+  const parentIds = new Set(store.getAllMembers().map((member) => member.parent_id));
+  const members = scopedMembers(tree, scope, maxDepth).filter((member) => store.getMember(member.parent_id) || parentIds.has(member.id));
+  return withoutStandaloneSpouses(members, store, scope.startsWith("SUBTREE:") ? scope.slice(8) : null);
+}
+function familyChildren(members) {
+  const children = /* @__PURE__ */ new Map();
+  for (const member of members) {
+    if (!children.has(member.parent_id)) children.set(member.parent_id, []);
+    children.get(member.parent_id).push(member);
+  }
+  for (const siblings of children.values()) siblings.sort(compareSiblings);
+  return children;
+}
+function familyOrder(members) {
+  const children = familyChildren(members);
+  const ids = new Set(members.map((member) => member.id));
+  const visited = /* @__PURE__ */ new Set();
+  const order = [];
+  function visit(member) {
+    if (visited.has(member.id)) return;
+    visited.add(member.id);
+    order.push(member);
+    for (const child of children.get(member.id) || []) visit(child);
+  }
+  for (const member of members) if (!ids.has(member.parent_id)) visit(member);
+  for (const member of members) visit(member);
+  return order;
+}
 function pdfBranchSections(members) {
   const sections = /* @__PURE__ */ new Map();
+  const byId = new Map(members.map((member) => [member.id, member]));
+  function branchOf(member) {
+    const visited = /* @__PURE__ */ new Set();
+    for (let current = member; current && !visited.has(current.id); current = byId.get(current.parent_id)) {
+      visited.add(current.id);
+      const value = String(current.branch ?? "").trim();
+      const number = value.match(/^chi\s*(\d+)\b|\(chi\s*(\d+)\)/i);
+      if (number) return `Chi ${Number(number[1] || number[2])}`;
+      if (value.toLowerCase() === "ng\xE0nh ii") return "Ng\xE0nh II";
+    }
+    return "";
+  }
   for (const member of members) {
-    const value = String(member.branch ?? "").trim();
-    const number = value.match(/^chi\s*(\d+)\b|\(chi\s*(\d+)\)/i);
-    const branch = number ? `Chi ${Number(number[1] || number[2])}` : value.toLowerCase() === "ng\xE0nh ii" ? "Ng\xE0nh II" : "";
+    const branch = branchOf(member);
     if (!sections.has(branch)) sections.set(branch, []);
     sections.get(branch).push(member);
   }
@@ -3807,7 +3844,6 @@ function pdfBranchSections(members) {
   if (branches.filter((branch) => rank(branch) === 1).length < 2) {
     return [{ label: "", members, context: [] }];
   }
-  const byId = new Map(members.map((member) => [member.id, member]));
   return branches.map((branch) => {
     const branchMembers = sections.get(branch);
     const ids = new Set(branchMembers.map((member) => member.id));
@@ -3910,69 +3946,76 @@ function planA4(members, store, measure, context = []) {
     });
     if (fits || columns === 1) break;
   }
-  const groups = /* @__PURE__ */ new Map();
-  const covered = /* @__PURE__ */ new Set();
-  const firstGen = Math.min(...members.map(generation));
-  const add = (pair, block) => {
-    const key = pair.join(":");
-    if (!groups.has(key)) groups.set(key, { pair, blocks: [] });
-    groups.get(key).blocks.push(block);
-  };
-  for (const parent of parents) {
-    const children = members.filter((m) => m.parent_id === parent.id).sort(compareSiblings);
-    const childGens = [...new Set(children.map(generation))].sort((a, b) => a - b);
-    for (const childGen of childGens) {
-      const rowChildren = children.filter((m) => generation(m) === childGen);
-      for (let i = 0; i < rowChildren.length; i += columns) {
-        const row = rowChildren.slice(i, i + columns).map((m) => cards.get(m.id));
-        add([generation(parent), childGen], { parent: cards.get(parent.id), children: row, continued: i > 0, repeated: members.some((m) => m.id === parent.parent_id), branch: parent.branch || "" });
-        covered.add(parent.id);
-        row.forEach((c) => covered.add(c.member.id));
+  const childrenByParent = familyChildren(members);
+  const parentIds = new Set(parents.map((member) => member.id));
+  const visited = /* @__PURE__ */ new Set();
+  const blocks = [];
+  function visit(parent) {
+    if (visited.has(parent.id)) return;
+    visited.add(parent.id);
+    const children = childrenByParent.get(parent.id) || [];
+    for (const childGen of [...new Set(children.map(generation))].sort((a, b) => a - b)) {
+      const siblings = children.filter((child) => generation(child) === childGen);
+      for (let i = 0; i < siblings.length; i += columns) {
+        const row = siblings.slice(i, i + columns);
+        blocks.push({
+          pair: [generation(parent), childGen],
+          parent: cards.get(parent.id),
+          children: row.map((child) => cards.get(child.id)),
+          continued: i > 0,
+          repeated: parentIds.has(parent.parent_id),
+          endsBranch: row.every((child) => !childrenByParent.has(child.id))
+        });
+        for (const child of row) visit(child);
       }
     }
   }
-  const solos = /* @__PURE__ */ new Map();
-  for (const member of members) if (!covered.has(member.id)) {
-    const gen = generation(member);
-    const key = Math.max(firstGen, gen - 1);
-    if (!solos.has(key)) solos.set(key, []);
-    solos.get(key).push(cards.get(member.id));
-  }
-  for (const [gen, list] of solos) for (let i = 0; i < list.length; i += columns) {
-    add([gen, gen === firstGen && members.every((m) => generation(m) === gen) ? gen : gen + 1], { parent: null, children: list.slice(i, i + columns), continued: false, branch: "" });
+  for (const parent of parents) if (!parentIds.has(parent.parent_id)) visit(parent);
+  for (const parent of parents) visit(parent);
+  for (const member of members) {
+    if (!parentIds.has(member.parent_id) && !childrenByParent.has(member.id)) {
+      const gen = generation(member);
+      blocks.push({ pair: [gen, gen], children: [cards.get(member.id)] });
+    }
   }
   const pages = [];
-  for (const group of [...groups.values()].sort((a, b) => a.pair[0] - b.pair[0] || a.pair[1] - b.pair[1])) {
-    let page;
-    let cursor;
-    for (const block of group.blocks) {
-      const rowH = Math.max(...block.children.map((c) => c.height));
-      const height = (block.parent ? block.parent.height + PAGE.connectorGap : 0) + rowH;
-      if (height > A4.h - PAGE.bottom - PAGE.top) throw new Error(`Th\xF4ng tin c\u1EE7a ${block.parent?.member.full_name || block.children[0].member.full_name} qu\xE1 d\xE0i cho m\u1ED9t c\xE2y A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
-      if (!page || cursor + height > A4.h - PAGE.bottom) {
-        page = { pair: group.pair, blocks: [], nodes: [], paths: [] };
-        pages.push(page);
-        cursor = PAGE.top;
-      }
-      const rowW = block.children.length * cardW + (block.children.length - 1) * PAGE.gap;
-      const startX = (A4.w - rowW) / 2;
-      let childY = cursor;
-      const nodes = [];
-      if (block.parent) {
-        const parent = { ...block.parent, x: (A4.w - cardW) / 2, y: cursor, continued: block.continued, repeated: block.repeated };
-        nodes.push(parent);
-        childY += parent.height + PAGE.connectorGap;
-        for (let i = 0; i < block.children.length; i++) {
-          const cx = startX + i * (cardW + PAGE.gap) + cardW / 2;
-          const sx = parent.x + cardW / 2, sy = parent.y + parent.height, mid = sy + PAGE.connectorGap / 2;
-          page.paths.push({ parentId: parent.member.id, childId: block.children[i].member.id, points: [[sx, sy], [sx, mid], [cx, mid], [cx, childY]] });
-        }
-      }
-      block.children.forEach((card, i) => nodes.push({ ...card, x: startX + i * (cardW + PAGE.gap), y: childY }));
-      page.blocks.push({ ...block, y: cursor, height });
-      page.nodes.push(...nodes);
-      cursor += height + PAGE.blockGap;
+  let page;
+  let cursor;
+  let previous;
+  for (const block of blocks) {
+    const rowH = Math.max(...block.children.map((c) => c.height));
+    const height = (block.parent ? block.parent.height + PAGE.connectorGap : 0) + rowH;
+    if (height > A4.h - PAGE.bottom - PAGE.top) throw new Error(`Th\xF4ng tin c\u1EE7a ${block.parent?.member.full_name || block.children[0].member.full_name} qu\xE1 d\xE0i cho m\u1ED9t c\xE2y A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
+    const samePair = previous?.pair.join(":") === block.pair.join(":");
+    const parentId = block.parent?.member.id;
+    const lastChildren = block.endsBranch && previous && (previous.parent?.member.id === parentId || previous.children.some((card) => card.member.id === parentId));
+    if (!page || !samePair && !lastChildren || cursor + height > A4.h - PAGE.bottom) {
+      page = { pair: [...block.pair], blocks: [], nodes: [], paths: [] };
+      pages.push(page);
+      cursor = PAGE.top;
+    } else {
+      const generations = [...page.pair, ...block.pair];
+      page.pair = [Math.min(...generations), Math.max(...generations)];
     }
+    previous = block;
+    const rowW = block.children.length * cardW + (block.children.length - 1) * PAGE.gap;
+    const startX = (A4.w - rowW) / 2;
+    let childY = cursor;
+    const nodes = [];
+    if (block.parent) {
+      const parent = { ...block.parent, x: (A4.w - cardW) / 2, y: cursor, continued: block.continued, repeated: block.repeated };
+      nodes.push(parent);
+      childY += parent.height + PAGE.connectorGap;
+      for (let i = 0; i < block.children.length; i++) {
+        const cx = startX + i * (cardW + PAGE.gap) + cardW / 2;
+        const sx = parent.x + cardW / 2, sy = parent.y + parent.height, mid = sy + PAGE.connectorGap / 2;
+        page.paths.push({ parentId: parent.member.id, childId: block.children[i].member.id, points: [[sx, sy], [sx, mid], [cx, mid], [cx, childY]] });
+      }
+    }
+    block.children.forEach((card, i) => nodes.push({ ...card, x: startX + i * (cardW + PAGE.gap), y: childY }));
+    page.blocks.push({ ...block, y: cursor, height });
+    page.nodes.push(...nodes);
+    cursor += height + PAGE.blockGap;
   }
   return pages;
 }
@@ -3982,9 +4025,9 @@ function planTable(members, store, measure) {
   const pages = [];
   let page;
   let y;
-  for (const member of members) {
+  for (const member of familyOrder(members)) {
     const fields = exportFields(member, store);
-    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), fields.find((f) => f.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text.replace("H\u01B0\u1EDFng th\u1ECD ", "") || "", fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role].filter(Boolean).join("\n")];
+    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), fields.find((f) => f.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text.replace("H\u01B0\u1EDFng th\u1ECD ", "") || "", fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role?.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng")].filter(Boolean).join("\n")];
     const cells = texts.map((text, i) => text.split("\n").flatMap((t) => wrapText(t, widths[i] - 12, (s) => measure(s, { size: 9, weight: "normal" }))));
     const height = Math.max(34, 12 + Math.max(...cells.map((c) => c.length)) * 12);
     if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Th\xF4ng tin c\u1EE7a ${member.full_name} qu\xE1 d\xE0i cho m\u1ED9t h\xE0ng A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
@@ -4024,8 +4067,7 @@ var Exporter = class {
     return labels[scope] || (scope.startsWith("SUBTREE:") ? `Nh\xE1nh ${store.getMember(scope.slice(8))?.full_name || scope.slice(8)}` : "C\xE2y gia ph\u1EA3");
   }
   static getExportLayout(tree, scope = "ALL", maxDepth = 0, omitSpouses = false) {
-    const scoped = scopedMembers(tree, scope, maxDepth);
-    const members = omitSpouses ? withoutStandaloneSpouses(scoped, tree.dataStore, scope.startsWith("SUBTREE:") ? scope.slice(8) : null) : scoped;
+    const members = omitSpouses ? pdfMembers(tree, scope, maxDepth) : scopedMembers(tree, scope, maxDepth);
     return this.layoutMembers(tree.dataStore, members);
   }
   static layoutMembers(store, members) {
@@ -4037,7 +4079,7 @@ var Exporter = class {
     return { ...layout, cards, nodeWidth: width, nodeHeight: height };
   }
   static a4Pages(tree, scope = "ALL", template = "card", maxDepth = 0) {
-    const members = withoutStandaloneSpouses(scopedMembers(tree, scope, maxDepth), tree.dataStore, scope.startsWith("SUBTREE:") ? scope.slice(8) : null);
+    const members = pdfMembers(tree, scope, maxDepth);
     const measure = this.measurer();
     return pdfBranchSections(members).flatMap((section) => {
       const pages = template === "table" ? planTable(section.members, tree.dataStore, measure) : planA4(section.members, tree.dataStore, measure, section.context);
@@ -4094,11 +4136,7 @@ var Exporter = class {
   }
   static fullTreeSVG(tree, scope = "ALL", maxDepth = 0, omitSpouses = false) {
     if (omitSpouses) {
-      const members = withoutStandaloneSpouses(
-        scopedMembers(tree, scope, maxDepth),
-        tree.dataStore,
-        scope.startsWith("SUBTREE:") ? scope.slice(8) : null
-      );
+      const members = pdfMembers(tree, scope, maxDepth);
       const sections = pdfBranchSections(members);
       if (sections.length > 1) {
         const rendered = sections.map((section) => {
@@ -4252,7 +4290,7 @@ var Exporter = class {
   }
   static exportCSV(tree, scope = "ALL", maxDepth = 0) {
     const members = scopedMembers(tree, scope, maxDepth);
-    const columns = [["M\xE3 ID", "id"], ["T\xEAn Th\xE1nh", "christian_name"], ["H\u1ECD v\xE0 T\xEAn", "full_name"], ["Gi\u1EDBi T\xEDnh", "gender"], ["Th\u1EBF H\u1EC7", "generation"], ["Chi Ng\xE0nh", "branch"], ["Nh\xE1nh N\u1ED9i Ngo\u1EA1i", "branch_type"], ["M\xE3 Cha M\u1EB9", "parent_id"], ["V\u1EE3 Ch\u1ED3ng", "spouse"], ["Ng\xE0y Sinh", "birth_date"], ["Gi\u1ED7 \xC2m L\u1ECBch", "death_date"], ["Ng\xE0y M\u1EA5t D\u01B0\u01A1ng L\u1ECBch", "death_date_solar"], ["H\u01B0\u1EDFng Th\u1ECD Nh\u1EADp Ri\xEAng", "lifespan_override"], ["Tr\u1EA1ng Th\xE1i", "status"], ["Vai Tr\xF2", "role"], ["Ghi Ch\xFA", "notes"], ["M\xE3 Ph\u1ED1i Ng\u1EABu", "spouse_id"], ["Th\u1EE9 T\u1EF1 Anh Em", "sibling_order"], ["H\u01B0\u1EDFng Th\u1ECD T\u1EF1 T\xEDnh", "computed_lifespan"]];
+    const columns = [["M\xE3 ID", "id"], ["T\xEAn Th\xE1nh", "christian_name"], ["H\u1ECD v\xE0 T\xEAn", "full_name"], ["Gi\u1EDBi T\xEDnh", "gender"], ["Th\u1EBF H\u1EC7", "generation"], ["Chi Ng\xE0nh", "branch"], ["Nh\xE1nh N\u1ED9i Ngo\u1EA1i", "branch_type"], ["M\xE3 Cha M\u1EB9", "parent_id"], ["V\u1EE3 Ch\u1ED3ng", "spouse"], ["Ng\xE0y Sinh", "birth_date"], ["Gi\u1ED7 \xC2m L\u1ECBch", "death_date"], ["Ng\xE0y M\u1EA5t D\u01B0\u01A1ng L\u1ECBch", "death_date_solar"], ["H\u01B0\u1EDFng Th\u1ECD Nh\u1EADp Ri\xEAng", "lifespan_override"], ["Tr\u1EA1ng Th\xE1i", "status"], ["Vai Tr\xF2", "role"], ["Ghi Ch\xFA", "notes"], ["M\xE3 V\u1EE3/Ch\u1ED3ng", "spouse_id"], ["Th\u1EE9 T\u1EF1 Anh Em", "sibling_order"], ["H\u01B0\u1EDFng Th\u1ECD T\u1EF1 T\xEDnh", "computed_lifespan"]];
     const cell = (value) => '"' + String(value ?? "").replace(/"/g, '""') + '"';
     const rows = [columns.map((c) => cell(c[0])).join(","), ...members.map((m) => columns.map((c) => cell(c[1] === "computed_lifespan" ? lifespanAge(m) : m[c[1]])).join(","))];
     this.downloadBlob(new Blob(["\uFEFF" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" }), this.filename("Du_Lieu", scope, "csv"));
@@ -4402,7 +4440,7 @@ async function getSupabaseClient() {
 function describeError(error) {
   if (["40001", "PT409"].includes(error?.code)) return "D\u1EEF li\u1EC7u tr\xEAn m\xE1y ch\u1EE7 \u0111\xE3 thay \u0111\u1ED5i. B\u1EA3n nh\xE1p v\u1EABn \u0111\u01B0\u1EE3c gi\u1EEF; h\xE3y xu\u1EA5t JSON \u0111\u1EC3 sao l\u01B0u r\u1ED3i t\u1EA3i l\u1EA1i v\xE0 \u0111\u1ED1i chi\u1EBFu tr\u01B0\u1EDBc khi l\u01B0u.";
   if (error?.code === "42501") return "B\u1EA1n ch\u01B0a \u0111\u0103ng nh\u1EADp ho\u1EB7c kh\xF4ng c\xF3 quy\u1EC1n th\u1EF1c hi\u1EC7n thao t\xE1c n\xE0y.";
-  if (error?.code === "23503") return "C\xF3 quan h\u1EC7 cha/m\u1EB9 ho\u1EB7c ph\u1ED1i ng\u1EABu kh\xF4ng t\u1ED3n t\u1EA1i trong gia ph\u1EA3.";
+  if (error?.code === "23503") return "C\xF3 quan h\u1EC7 cha/m\u1EB9 ho\u1EB7c v\u1EE3/ch\u1ED3ng kh\xF4ng t\u1ED3n t\u1EA1i trong gia ph\u1EA3.";
   if (error?.code === "23505") return "M\xE3 th\xE0nh vi\xEAn \u0111\xE3 t\u1ED3n t\u1EA1i.";
   if (error?.message?.includes("Email not confirmed")) return "Vui l\xF2ng x\xE1c nh\u1EADn email tr\u01B0\u1EDBc khi \u0111\u0103ng nh\u1EADp.";
   if (error?.message?.includes("Invalid login credentials")) return "Email ho\u1EB7c m\u1EADt kh\u1EA9u kh\xF4ng \u0111\xFAng.";
@@ -4868,7 +4906,7 @@ var FamilyPortal = class {
 var $2 = (id) => document.getElementById(id);
 var copy = (value) => JSON.parse(JSON.stringify(value));
 var roles = { admin: "Qu\u1EA3n tr\u1ECB", editor: "Ch\u1EC9nh s\u1EEDa", viewer: "Ch\u1EC9 xem" };
-var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "Ph\u1ED1i ng\u1EABu", generation: "Th\u1EBF h\u1EC7", sibling_order: "Th\u1EE9 t\u1EF1 anh/ch\u1ECB/em", death_date_solar: "Ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch", lifespan_override: "H\u01B0\u1EDFng th\u1ECD nh\u1EADp ri\xEAng" };
+var fieldNames = { full_name: "H\u1ECD t\xEAn", christian_name: "T\xEAn th\xE1nh", birth_date: "Ng\xE0y sinh", death_date: "Ng\xE0y m\u1EA5t", notes: "Ghi ch\xFA", parent_id: "Cha/m\u1EB9", spouse_id: "V\u1EE3/ch\u1ED3ng", generation: "Th\u1EBF h\u1EC7", sibling_order: "Th\u1EE9 t\u1EF1 anh/ch\u1ECB/em", death_date_solar: "Ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch", lifespan_override: "H\u01B0\u1EDFng th\u1ECD nh\u1EADp ri\xEAng" };
 var SupabaseController = class {
   constructor(app) {
     this.app = app;
@@ -5906,7 +5944,7 @@ var App = class {
         this.dataStore.loadState(data);
         const migrated = this.dataStore.migrateSpouseTextToMembers();
         if (migrated > 0) {
-          this.showToast(`\u0110\xE3 chuy\u1EC3n \u0111\u1ED5i ${migrated} th\xF4ng tin ph\u1ED1i ng\u1EABu th\xE0nh th\xE0nh vi\xEAn \u0111\u1EA7y \u0111\u1EE7.`, "success");
+          this.showToast(`\u0110\xE3 chuy\u1EC3n \u0111\u1ED5i ${migrated} th\xF4ng tin v\u1EE3/ch\u1ED3ng th\xE0nh th\xE0nh vi\xEAn \u0111\u1EA7y \u0111\u1EE7.`, "success");
         }
         this.dataStore.initializeTracking();
         this.updateStatsDisplay();
@@ -6054,7 +6092,7 @@ var App = class {
             document.getElementById("inspect-lifespan").value = lifespanAge(member) ?? "";
           }
           if (key === "full_name") {
-            document.getElementById("inspect-header-name").textContent = val || "Ng\u01B0\u1EDDi M\u1EDBi";
+            document.getElementById("inspect-header-name").textContent = val || "Tr\u1EA7n Ng\u1ECDc";
           }
         } catch (err) {
           alert(err.message);
@@ -6197,7 +6235,7 @@ var App = class {
     document.getElementById("inspect-lifespan").value = lifespanAge(m) ?? "";
     document.getElementById("inspect-lifespan-hint").textContent = m.lifespan_override !== void 0 && m.lifespan_override !== null && m.lifespan_override !== "" ? "H\u01B0\u1EDFng th\u1ECD \u0111ang nh\u1EADp ri\xEAng. B\u1EA5m T\u1EF1 t\xEDnh l\u1EA1i \u0111\u1EC3 d\xF9ng ng\xE0y sinh v\xE0 ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch." : "T\u1EF1 t\xEDnh theo ng\xE0y sinh v\xE0 ng\xE0y m\u1EA5t d\u01B0\u01A1ng l\u1ECBch; t\xEDnh theo n\u0103m n\u1EBFu thi\u1EBFu ng\xE0y/th\xE1ng.";
     document.getElementById("inspect-status").value = m.status || "C\xF2n s\u1ED1ng";
-    document.getElementById("inspect-role").value = m.role || "Th\xE0nh vi\xEAn";
+    document.getElementById("inspect-role").value = m.role?.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng") || "Th\xE0nh vi\xEAn";
     document.getElementById("inspect-notes").value = m.notes || "";
   }
   setupToolbarButtons() {
@@ -6251,7 +6289,7 @@ var App = class {
     document.getElementById("btn-expand-all").onclick = () => this.textEditor.expandAll();
     document.getElementById("btn-collapse-all").onclick = () => this.textEditor.collapseAll();
     document.getElementById("btn-quick-add-root").onclick = () => {
-      const name = prompt("Nh\u1EADp h\u1ECD t\xEAn C\u1EE5 Th\u1EE7y T\u1ED5:");
+      const name = prompt("Nh\u1EADp h\u1ECD t\xEAn C\u1EE5 Th\u1EE7y T\u1ED5:", "Tr\u1EA7n Ng\u1ECDc");
       if (name && name.trim()) {
         const root = this.dataStore.addMember({
           full_name: name.trim(),

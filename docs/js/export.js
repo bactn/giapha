@@ -1,7 +1,7 @@
 // All exports use measured, complete card content and orthogonal connectors.
 import { avatarSVG, lifespanAge } from './member-presentation.js';
 import { AutoLayout } from './auto-layout.js';
-import { A4, PAGE, scopedMembers, measureCard, planA4, planTable, wrapText, withoutStandaloneSpouses, pdfBranchSections } from './export-layout.js';
+import { A4, PAGE, scopedMembers, measureCard, planA4, planTable, wrapText, pdfMembers, pdfBranchSections } from './export-layout.js';
 
 const FONT = 'Arial, Helvetica, sans-serif';
 const xml = value => String(value ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
@@ -27,8 +27,7 @@ export class Exporter {
     return labels[scope] || (scope.startsWith('SUBTREE:') ? `Nhánh ${store.getMember(scope.slice(8))?.full_name || scope.slice(8)}` : 'Cây gia phả');
   }
   static getExportLayout(tree, scope='ALL', maxDepth=0, omitSpouses=false) {
-    const scoped=scopedMembers(tree,scope,maxDepth);
-    const members=omitSpouses ? withoutStandaloneSpouses(scoped,tree.dataStore,scope.startsWith('SUBTREE:')?scope.slice(8):null) : scoped;
+    const members = omitSpouses ? pdfMembers(tree, scope, maxDepth) : scopedMembers(tree, scope, maxDepth);
     return this.layoutMembers(tree.dataStore, members);
   }
   static layoutMembers(store, members) {
@@ -40,7 +39,7 @@ export class Exporter {
     return {...layout,cards,nodeWidth:width,nodeHeight:height};
   }
   static a4Pages(tree,scope='ALL',template='card',maxDepth=0) {
-    const members=withoutStandaloneSpouses(scopedMembers(tree,scope,maxDepth),tree.dataStore,scope.startsWith('SUBTREE:')?scope.slice(8):null);
+    const members=pdfMembers(tree, scope, maxDepth);
     const measure=this.measurer();
     return pdfBranchSections(members).flatMap(section => {
       const pages = template === 'table'
@@ -93,8 +92,7 @@ export class Exporter {
   }
   static fullTreeSVG(tree,scope='ALL',maxDepth=0,omitSpouses=false) {
     if (omitSpouses) {
-      const members = withoutStandaloneSpouses(scopedMembers(tree, scope, maxDepth), tree.dataStore,
-        scope.startsWith('SUBTREE:') ? scope.slice(8) : null);
+      const members = pdfMembers(tree, scope, maxDepth);
       const sections = pdfBranchSections(members);
       if (sections.length > 1) {
         const rendered = sections.map(section => {
@@ -218,7 +216,7 @@ export class Exporter {
   static exportCSV(tree,scope='ALL',maxDepth=0) {
     const members=scopedMembers(tree,scope,maxDepth);
     // Raw fields remain separate; computed age is informational, not an override.
-    const columns=[['Mã ID','id'],['Tên Thánh','christian_name'],['Họ và Tên','full_name'],['Giới Tính','gender'],['Thế Hệ','generation'],['Chi Ngành','branch'],['Nhánh Nội Ngoại','branch_type'],['Mã Cha Mẹ','parent_id'],['Vợ Chồng','spouse'],['Ngày Sinh','birth_date'],['Giỗ Âm Lịch','death_date'],['Ngày Mất Dương Lịch','death_date_solar'],['Hưởng Thọ Nhập Riêng','lifespan_override'],['Trạng Thái','status'],['Vai Trò','role'],['Ghi Chú','notes'],['Mã Phối Ngẫu','spouse_id'],['Thứ Tự Anh Em','sibling_order'],['Hưởng Thọ Tự Tính','computed_lifespan']];
+    const columns=[['Mã ID','id'],['Tên Thánh','christian_name'],['Họ và Tên','full_name'],['Giới Tính','gender'],['Thế Hệ','generation'],['Chi Ngành','branch'],['Nhánh Nội Ngoại','branch_type'],['Mã Cha Mẹ','parent_id'],['Vợ Chồng','spouse'],['Ngày Sinh','birth_date'],['Giỗ Âm Lịch','death_date'],['Ngày Mất Dương Lịch','death_date_solar'],['Hưởng Thọ Nhập Riêng','lifespan_override'],['Trạng Thái','status'],['Vai Trò','role'],['Ghi Chú','notes'],['Mã Vợ/Chồng','spouse_id'],['Thứ Tự Anh Em','sibling_order'],['Hưởng Thọ Tự Tính','computed_lifespan']];
     const cell=value=>'"'+String(value??'').replace(/"/g,'""')+'"';
     const rows=[columns.map(c=>cell(c[0])).join(','),...members.map(m=>columns.map(c=>cell(c[1]==='computed_lifespan'?lifespanAge(m):m[c[1]])).join(','))];
     this.downloadBlob(new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'}),this.filename('Du_Lieu',scope,'csv'));

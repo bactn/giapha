@@ -1,7 +1,7 @@
 export function describeError(error) {
   if (['40001', 'PT409'].includes(error?.code)) return 'Dữ liệu trên máy chủ đã thay đổi. Bản nháp vẫn được giữ; hãy xuất JSON để sao lưu rồi tải lại và đối chiếu trước khi lưu.';
   if (error?.code === '42501') return 'Bạn chưa đăng nhập hoặc không có quyền thực hiện thao tác này.';
-  if (error?.code === '23503') return 'Có quan hệ cha/mẹ hoặc phối ngẫu không tồn tại trong gia phả.';
+  if (error?.code === '23503') return 'Có quan hệ cha/mẹ hoặc vợ/chồng không tồn tại trong gia phả.';
   if (error?.code === '23505') return 'Mã thành viên đã tồn tại.';
   if (error?.message?.includes('Email not confirmed')) return 'Vui lòng xác nhận email trước khi đăng nhập.';
   if (error?.message?.includes('Invalid login credentials')) return 'Email hoặc mật khẩu không đúng.';

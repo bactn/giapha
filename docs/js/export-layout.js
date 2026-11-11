@@ -25,7 +25,7 @@ export function exportFields(member, store) {
     ...(!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: 'detail', text: member.status === 'Mất sớm' || /^mất sớm$/i.test(lunar) ? 'Mất sớm' : 'Mất: chưa rõ ngày' }] : []),
     ...(died ? [{ kind: 'detail', text: `Hưởng thọ ${age === null ? 'chưa rõ' : age + ' tuổi'}` }] : []),
     ...(spouse ? [{ kind: 'detail', text: spouse }] : []),
-    ...(member.role && member.role !== 'Thành viên' ? [{ kind: 'detail', text: member.role }] : [])
+    ...(member.role && member.role !== 'Thành viên' ? [{ kind: 'detail', text: member.role.replace(/phối ngẫu/gi, 'Vợ/chồng') }] : [])
   ];
 }
 
@@ -53,13 +53,56 @@ export function scopedMembers(tree, scope = 'ALL', maxDepth = 0) {
   return [...members].sort((a, b) => generation(a) - generation(b) || compareSiblings(a, b));
 }
 
+export function pdfMembers(tree, scope, maxDepth) {
+  const store = tree.dataStore;
+  const parentIds = new Set(store.getAllMembers().map(member => member.parent_id));
+  const members = scopedMembers(tree, scope, maxDepth).filter(member =>
+    store.getMember(member.parent_id) || parentIds.has(member.id));
+  return withoutStandaloneSpouses(members, store, scope.startsWith('SUBTREE:') ? scope.slice(8) : null);
+}
+
+function familyChildren(members) {
+  const children = new Map();
+  for (const member of members) {
+    if (!children.has(member.parent_id)) children.set(member.parent_id, []);
+    children.get(member.parent_id).push(member);
+  }
+  for (const siblings of children.values()) siblings.sort(compareSiblings);
+  return children;
+}
+
+function familyOrder(members) {
+  const children = familyChildren(members);
+  const ids = new Set(members.map(member => member.id));
+  const visited = new Set();
+  const order = [];
+  function visit(member) {
+    if (visited.has(member.id)) return;
+    visited.add(member.id);
+    order.push(member);
+    for (const child of children.get(member.id) || []) visit(child);
+  }
+  for (const member of members) if (!ids.has(member.parent_id)) visit(member);
+  for (const member of members) visit(member);
+  return order;
+}
+
 export function pdfBranchSections(members) {
   const sections = new Map();
+  const byId = new Map(members.map(member => [member.id, member]));
+  function branchOf(member) {
+    const visited = new Set();
+    for (let current = member; current && !visited.has(current.id); current = byId.get(current.parent_id)) {
+      visited.add(current.id);
+      const value = String(current.branch ?? '').trim();
+      const number = value.match(/^chi\s*(\d+)\b|\(chi\s*(\d+)\)/i);
+      if (number) return `Chi ${Number(number[1] || number[2])}`;
+      if (value.toLowerCase() === 'ngành ii') return 'Ngành II';
+    }
+    return '';
+  }
   for (const member of members) {
-    const value = String(member.branch ?? '').trim();
-    const number = value.match(/^chi\s*(\d+)\b|\(chi\s*(\d+)\)/i);
-    const branch = number ? `Chi ${Number(number[1] || number[2])}`
-      : value.toLowerCase() === 'ngành ii' ? 'Ngành II' : '';
+    const branch = branchOf(member);
     if (!sections.has(branch)) sections.set(branch, []);
     sections.get(branch).push(member);
   }
@@ -69,7 +112,6 @@ export function pdfBranchSections(members) {
   if (branches.filter(branch => rank(branch) === 1).length < 2) {
     return [{ label: '', members, context: [] }];
   }
-  const byId = new Map(members.map(member => [member.id, member]));
   return branches.map(branch => {
     const branchMembers = sections.get(branch);
     const ids = new Set(branchMembers.map(member => member.id));
@@ -163,62 +205,75 @@ export function planA4(members, store, measure, context = []) {
     });
     if (fits || columns === 1) break;
   }
-  const groups = new Map(); const covered = new Set();
-  const firstGen = Math.min(...members.map(generation));
-  const add = (pair, block) => {
-    const key = pair.join(':');
-    if (!groups.has(key)) groups.set(key, { pair, blocks: [] });
-    groups.get(key).blocks.push(block);
-  };
-  for (const parent of parents) {
-    const children = members.filter(m => m.parent_id === parent.id).sort(compareSiblings);
-    const childGens = [...new Set(children.map(generation))].sort((a,b) => a-b);
-    for (const childGen of childGens) {
-      const rowChildren = children.filter(m => generation(m) === childGen);
-      for (let i = 0; i < rowChildren.length; i += columns) {
-        const row = rowChildren.slice(i, i + columns).map(m => cards.get(m.id));
-        add([generation(parent), childGen], { parent: cards.get(parent.id), children: row, continued: i > 0, repeated: members.some(m => m.id === parent.parent_id), branch: parent.branch || '' });
-        covered.add(parent.id); row.forEach(c => covered.add(c.member.id));
+  const childrenByParent = familyChildren(members);
+  const parentIds = new Set(parents.map(member => member.id));
+  const visited = new Set();
+  const blocks = [];
+  function visit(parent) {
+    if (visited.has(parent.id)) return;
+    visited.add(parent.id);
+    const children = childrenByParent.get(parent.id) || [];
+    for (const childGen of [...new Set(children.map(generation))].sort((a, b) => a - b)) {
+      const siblings = children.filter(child => generation(child) === childGen);
+      for (let i = 0; i < siblings.length; i += columns) {
+        const row = siblings.slice(i, i + columns);
+        blocks.push({
+          pair: [generation(parent), childGen],
+          parent: cards.get(parent.id),
+          children: row.map(child => cards.get(child.id)),
+          continued: i > 0,
+          repeated: parentIds.has(parent.parent_id),
+          endsBranch: row.every(child => !childrenByParent.has(child.id))
+        });
+        for (const child of row) visit(child);
       }
     }
   }
-  // Includes isolated ancestors, spouse nodes and leaves excluded from a branch.
-  const solos = new Map();
-  for (const member of members) if (!covered.has(member.id)) {
-    const gen = generation(member); const key = Math.max(firstGen, gen - 1);
-    if (!solos.has(key)) solos.set(key, []);
-    solos.get(key).push(cards.get(member.id));
-  }
-  for (const [gen, list] of solos) for (let i = 0; i < list.length; i += columns) {
-    add([gen, gen === firstGen && members.every(m => generation(m) === gen) ? gen : gen + 1], { parent: null, children: list.slice(i, i + columns), continued: false, branch: '' });
+  for (const parent of parents) if (!parentIds.has(parent.parent_id)) visit(parent);
+  for (const parent of parents) visit(parent);
+  for (const member of members) {
+    if (!parentIds.has(member.parent_id) && !childrenByParent.has(member.id)) {
+      const gen = generation(member);
+      blocks.push({ pair: [gen, gen], children: [cards.get(member.id)] });
+    }
   }
   const pages = [];
-  for (const group of [...groups.values()].sort((a,b) => a.pair[0] - b.pair[0] || a.pair[1] - b.pair[1])) {
-    let page; let cursor;
-    for (const block of group.blocks) {
-      const rowH = Math.max(...block.children.map(c => c.height));
-      const height = (block.parent ? block.parent.height + PAGE.connectorGap : 0) + rowH;
-      if (height > A4.h - PAGE.bottom - PAGE.top) throw new Error(`Thông tin của ${block.parent?.member.full_name || block.children[0].member.full_name} quá dài cho một cây A4. Hãy rút gọn nội dung hoặc xuất SVG.`);
-      if (!page || cursor + height > A4.h - PAGE.bottom) {
-        page = { pair: group.pair, blocks: [], nodes: [], paths: [] }; pages.push(page); cursor = PAGE.top;
-      }
-      const rowW = block.children.length * cardW + (block.children.length - 1) * PAGE.gap;
-      const startX = (A4.w - rowW) / 2;
-      let childY = cursor;
-      const nodes = [];
-      if (block.parent) {
-        const parent = { ...block.parent, x: (A4.w - cardW) / 2, y: cursor, continued: block.continued, repeated: block.repeated };
-        nodes.push(parent); childY += parent.height + PAGE.connectorGap;
-        for (let i = 0; i < block.children.length; i++) {
-          const cx = startX + i * (cardW + PAGE.gap) + cardW / 2;
-          const sx = parent.x + cardW / 2, sy = parent.y + parent.height, mid = sy + PAGE.connectorGap / 2;
-          page.paths.push({ parentId: parent.member.id, childId: block.children[i].member.id, points: [[sx,sy],[sx,mid],[cx,mid],[cx,childY]] });
-        }
-      }
-      block.children.forEach((card, i) => nodes.push({ ...card, x: startX + i * (cardW + PAGE.gap), y: childY }));
-      page.blocks.push({ ...block, y: cursor, height }); page.nodes.push(...nodes);
-      cursor += height + PAGE.blockGap;
+  let page;
+  let cursor;
+  let previous;
+  for (const block of blocks) {
+    const rowH = Math.max(...block.children.map(c => c.height));
+    const height = (block.parent ? block.parent.height + PAGE.connectorGap : 0) + rowH;
+    if (height > A4.h - PAGE.bottom - PAGE.top) throw new Error(`Thông tin của ${block.parent?.member.full_name || block.children[0].member.full_name} quá dài cho một cây A4. Hãy rút gọn nội dung hoặc xuất SVG.`);
+    const samePair = previous?.pair.join(':') === block.pair.join(':');
+    const parentId = block.parent?.member.id;
+    const lastChildren = block.endsBranch && previous &&
+      (previous.parent?.member.id === parentId || previous.children.some(card => card.member.id === parentId));
+    if (!page || (!samePair && !lastChildren) || cursor + height > A4.h - PAGE.bottom) {
+      page = { pair: [...block.pair], blocks: [], nodes: [], paths: [] };
+      pages.push(page);
+      cursor = PAGE.top;
+    } else {
+      const generations = [...page.pair, ...block.pair];
+      page.pair = [Math.min(...generations), Math.max(...generations)];
     }
+    previous = block;
+    const rowW = block.children.length * cardW + (block.children.length - 1) * PAGE.gap;
+    const startX = (A4.w - rowW) / 2;
+    let childY = cursor;
+    const nodes = [];
+    if (block.parent) {
+      const parent = { ...block.parent, x: (A4.w - cardW) / 2, y: cursor, continued: block.continued, repeated: block.repeated };
+      nodes.push(parent); childY += parent.height + PAGE.connectorGap;
+      for (let i = 0; i < block.children.length; i++) {
+        const cx = startX + i * (cardW + PAGE.gap) + cardW / 2;
+        const sx = parent.x + cardW / 2, sy = parent.y + parent.height, mid = sy + PAGE.connectorGap / 2;
+        page.paths.push({ parentId: parent.member.id, childId: block.children[i].member.id, points: [[sx,sy],[sx,mid],[cx,mid],[cx,childY]] });
+      }
+    }
+    block.children.forEach((card, i) => nodes.push({ ...card, x: startX + i * (cardW + PAGE.gap), y: childY }));
+    page.blocks.push({ ...block, y: cursor, height }); page.nodes.push(...nodes);
+    cursor += height + PAGE.blockGap;
   }
   return pages;
 }
@@ -227,9 +282,9 @@ export function planTable(members, store, measure) {
   const widths = [42, 188, 180, 68, 190, A4.w - PAGE.left - PAGE.right - 668];
   const headings = ['Đời', 'Tên thánh / Họ tên', 'Ngày sinh / Ngày mất', 'Hưởng thọ', 'Vợ / Chồng', 'Chi / Vai trò'];
   const pages = []; let page; let y;
-  for (const member of members) {
+  for (const member of familyOrder(members)) {
     const fields = exportFields(member, store);
-    const texts = [fields.filter(f => f.kind === 'badge').map(f => `Đ${generation(member)}`).join(''), fields.filter(f => ['saint','name'].includes(f.kind)).map(f=>f.text).join('\n'), fields.filter(f => f.kind === 'detail' && /^(?:SN |Mất|Giỗ )/.test(f.text)).map(f=>f.text).join('\n'), fields.find(f=>f.text.startsWith('Hưởng thọ'))?.text.replace('Hưởng thọ ','') || '', fields.find(f=>/^(?:Vợ|Chồng)/.test(f.text))?.text || '', [member.branch, member.role].filter(Boolean).join('\n')];
+    const texts = [fields.filter(f => f.kind === 'badge').map(f => `Đ${generation(member)}`).join(''), fields.filter(f => ['saint','name'].includes(f.kind)).map(f=>f.text).join('\n'), fields.filter(f => f.kind === 'detail' && /^(?:SN |Mất|Giỗ )/.test(f.text)).map(f=>f.text).join('\n'), fields.find(f=>f.text.startsWith('Hưởng thọ'))?.text.replace('Hưởng thọ ','') || '', fields.find(f=>/^(?:Vợ|Chồng)/.test(f.text))?.text || '', [member.branch, member.role?.replace(/phối ngẫu/gi, 'Vợ/chồng')].filter(Boolean).join('\n')];
     const cells = texts.map((text,i) => text.split('\n').flatMap(t => wrapText(t,widths[i]-12,s=>measure(s,{size:9,weight:'normal'}))));
     const height = Math.max(34, 12 + Math.max(...cells.map(c=>c.length))*12);
     if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Thông tin của ${member.full_name} quá dài cho một hàng A4. Hãy rút gọn nội dung hoặc xuất SVG.`);

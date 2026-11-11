@@ -398,7 +398,7 @@ class App {
         // Migrate existing spouse text strings to full member nodes
         const migrated = this.dataStore.migrateSpouseTextToMembers();
         if (migrated > 0) {
-          this.showToast(`Đã chuyển đổi ${migrated} thông tin phối ngẫu thành thành viên đầy đủ.`, 'success');
+          this.showToast(`Đã chuyển đổi ${migrated} thông tin vợ/chồng thành thành viên đầy đủ.`, 'success');
         }
 
         // Initialize change tracking baseline (co-working: editor → admin approval)
@@ -561,7 +561,7 @@ class App {
             document.getElementById('inspect-lifespan').value=lifespanAge(member) ?? '';
           }
           if (key === 'full_name') {
-            document.getElementById('inspect-header-name').textContent = val || 'Người Mới';
+            document.getElementById('inspect-header-name').textContent = val || 'Trần Ngọc';
           }
         } catch (err) {
           alert(err.message);
@@ -645,7 +645,7 @@ class App {
       };
     }
 
-    // "Tạo phối ngẫu mới" button
+    // "Tạo vợ/chồng mới" button
     const btnAddSpouseNew = document.getElementById('btn-add-spouse-new');
     if (btnAddSpouseNew) {
       btnAddSpouseNew.onclick = () => {
@@ -713,7 +713,7 @@ class App {
     document.getElementById('inspect-lifespan').value=lifespanAge(m) ?? '';
     document.getElementById('inspect-lifespan-hint').textContent=m.lifespan_override !== undefined && m.lifespan_override !== null && m.lifespan_override !== '' ? 'Hưởng thọ đang nhập riêng. Bấm Tự tính lại để dùng ngày sinh và ngày mất dương lịch.' : 'Tự tính theo ngày sinh và ngày mất dương lịch; tính theo năm nếu thiếu ngày/tháng.';
     document.getElementById('inspect-status').value = m.status || 'Còn sống';
-    document.getElementById('inspect-role').value = m.role || 'Thành viên';
+    document.getElementById('inspect-role').value = m.role?.replace(/phối ngẫu/gi, 'Vợ/chồng') || 'Thành viên';
     document.getElementById('inspect-notes').value = m.notes || '';
   }
 
@@ -779,7 +779,7 @@ class App {
 
     // Quick add root
     document.getElementById('btn-quick-add-root').onclick = () => {
-      const name = prompt('Nhập họ tên Cụ Thủy Tổ:');
+      const name = prompt('Nhập họ tên Cụ Thủy Tổ:', 'Trần Ngọc');
       if (name && name.trim()) {
         const root = this.dataStore.addMember({
           full_name: name.trim(),

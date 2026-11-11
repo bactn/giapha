@@ -59,7 +59,7 @@ test('PDF scopes omit represented standalone spouses while full image scopes kee
 });
 test('content preserves Christian name, separate calendars, manual age, missing dates and escaped text',()=>{
   const m=member('A',1,'',{christian_name:'Giuse',full_name:'A <script>',birth_date:'1930',death_date_solar:'2010',death_date:'20/03 Âm',status:'Đã mất',lifespan_override:85});
-  const s=storeFor([m]); const texts=exportFields(m,s).map(f=>f.text);
+  const s=storeFor([m,member('child',2,'A')]); const texts=exportFields(m,s).map(f=>f.text);
   assert(texts.includes('[Giuse] A <script>'));assert(texts.includes('SN 1930'));assert(texts.includes('Mất 2010 (DL)'));assert(texts.includes('Giỗ 20/03 (ÂL)'));assert(texts.includes('Hưởng thọ 85 tuổi'));
   const page=Exporter.a4Pages({dataStore:s},'ALL')[0];const svg=Exporter.a4PageSVG({dataStore:s},page,1,1);
   assert(svg.includes('&lt;script&gt;'));assert(!svg.includes('<script>'));
@@ -98,7 +98,7 @@ test('print and PDF consume identical A4 pages; print popup opens before awaitin
   Exporter.ready=async()=>{events.push('fonts');};
   try {
     const count=await Exporter.printA4(tree);
-    assert.equal(count,2);assert.deepEqual(events,['open','fonts','print']);
+    assert.equal(count,1);assert.deepEqual(events,['open','fonts','print']);
     const pages=Exporter.a4Pages(tree);
     const expected=pages.map((p,i)=>`<section class="a4-page">${Exporter.a4PageSVG(tree,p,i+1,pages.length)}</section>`).join('');
     assert.equal(printed.body.innerHTML,expected);
@@ -119,7 +119,7 @@ test('346 members with many roots, spouses and eight generations retain complete
   assert.equal(pages.flatMap(p=>p.paths).length,340);
 });
 test('printed nodes hide identifiers, combine saint/name and include complete spouse dates with symmetric content padding',()=>{
-  const store=storeFor([member('P001',1,'',{christian_name:'Giuse',spouse_id:'P002'}),member('P002',1,'',{christian_name:'Maria',gender:'Nữ',birth_date:'1935',death_date_solar:'2015',status:'Đã mất'})]);
+  const store=storeFor([member('P001',1,'',{christian_name:'Giuse',spouse_id:'P002'}),member('child',2,'P001'),member('P002',1,'',{christian_name:'Maria',gender:'Nữ',birth_date:'1935',death_date_solar:'2015',status:'Đã mất'})]);
   const fields=exportFields(store.getMember('P001'),store);
   assert(fields.some(f=>f.kind==='name'&&f.text==='[Giuse] Trần Ngọc P001'));
   assert(!fields.find(f=>f.kind==='badge').text.includes('P001'));
@@ -143,7 +143,7 @@ test('A4 fits four child cards per row, centers header text beside the avatar an
   assert(firstName.y-firstName.size-lastBadge.y>=6);
   assert(card.lines.filter(l=>l.kind==='name').every(l=>l.size===12));
 });
-test('PDF hides only standalone spouses represented by a retained partner and preserves ancestors, selected roots and raw records',()=>{
+test('PDF omits standalone records and retains spouse details and ancestors',()=>{
   const members=[member('A',1,'',{spouse_id:'B',christian_name:'Giuse'}),member('B',1,'',{spouse_id:'A',christian_name:'Maria',gender:'Nữ',birth_date:'1930',death_date_solar:'2010'}),member('C',2,'A'),member('OTHER',1)];
   const store=storeFor(members),before=JSON.stringify(store.getAllMembers());
   const pdf=withoutStandaloneSpouses(scopedMembers({dataStore:store}),store);
@@ -151,9 +151,9 @@ test('PDF hides only standalone spouses represented by a retained partner and pr
   const pages=Exporter.a4Pages({dataStore:store});assert(!pages.some(p=>p.nodes.some(n=>n.member.id==='B')));
   const a=pages.flatMap(p=>p.nodes).find(n=>n.member.id==='A');
   assert(a.lines.filter(l=>l.kind==='detail').map(l=>l.text).join(' ').includes('Vợ: [Maria] Trần Ngọc B · SN 1930 - Mất 2010'));
-  assert.deepEqual([...Exporter.getExportLayout({dataStore:store},'ALL',0,true).positions.keys()].sort(),['A','C','OTHER']);
+  assert.deepEqual([...Exporter.getExportLayout({dataStore:store},'ALL',0,true).positions.keys()].sort(),['A','C']);
   assert.deepEqual([...Exporter.getExportLayout({dataStore:store}).positions.keys()].sort(),['A','B','C','OTHER']);
-  const selected=Exporter.a4Pages({dataStore:store},'SUBTREE:B');assert(selected.some(p=>p.nodes.some(n=>n.member.id==='B')));
+  const selected=Exporter.a4Pages({dataStore:store},'SUBTREE:B');assert(!selected.some(p=>p.nodes.some(n=>n.member.id==='B')));
   assert.equal(JSON.stringify(store.getAllMembers()),before);
   const withChild=storeFor([...members,member('D',2,'B')]);assert(withoutStandaloneSpouses(withChild.getAllMembers(),withChild).some(m=>m.id==='B'));
   const withParent=storeFor(members.map(m=>m.id==='B'?{...m,parent_id:'OTHER'}:m));assert(withoutStandaloneSpouses(withParent.getAllMembers(),withParent).some(m=>m.id==='B'));
@@ -185,16 +185,53 @@ test('PDF finishes each branch before the next and keeps links from shared paren
   ]);
   const tree = { dataStore: store };
   const pages = Exporter.a4Pages(tree);
-  assert.deepEqual(pages.map(page => page.branch), ['Ngành II', 'Chi 1', 'Chi 1', 'Chi 2', 'Chi 2', 'Chưa phân chi']);
+  assert.deepEqual(pages.map(page => page.branch), ['Ngành II', 'Chi 1', 'Chi 2']);
   assert.deepEqual(pages.flatMap(page => page.paths.map(path => [path.parentId, path.childId])),
     [['root', 'a2'], ['a2', 'a3'], ['root', 'b2'], ['b2', 'b3']]);
   checkGeometry(pages);
-  assert.match(Exporter.a4PageSVG(tree, pages[1], 2, pages.length), /Chi 1 · Đời 1–2/);
+  assert.match(Exporter.a4PageSVG(tree, pages[1], 2, pages.length), /Chi 1 · Đời 1–3/);
   const table = Exporter.a4Pages(tree, 'ALL', 'table');
   assert.deepEqual(table.flatMap(page => page.rows.map(row => row.member.id)),
-    ['root', 'a2', 'a3', 'b2', 'b3', 'other']);
+    ['root', 'a2', 'a3', 'b2', 'b3']);
   const { svg } = Exporter.fullTreeSVG(tree, 'ALL', 0, true);
   const markers = ['a2', 'a3', 'b2', 'b3'].map(id => svg.indexOf('data-member-id="' + id + '"'));
   assert(markers.every(value => value >= 0));
   assert(Math.max(...markers.slice(0, 2)) < Math.min(...markers.slice(2)));
+});
+
+test('late-added descendants follow their parent branch and the last generation fits below it', () => {
+  const dataStore = storeFor([
+    member('P001', 7),
+    member('P002', 8, 'P001', { full_name: 'Trần Ngọc Hạnh' }),
+    member('P003', 8, 'P001'),
+    member('P004', 9, 'P003'),
+    member('P999', 9, 'P002', { full_name: 'Trần Ngọc Hiền' }),
+    member('P998', 9)
+  ]);
+  const tree = { dataStore };
+  const pages = Exporter.a4Pages(tree);
+  checkGeometry(pages);
+  const page = pages.find(p => p.paths.some(path => path.childId === 'P999'));
+  const parentRow = page.blocks.find(block => block.children.some(card => card.member.id === 'P002'));
+  const finalRow = page.blocks.find(block => block.children.some(card => card.member.id === 'P999'));
+  assert(finalRow.y > parentRow.y);
+  assert.deepEqual(page.pair, [7, 9]);
+  const paths = pages.flatMap(p => p.paths);
+  assert(paths.findIndex(path => path.childId === 'P999') < paths.findIndex(path => path.childId === 'P004'));
+  assert(!pages.some(p => p.nodes.some(card => card.member.id === 'P998')));
+  const rows = Exporter.a4Pages(tree, 'ALL', 'table').flatMap(p => p.rows);
+  assert.deepEqual(rows.map(row => row.member.id), ['P001', 'P002', 'P999', 'P003', 'P004']);
+  assert(!Exporter.fullTreeSVG(tree, 'ALL', 0, true).svg.includes('data-member-id="P998"'));
+});
+
+test('new members use the Trần Ngọc default and children inherit the parent chi', () => {
+  const dataStore = storeFor([member('P001', 7, '', { branch: 'Chi 2' })]);
+  const child = dataStore.addMember({ parent_id: 'P001' });
+  assert.equal(child.full_name, 'Trần Ngọc');
+  assert.equal(child.generation, '8');
+  assert.equal(child.branch, 'Chi 2');
+  const partner = dataStore.addSpouseAsMember(child.id);
+  assert.equal(partner.full_name, 'Trần Ngọc');
+  assert.equal(partner.role, 'Vợ/chồng');
+  assert.equal(dataStore.addMember({}).full_name, 'Trần Ngọc');
 });

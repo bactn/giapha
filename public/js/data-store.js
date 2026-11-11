@@ -115,7 +115,7 @@ export class DataStore {
     const roots = [];
     for (const m of this.members.values()) {
       // Only explicitly classified partners are inline; a spouse link must not hide an ancestor.
-      if (m.branch_type?.includes('Phối ngẫu') && m.spouse_id && this.members.has(m.spouse_id) && this.getChildren(m.id).length === 0) continue;
+      if (/phối ngẫu|vợ\/chồng/i.test(m.branch_type || '') && m.spouse_id && this.members.has(m.spouse_id) && this.getChildren(m.id).length === 0) continue;
       if (!m.parent_id || m.parent_id === '-' || !this.members.has(m.parent_id)) {
         roots.push(m);
       }
@@ -285,10 +285,10 @@ export class DataStore {
     const newMember = {
       id,
       christian_name: memberData.christian_name || '',
-      full_name: memberData.full_name || 'Người Mới',
+      full_name: memberData.full_name || 'Trần Ngọc',
       gender: memberData.gender || 'Nam',
       generation: String(generation || 1),
-      branch: memberData.branch || 'Chi 1',
+      branch: memberData.branch || this.members.get(memberData.parent_id)?.branch || 'Chi 1',
       branch_type: memberData.branch_type || 'Nội tộc (Trực hệ)',
       parent_id: memberData.parent_id || '-',
       parent_name: memberData.parent_name || '',
@@ -429,11 +429,11 @@ export class DataStore {
     const spouse = {
       id: spouseId,
       christian_name: '',
-      full_name: 'Phối Ngẫu',
+      full_name: 'Trần Ngọc',
       gender: oppositeGender,
       generation: member.generation,
       branch: member.branch,
-      branch_type: 'Ngoại tộc (Phối ngẫu)',
+      branch_type: 'Ngoại tộc (Vợ/chồng)',
       parent_id: '-',
       parent_name: '',
       spouse: member.full_name,
@@ -441,7 +441,7 @@ export class DataStore {
       birth_date: '',
       death_date: '',
       status: 'Còn sống',
-      role: 'Phối ngẫu',
+      role: 'Vợ/chồng',
       notes: ''
     };
 
@@ -497,7 +497,7 @@ export class DataStore {
         gender: oppositeGender,
         generation: member.generation,
         branch: member.branch,
-        branch_type: 'Ngoại tộc (Phối ngẫu)',
+        branch_type: 'Ngoại tộc (Vợ/chồng)',
         parent_id: '-',
         parent_name: '',
         spouse: member.full_name,
@@ -505,7 +505,7 @@ export class DataStore {
         birth_date: '',
         death_date: '',
         status: 'Còn sống',
-        role: 'Phối ngẫu',
+        role: 'Vợ/chồng',
         notes: ''
       };
 

@@ -362,7 +362,7 @@ export class TreeCanvas {
           <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
           <span>Con</span>
         </button>
-        <button class="node-action-btn action-add-spouse" title="Thêm phối ngẫu">
+        <button class="node-action-btn action-add-spouse" title="Thêm vợ/chồng">
           <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
           <span>Vợ/Chồng</span>
         </button>
@@ -423,7 +423,6 @@ export class TreeCanvas {
       e.stopPropagation();
       const newGen = (parseInt(member.generation, 10) || 1) + 1;
       const child = this.dataStore.addMember({
-        full_name: 'Người Mới',
         parent_id: member.id,
         parent_name: member.full_name,
         generation: newGen,
@@ -438,7 +437,7 @@ export class TreeCanvas {
       e.stopPropagation();
       const existingSpouse = this.dataStore.getSpouseMember(member.id);
       if (existingSpouse) {
-        alert(`${member.full_name} đã có phối ngẫu là ${existingSpouse.full_name}. Nếu muốn thay đổi, hãy hủy liên kết trước.`);
+        alert(`${member.full_name} đã có vợ/chồng là ${existingSpouse.full_name}. Nếu muốn thay đổi, hãy hủy liên kết trước.`);
         return;
       }
       const spouse = this.dataStore.addSpouseAsMember(member.id);

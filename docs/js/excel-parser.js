@@ -86,7 +86,7 @@ export class ExcelParser {
       else if (norm.includes('nhanh') || norm.includes('noingoai') || norm.includes('chau')) colMap.branch_type = idx;
       else if (norm.includes('machame') || norm.includes('idcha') || norm.includes('cha') || norm.includes('parent')) colMap.parent_id = idx;
       else if (norm.includes('tenchame') || norm.includes('tencha') || norm.includes('parentname')) colMap.parent_name = idx;
-      else if (norm==='maphoingau') colMap.spouse_id = idx;
+      else if (['maphoingau','mavochong'].includes(norm)) colMap.spouse_id = idx;
       else if (norm==='thutuanhem') colMap.sibling_order = idx;
       else if (norm==='huongthotutinh') { /* Derived column; never turn it into an override. */ }
       else if (norm.includes('vochong') || norm.includes('phoingau') || norm.includes('spouse')) colMap.spouse = idx;
