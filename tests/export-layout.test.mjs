@@ -254,3 +254,18 @@ test('A4 headers identify the leading parent card and its parents outside the ex
   const oneParent = Exporter.a4PageSVG(tree, page, 1, 1, 'SUBTREE:B');
   assert.match(oneParent, /Con Ông\/bà: Trần Ngọc Vị<\/text>/);
 });
+
+test('A4 ngang shows the complete unknown lifespan label in both templates', () => {
+  const dataStore = storeFor([
+    member('A', 1, '', { status: 'Đã mất' }),
+    member('B', 2, 'A', { status: 'Đã mất', lifespan_override: 75 })
+  ]);
+  const tree = { dataStore };
+  for (const template of ['card', 'table']) {
+    const pages = Exporter.a4Pages(tree, 'ALL', template);
+    const svg = Exporter.a4PageSVG(tree, pages[0], 1, pages.length, 'ALL', template);
+    assert.match(svg, />Hưởng thọ\(chưa rõ\)<\/text>/);
+    assert.match(svg, />[^<]*75 tuổi<\/text>/);
+    assert.doesNotMatch(svg, />Hưởng thọ chưa rõ<\/text>/);
+  }
+});

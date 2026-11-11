@@ -4030,14 +4030,16 @@ function planA4(members, store, measure, context = []) {
   return pages;
 }
 function planTable(members, store, measure) {
-  const widths = [42, 188, 180, 68, 190, A4.w - PAGE.left - PAGE.right - 668];
+  const widths = [42, 188, 180, 128, 130, A4.w - PAGE.left - PAGE.right - 668];
   const headings = ["\u0110\u1EDDi", "T\xEAn th\xE1nh / H\u1ECD t\xEAn", "Ng\xE0y sinh / Ng\xE0y m\u1EA5t", "H\u01B0\u1EDFng th\u1ECD", "V\u1EE3 / Ch\u1ED3ng", "Chi / Vai tr\xF2"];
   const pages = [];
   let page;
   let y;
   for (const member of familyOrder(members)) {
     const fields = exportFields(member, store);
-    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), fields.find((f) => f.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text.replace(/^Hưởng thọ ?/, "") || "", fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role?.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng")].filter(Boolean).join("\n")];
+    const lifespan = fields.find((field) => field.text.startsWith("H\u01B0\u1EDFng th\u1ECD"))?.text || "";
+    const lifespanCell = lifespan.replace(/^Hưởng thọ /, "");
+    const texts = [fields.filter((f) => f.kind === "badge").map((f) => `\u0110${generation(member)}`).join(""), fields.filter((f) => ["saint", "name"].includes(f.kind)).map((f) => f.text).join("\n"), fields.filter((f) => f.kind === "detail" && /^(?:SN |Mất|Giỗ )/.test(f.text)).map((f) => f.text).join("\n"), lifespanCell, fields.find((f) => /^(?:Vợ|Chồng)/.test(f.text))?.text || "", [member.branch, member.role?.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng")].filter(Boolean).join("\n")];
     const cells = texts.map((text, i) => text.split("\n").flatMap((t) => wrapText(t, widths[i] - 12, (s) => measure(s, { size: 9, weight: "normal" }))));
     const height = Math.max(34, 12 + Math.max(...cells.map((c) => c.length)) * 12);
     if (height > A4.h - PAGE.top - PAGE.bottom - 28) throw new Error(`Th\xF4ng tin c\u1EE7a ${member.full_name} qu\xE1 d\xE0i cho m\u1ED9t h\xE0ng A4. H\xE3y r\xFAt g\u1ECDn n\u1ED9i dung ho\u1EB7c xu\u1EA5t SVG.`);
