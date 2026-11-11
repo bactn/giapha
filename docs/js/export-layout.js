@@ -36,7 +36,7 @@ export function exportFields(member, store) {
     ...(!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: 'detail', text: member.status === 'Mất sớm' || /^mất sớm$/i.test(lunar) ? 'Mất sớm' : 'Mất: chưa rõ ngày' }] : []),
     ...(died ? [{ kind: 'detail', text: `Hưởng thọ ${age === null ? 'chưa rõ' : age + ' tuổi'}` }] : []),
     ...(spouse ? [{ kind: 'detail', text: spouse }] : []),
-    ...(member.role && member.role !== 'Thành viên' ? [{ kind: 'detail', text: member.role.replace(/phối ngẫu/gi, 'Vợ/chồng') }] : [])
+    ...(member.role && member.role !== 'Thành viên' ? [{ kind: /^đích tôn$/i.test(member.role.trim()) ? 'heir' : 'detail', text: member.role.replace(/phối ngẫu/gi, 'Vợ/chồng') }] : [])
   ];
 }
 
@@ -148,7 +148,7 @@ export function wrapText(text, width, measure) {
   if (line) lines.push(line);
   return lines;
 }
-export const fontFor = kind => kind === 'name' ? { size: 12, weight: 'bold', line: 15 } : kind === 'badge' ? { size: 8, weight: 'bold', line: 11 } : { size: 9, weight: kind === 'saint' ? 'bold' : 'normal', line: 12 };
+export const fontFor = kind => kind === 'name' ? { size: 12, weight: 'bold', line: 15 } : kind === 'badge' ? { size: 8, weight: 'bold', line: 11 } : { size: 9, weight: ['saint', 'heir'].includes(kind) ? 'bold' : 'normal', line: 12 };
 export function measureCard(member, store, width, measure) {
   const padding = 12, avatarSize = 34, avatarGap = 10, headingGap = 6, detailGap = 10;
   const headerX = padding + avatarSize + avatarGap;

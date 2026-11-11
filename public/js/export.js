@@ -51,7 +51,7 @@ export class Exporter {
   static cardSVG(card) {
     const {x=0,y=0,width,height,member,lines}=card;
     const text=lines.map(line=>{
-      const fill=line.kind==='badge'||line.kind==='saint'?'#92400e':line.kind==='name'?'#292524':'#57534e';
+      const fill=line.kind==='heir'?'#991b1b':line.kind==='badge'||line.kind==='saint'?'#92400e':line.kind==='name'?'#292524':'#57534e';
       return `<text x="${x+line.x}" y="${y+line.y}" text-anchor="${line.anchor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
     }).join('');
     const avatar=card.avatar;
@@ -83,7 +83,14 @@ export class Exporter {
       page.rows.forEach((row,r)=>{
         body+=`<rect x="${PAGE.left}" y="${row.y}" width="${A4.w-PAGE.left-PAGE.right}" height="${row.height}" fill="${r%2?'#fff':'#fafaf9'}" stroke="#e7e5e4" stroke-width=".4"/>`;
         let cx=PAGE.left;
-        row.cells.forEach((lines,i)=>{lines.forEach((line,j)=>{body+=`<text x="${cx+6}" y="${row.y+15+j*12}" font-size="9" fill="#292524">${xml(line)}</text>`;});cx+=page.widths[i];});
+        row.cells.forEach((lines, i) => {
+          lines.forEach((line, j) => {
+            const heir = i === 5 && /^đích tôn$/i.test(line.trim());
+            const style = heir ? 'fill="#991b1b" font-weight="bold"' : 'fill="#292524"';
+            body += `<text x="${cx+6}" y="${row.y+15+j*12}" font-size="9" ${style}>${xml(line)}</text>`;
+          });
+          cx += page.widths[i];
+        });
       });
     } else {
       body=page.paths.map(p=>`<path data-parent="${xml(p.parentId)}" data-child="${xml(p.childId)}" d="${pathString(p.points)}" fill="none" stroke="#44403c" stroke-width="1"/>`).join('');

@@ -3771,7 +3771,7 @@ function exportFields(member, store) {
     ...!solar && (!lunar || /^(?:mất sớm|đã mất|mất)$/i.test(lunar)) && died ? [{ kind: "detail", text: member.status === "M\u1EA5t s\u1EDBm" || /^mất sớm$/i.test(lunar) ? "M\u1EA5t s\u1EDBm" : "M\u1EA5t: ch\u01B0a r\xF5 ng\xE0y" }] : [],
     ...died ? [{ kind: "detail", text: `H\u01B0\u1EDFng th\u1ECD ${age === null ? "ch\u01B0a r\xF5" : age + " tu\u1ED5i"}` }] : [],
     ...spouse ? [{ kind: "detail", text: spouse }] : [],
-    ...member.role && member.role !== "Th\xE0nh vi\xEAn" ? [{ kind: "detail", text: member.role.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng") }] : []
+    ...member.role && member.role !== "Th\xE0nh vi\xEAn" ? [{ kind: /^đích tôn$/i.test(member.role.trim()) ? "heir" : "detail", text: member.role.replace(/phối ngẫu/gi, "V\u1EE3/ch\u1ED3ng") }] : []
   ];
 }
 function scopedMembers(tree, scope = "ALL", maxDepth = 0) {
@@ -3886,7 +3886,7 @@ function wrapText(text, width, measure) {
   if (line) lines.push(line);
   return lines;
 }
-var fontFor = (kind) => kind === "name" ? { size: 12, weight: "bold", line: 15 } : kind === "badge" ? { size: 8, weight: "bold", line: 11 } : { size: 9, weight: kind === "saint" ? "bold" : "normal", line: 12 };
+var fontFor = (kind) => kind === "name" ? { size: 12, weight: "bold", line: 15 } : kind === "badge" ? { size: 8, weight: "bold", line: 11 } : { size: 9, weight: ["saint", "heir"].includes(kind) ? "bold" : "normal", line: 12 };
 function measureCard(member, store, width, measure) {
   const padding = 12, avatarSize = 34, avatarGap = 10, headingGap = 6, detailGap = 10;
   const headerX = padding + avatarSize + avatarGap;
@@ -4099,7 +4099,7 @@ var Exporter = class {
   static cardSVG(card) {
     const { x = 0, y = 0, width, height, member, lines } = card;
     const text = lines.map((line) => {
-      const fill = line.kind === "badge" || line.kind === "saint" ? "#92400e" : line.kind === "name" ? "#292524" : "#57534e";
+      const fill = line.kind === "heir" ? "#991b1b" : line.kind === "badge" || line.kind === "saint" ? "#92400e" : line.kind === "name" ? "#292524" : "#57534e";
       return `<text x="${x + line.x}" y="${y + line.y}" text-anchor="${line.anchor}" font-size="${line.size}" font-weight="${line.weight}" fill="${fill}">${xml(line.text)}</text>`;
     }).join("");
     const avatar = card.avatar;
@@ -4132,7 +4132,9 @@ var Exporter = class {
         let cx = PAGE.left;
         row.cells.forEach((lines, i) => {
           lines.forEach((line, j) => {
-            body += `<text x="${cx + 6}" y="${row.y + 15 + j * 12}" font-size="9" fill="#292524">${xml(line)}</text>`;
+            const heir = i === 5 && /^đích tôn$/i.test(line.trim());
+            const style = heir ? 'fill="#991b1b" font-weight="bold"' : 'fill="#292524"';
+            body += `<text x="${cx + 6}" y="${row.y + 15 + j * 12}" font-size="9" ${style}>${xml(line)}</text>`;
           });
           cx += page.widths[i];
         });
