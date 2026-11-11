@@ -384,3 +384,23 @@ body {
   .outline-node-actions { display:none; }
   .outline-node-row.selected > .outline-node-actions { display:flex; opacity:1; }
 }
+
+.share-qr { margin-top: .5rem; }
+.share-qr > button {
+  padding: .5rem .75rem;
+  border-radius: .5rem;
+  background: #f1f5f9;
+  font-size: .8rem;
+  font-weight: 600;
+}
+.share-qr > button:disabled { opacity: .5; cursor: default; }
+.share-qr-result { margin-top: .5rem; }
+.share-qr-result img {
+  display: block;
+  width: 224px;
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+}
+.share-qr-result a { display: inline-block; margin-top: .4rem; text-decoration: underline; }
+.share-qr-status { font-size: .8rem; }

@@ -1,3 +1,4 @@
+import { mountShareQr } from './share-qr.js';
 import { getSupabaseClient, signInWithGoogle } from './supabase-client.js';
 import { GenealogyService, describeError, snapshotChanges } from './services/genealogy.js';
 import { oauthReturnMessage } from './services/auth.js';
@@ -233,6 +234,7 @@ export class SupabaseController {
 
   async open(id, role, state = null) {
     const snapshot = state || await this.service.load(id);
+    if (this.app.lineageId !== id) this.resetShareResult?.();
     this.guest = Boolean(this.publicSlug || (state && this.shareToken));
     this.app.lineageId = id; this.app.userRole = role; this.app.isAuthenticated = true;
     this.app.currentUser = { id: this.user?.id || null, username: this.guest ? 'Khách (chỉ xem)' : this.profile?.display_name || this.user.user_metadata?.display_name || this.user.user_metadata?.full_name || this.user.email };
@@ -337,6 +339,7 @@ export class SupabaseController {
       this.user = null; this.profile = null; this.base = null; this.guest = false; this.publicSlug = null; this.shareToken = null; this.stopPoll();
       this.app.dataStore.loadState({ lineageInfo: { name: '', total_members: 0, generations: 0 }, members: [] });
       this.app.isAuthenticated = false; this.app.lineageId = null;
+      this.resetShareResult?.();
       $('share-panel-overlay').classList.add('hidden'); $('edit-request-overlay').classList.add('hidden');
       $('notification-dropdown').classList.add('hidden');
       sessionStorage.removeItem('giapha_return');
@@ -353,8 +356,14 @@ export class SupabaseController {
       <label for="sb-link-duration">Thời hạn liên kết</label><select id="sb-link-duration"><option value="7days">7 ngày (mặc định)</option><option value="forever">Không hết hạn — đến khi admin thu hồi</option></select>
       <div class="sb-actions"><button id="sb-share-view">Tạo link chỉ xem</button><button id="sb-invite">Tạo link có quyền sửa</button><button id="sb-share-close">Đóng</button></div>
       <label for="sb-link-result">Liên kết mới (chỉ hiển thị một lần)</label><input id="sb-link-result" readonly><button id="sb-copy-link">Sao chép</button>
+      <div id="sb-share-qr"></div>
       <h2 style="margin-top:1rem">Liên kết còn hiệu lực</h2><div id="sb-links"></div><details><summary>Quyền cấp trực tiếp cho tài khoản</summary><p class="sb-message">Quyền cấp trực tiếp độc lập với link. Thu hồi link không xóa quyền được admin cấp riêng.</p><div id="sb-access"></div></details>
       <button id="sb-open-requests" style="margin-top:1rem">Quản lý yêu cầu phê duyệt</button></div>`;
+    const setQrLink = mountShareQr($('sb-share-qr'));
+    this.resetShareResult = () => {
+      $('sb-link-result').value = '';
+      setQrLink('');
+    };
     const close = () => { overlay.classList.add('hidden'); overlay.classList.remove('flex'); };
     $('sb-share-close').onclick = close;
     $('sb-open-requests').onclick = () => { close(); this.portal.go('requests'); };
@@ -364,9 +373,14 @@ export class SupabaseController {
       try { await this.refreshSharing(); } catch (error) { this.app.showToast(describeError(error), 'error'); }
     };
     const create = (button, kind, role) => this.action(button, async () => {
-      const token = await this.service.link(this.app.lineageId, kind, role, $('sb-link-duration').value);
+      const lineageId = this.app.lineageId;
+      const user = this.user;
+      const token = await this.service.link(lineageId, kind, role, $('sb-link-duration').value);
+      if (this.app.lineageId !== lineageId || this.user !== user) return;
       const url = new URL(this.callbackUrl()); url.hash = new URLSearchParams({ [kind === 'share' ? 'share' : 'invite']: token });
-      $('sb-link-result').value = url.href; await this.refreshSharing();
+      $('sb-link-result').value = url.href;
+      setQrLink(url.href);
+      await this.refreshSharing();
     });
     $('sb-share-view').onclick = () => create($('sb-share-view'), 'share', 'viewer');
     $('sb-invite').onclick = () => create($('sb-invite'), 'invite', 'editor');
@@ -384,7 +398,7 @@ export class SupabaseController {
     for (const link of links) {
       const row = this.row($('sb-links'), `${link.kind === 'share' ? 'Chỉ xem · Không cần đăng nhập' : roles[link.role]+' · Cần đăng nhập'} · ${link.expires_at ? 'Hết hạn '+new Date(link.expires_at).toLocaleString('vi-VN') : 'Không hết hạn'}`);
       row.classList.add('sb-link-row');
-      this.button(row, 'Thu hồi', async () => { await this.service.revoke(link.id); $('sb-link-result').value = ''; await this.refreshSharing(); });
+      this.button(row, 'Thu hồi', async () => { await this.service.revoke(link.id); this.resetShareResult?.(); await this.refreshSharing(); });
     }
     if (!links.length) this.row($('sb-links'), 'Chưa có liên kết còn hiệu lực.');
     for (const item of access) {

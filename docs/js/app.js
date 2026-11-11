@@ -1,3 +1,4 @@
+import { mountShareQr } from './share-qr.js';
 // app.js - Main Application Orchestrator with Responsive Drawer & Touch Handling
 import { PendingEdits } from './input-editing.js';
 import { DataStore } from './data-store.js';
@@ -1203,6 +1204,8 @@ class App {
       return null;
     };
 
+    const setQrLink = mountShareQr(document.getElementById('share-link-qr'));
+
     // Generate share link
     document.getElementById('btn-generate-share-link').onclick = async () => {
       const role = document.getElementById('share-link-role').value;
@@ -1222,6 +1225,7 @@ class App {
           const token = data.share_link?.token || data.token;
           const url = shareUrl(token);
           document.getElementById('share-link-url').value = url;
+          setQrLink(url);
           document.getElementById('share-link-result').classList.remove('hidden');
         } else {
           this.showToast(data.error || 'Tạo link thất bại', 'error');
